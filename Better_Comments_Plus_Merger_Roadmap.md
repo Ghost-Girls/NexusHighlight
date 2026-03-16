@@ -165,6 +165,7 @@ public class UnifiedConfig
 - [x] 1.7 创建ForegroundStyle、BackgroundStyle、StyleRule、UnifiedConfig数据结构
 - [x] 1.8 修改CommentViewDecorator.cs，实现动态颜色应用
 - [x] 1.9 修复所有编译错误
+- [x] 1.10 在ColorPickerDialog中添加HEX值输入功能（2026-03-17）
 
 **验证点**：
 - [x] 可以在Options页面中通过ColorPicker选择颜色
@@ -172,6 +173,9 @@ public class UnifiedConfig
 - [x] 注释颜色显示正常（不依赖VS「字体和颜色」设置）
 - [x] 颜色预览功能正常工作
 - [x] 数据本地化（JSON）正常
+- [x] 可以通过输入HEX值来自定义颜色（支持带#或不带#，6位或8位格式）
+- [x] 输入HEX值时实时预览颜色
+- [x] 点击预设颜色时自动填充对应的HEX值
 
 **已创建/修改的文件**：
 - Options/Infrastructure/ForegroundStyle.cs ✅
@@ -434,6 +438,6 @@ public class DynamicClassificationManager
 
 ---
 
-*文档版本: 1.1*
-*更新日期: 2026-03-16*
-*上次更新: 标记阶段一完成，更新进度概览*
+*文档版本: 1.2*
+*更新日期: 2026-03-17*
+*上次更新: 在ColorPickerDialog中添加HEX值输入功能*
