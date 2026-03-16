@@ -65,6 +65,13 @@ namespace BetterCommentsPlus.Options
             unifiedConfig = UnifiedConfig.CreateDefault();
             SettingsStore.LoadSettings(this);
             SyncCommentTokensToUnifiedConfig();
+            
+            foreach (var token in commentTokens)
+            {
+                token.PropertyChanged += CommentToken_PropertyChanged;
+            }
+            
+            commentTokens.CollectionChanged += CommentTokens_CollectionChanged;
         }
 
         #endregion Singleton
@@ -239,6 +246,40 @@ namespace BetterCommentsPlus.Options
                     token.ColorHex = rule.Foreground.ColorHex;
                 }
             }
+        }
+
+        private void CommentToken_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            SyncCommentTokensToUnifiedConfig();
+            OnConfigurationChanged();
+        }
+
+        private void CommentTokens_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (var item in e.OldItems)
+                {
+                    if (item is CommentToken token)
+                    {
+                        token.PropertyChanged -= CommentToken_PropertyChanged;
+                    }
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (var item in e.NewItems)
+                {
+                    if (item is CommentToken token)
+                    {
+                        token.PropertyChanged += CommentToken_PropertyChanged;
+                    }
+                }
+            }
+
+            SyncCommentTokensToUnifiedConfig();
+            OnConfigurationChanged();
         }
 
         #endregion Private Helpers

@@ -59,7 +59,7 @@
 						<Binding
 							Mode="TwoWay"
 							Path="CurrentValue"
-							UpdateSourceTrigger="PropertyChanged">
+							UpdateSourceTrigger="LostFocus">
 							<Binding.ValidationRules>
 								<local:RequiredAndUniqueRule ValidationStep="CommittedValue" />
 							</Binding.ValidationRules>
