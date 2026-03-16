@@ -1,4 +1,5 @@
 using BetterCommentsPlus.CommentsTagging;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -24,6 +25,8 @@ namespace BetterCommentsPlus.Options
                 new CommentToken(type: CommentType.Question,        defaultValue: "#QUESTION",      value: "#QUESTION",    colorHex: "#FFFFFF00"),
                 new CommentToken(type: CommentType.Task,            defaultValue: "#TASK",          value: "#TASK",        colorHex: "#FFEB690A"),
             };
+
+        private UnifiedConfig unifiedConfig;
 
         #endregion Fields
 
@@ -52,7 +55,9 @@ namespace BetterCommentsPlus.Options
         private Settings()
         {
             ResetTokens = new RelayCommand(SetTokensToDefault);
+            unifiedConfig = UnifiedConfig.CreateDefault();
             SettingsStore.LoadSettings(this);
+            SyncCommentTokensToUnifiedConfig();
         }
 
         #endregion Singleton
@@ -126,6 +131,11 @@ namespace BetterCommentsPlus.Options
             get { return commentTokens; }
         }
 
+        public UnifiedConfig UnifiedConfig
+        {
+            get { return unifiedConfig; }
+        }
+
         #endregion Non-Settings Properties & Commands
 
         #region ISettings Members
@@ -153,7 +163,25 @@ namespace BetterCommentsPlus.Options
         private void SetTokensToDefault()
         {
             foreach (var token in commentTokens)
+            {
                 token.CurrentValue = token.DefaultValue;
+                switch (token.Type)
+                {
+                    case CommentType.Important:
+                        token.ColorHex = "#FFFF0000";
+                        break;
+                    case CommentType.Question:
+                        token.ColorHex = "#FFFFFF00";
+                        break;
+                    case CommentType.Remove:
+                        token.ColorHex = "#FF808080";
+                        break;
+                    case CommentType.Task:
+                        token.ColorHex = "#FFEB690A";
+                        break;
+                }
+            }
+            SyncCommentTokensToUnifiedConfig();
         }
 
         private void UpdateCommentTokens(string tokensString)
@@ -178,6 +206,30 @@ namespace BetterCommentsPlus.Options
         {
             var r = string.Join("|", commentTokens.Select(t => t.ToString()));
             return r;
+        }
+
+        private void SyncCommentTokensToUnifiedConfig()
+        {
+            foreach (var token in commentTokens)
+            {
+                var rule = unifiedConfig.Comments.FirstOrDefault(r => r.Criteria == token.CurrentValue);
+                if (rule != null && rule.Foreground != null)
+                {
+                    rule.Foreground.ColorHex = token.ColorHex;
+                }
+            }
+        }
+
+        public void SyncUnifiedConfigToCommentTokens()
+        {
+            foreach (var rule in unifiedConfig.Comments)
+            {
+                var token = commentTokens.FirstOrDefault(t => t.CurrentValue == rule.Criteria);
+                if (token != null && rule.Foreground != null)
+                {
+                    token.ColorHex = rule.Foreground.ColorHex;
+                }
+            }
         }
 
         #endregion Private Helpers

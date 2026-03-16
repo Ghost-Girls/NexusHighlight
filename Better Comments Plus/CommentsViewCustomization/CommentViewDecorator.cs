@@ -137,28 +137,57 @@ namespace BetterCommentsPlus.CommentsViewCustomization
          try
          {
             CommentType? commentType = null;
+            string criteria = null;
 
             if (classificationType.IsOfType(CommentNames.IMPORTANT_COMMENT))
+            {
                commentType = CommentType.Important;
+               criteria = "#IMPORTANT";
+            }
             else if (classificationType.IsOfType(CommentNames.QUESTION_COMMENT))
+            {
                commentType = CommentType.Question;
+               criteria = "#QUESTION";
+            }
             else if (classificationType.IsOfType(CommentNames.REMOVE_COMMENT))
+            {
                commentType = CommentType.Remove;
+               criteria = "#REMOVE";
+            }
             else if (classificationType.IsOfType(CommentNames.TASK_COMMENT))
+            {
                commentType = CommentType.Task;
+               criteria = "#TASK";
+            }
 
-            if (commentType.HasValue)
+            string colorHex = null;
+
+            if (settings.UnifiedConfig != null && !string.IsNullOrEmpty(criteria))
+            {
+               var rule = settings.UnifiedConfig.Comments.FirstOrDefault(r => r.Criteria == criteria);
+               if (rule != null && rule.Foreground != null)
+               {
+                  colorHex = rule.Foreground.ColorHex;
+               }
+            }
+
+            if (string.IsNullOrEmpty(colorHex) && commentType.HasValue)
             {
                var token = settings.GetToken(commentType.Value);
                if (token != null && !string.IsNullOrEmpty(token.ColorHex))
                {
-                  try
-                  {
-                     var color = (Color)ColorConverter.ConvertFromString(token.ColorHex);
-                     properties = properties.SetForeground(color);
-                  }
-                  catch { }
+                  colorHex = token.ColorHex;
                }
+            }
+
+            if (!string.IsNullOrEmpty(colorHex))
+            {
+               try
+               {
+                  var color = (Color)ColorConverter.ConvertFromString(colorHex);
+                  properties = properties.SetForeground(color);
+               }
+               catch { }
             }
          }
          catch { }
