@@ -15,6 +15,7 @@ namespace BetterCommentsPlus.Options
             if (initialColor.HasValue)
             {
                 SelectedColor = initialColor.Value;
+                HexTextBox.Text = ColorToHex(initialColor.Value);
             }
             
             Loaded += ColorPickerDialog_Loaded;
@@ -65,6 +66,7 @@ namespace BetterCommentsPlus.Options
                         try
                         {
                             SelectedColor = (Color)ColorConverter.ConvertFromString(hex);
+                            HexTextBox.Text = hex;
                             DialogResult = true;
                             Close();
                         }
@@ -74,6 +76,65 @@ namespace BetterCommentsPlus.Options
 
                 ColorsWrapPanel.Children.Add(border);
             }
+        }
+
+        private void HexTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var hex = HexTextBox.Text.Trim();
+            
+            if (string.IsNullOrEmpty(hex))
+            {
+                PreviewBorder.Background = Brushes.Transparent;
+                ConfirmHexButton.IsEnabled = false;
+                return;
+            }
+
+            try
+            {
+                var color = ParseHexColor(hex);
+                PreviewBorder.Background = new SolidColorBrush(color);
+                ConfirmHexButton.IsEnabled = true;
+            }
+            catch
+            {
+                PreviewBorder.Background = Brushes.Transparent;
+                ConfirmHexButton.IsEnabled = false;
+            }
+        }
+
+        private void ConfirmHexButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var hex = HexTextBox.Text.Trim();
+                SelectedColor = ParseHexColor(hex);
+                DialogResult = true;
+                Close();
+            }
+            catch
+            {
+                MessageBox.Show("请输入有效的HEX颜色值！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private Color ParseHexColor(string hex)
+        {
+            if (!hex.StartsWith("#"))
+            {
+                hex = "#" + hex;
+            }
+
+            if (hex.Length == 7)
+            {
+                hex = "#FF" + hex.Substring(1);
+            }
+
+            return (Color)ColorConverter.ConvertFromString(hex);
+        }
+
+        private string ColorToHex(Color color)
+        {
+            return string.Format("#{0:X2}{1:X2}{2:X2}{3:X2}", color.A, color.R, color.G, color.B);
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

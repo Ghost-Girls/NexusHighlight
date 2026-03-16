@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Better Comments Plus.Ghost-Girls.646f2284-7979-4af0-a676-4f2d7693df8e" Version="0.6" Language="en-US" Publisher="Ghost-Girls" />
+        <Identity Id="Better Comments Plus.Ghost-Girls.646f2284-7979-4af0-a676-4f2d7693df8e" Version="0.7" Language="en-US" Publisher="Ghost-Girls" />
         <DisplayName>Better Comments Plus</DisplayName>
         <Description xml:space="preserve">Better Comments is a Visual Studio extension that gives you the ability to customize the font and opacity of your comments independently of the editor's font settings. It also adds four additional comment classifications, each classification with its own customizable foreground.
 
