@@ -28,6 +28,13 @@ namespace BetterCommentsPlus.Options
 
         private UnifiedConfig unifiedConfig;
 
+        public event EventHandler ConfigurationChanged;
+
+        protected virtual void OnConfigurationChanged()
+        {
+            ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         #endregion Fields
 
         #region Singleton
@@ -182,6 +189,7 @@ namespace BetterCommentsPlus.Options
                 }
             }
             SyncCommentTokensToUnifiedConfig();
+            OnConfigurationChanged();
         }
 
         private void UpdateCommentTokens(string tokensString)
@@ -218,6 +226,7 @@ namespace BetterCommentsPlus.Options
                     rule.Foreground.ColorHex = token.ColorHex;
                 }
             }
+            OnConfigurationChanged();
         }
 
         public void SyncUnifiedConfigToCommentTokens()

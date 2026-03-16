@@ -43,6 +43,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
          view.GotAggregateFocus += TextView_GotAggregateFocus;
 
          SettingsStore.SettingsSaved += OnSettingsSaved;
+         settings.ConfigurationChanged += OnConfigurationChanged;
 
          formatMap = map;
          regService = service;
@@ -51,6 +52,12 @@ namespace BetterCommentsPlus.CommentsViewCustomization
       }
 
       private void OnSettingsSaved()
+      {
+         if (!isDecorating)
+            Decorate();
+      }
+
+      private void OnConfigurationChanged(object sender, EventArgs e)
       {
          if (!isDecorating)
             Decorate();
