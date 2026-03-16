@@ -208,7 +208,7 @@ namespace BetterCommentsPlus.Options
             return r;
         }
 
-        private void SyncCommentTokensToUnifiedConfig()
+        public void SyncCommentTokensToUnifiedConfig()
         {
             foreach (var token in commentTokens)
             {

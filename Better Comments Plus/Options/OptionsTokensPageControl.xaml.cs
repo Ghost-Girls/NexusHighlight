@@ -36,6 +36,7 @@ namespace BetterCommentsPlus.Options
             if (dialog.ShowDialog() == true && dialog.SelectedColor.HasValue)
             {
                token.ColorHex = $"#{dialog.SelectedColor.Value.A:X2}{dialog.SelectedColor.Value.R:X2}{dialog.SelectedColor.Value.G:X2}{dialog.SelectedColor.Value.B:X2}";
+               Settings.Instance.SyncCommentTokensToUnifiedConfig();
             }
          }
       }
