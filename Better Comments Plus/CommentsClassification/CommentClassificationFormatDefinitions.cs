@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.Text.Classification;
+using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
 
@@ -14,7 +14,6 @@ namespace BetterCommentsPlus.CommentsClassification
         public ImportantCommentFormat()
         {
             DisplayName = CommentNames.IMPORTANT_COMMENT;
-            ForegroundColor = CommentColors.ImportantColor;
         }
     }
 
@@ -28,7 +27,6 @@ namespace BetterCommentsPlus.CommentsClassification
         public QuestionCommentFormat()
         {
             DisplayName = CommentNames.QUESTION_COMMENT;
-            ForegroundColor = CommentColors.QuestionColor;
         }
     }
 
@@ -42,8 +40,6 @@ namespace BetterCommentsPlus.CommentsClassification
         public RemoveCommentFormat()
         {
             DisplayName = CommentNames.REMOVE_COMMENT;
-            ForegroundColor = CommentColors.RemoveColor;
-            TextDecorations = System.Windows.TextDecorations.Strikethrough;
         }
     }
 
@@ -57,7 +53,6 @@ namespace BetterCommentsPlus.CommentsClassification
         public TaskCommentFormat()
         {
             DisplayName = CommentNames.TASK_COMMENT;
-            ForegroundColor = CommentColors.TaskColor;
         }
     }
     /* #HACK Here is additional code for other comment types:*/
