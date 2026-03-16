@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
 	x:Class="BetterCommentsPlus.Options.OptionsTokensPageControl"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -92,10 +92,11 @@
 		</Grid.ColumnDefinitions>
 
 		<ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
-			<ItemsControl
+			<ListBox
 				x:Name="TokensList"
 				ItemTemplate="{StaticResource TokensListDataTemplate}"
-				ItemsSource="{Binding CommentTokens, Mode=OneWay}" />
+				ItemsSource="{Binding CommentTokens, Mode=OneWay}"
+				BorderThickness="0" />
 		</ScrollViewer>
 
 		<Button
