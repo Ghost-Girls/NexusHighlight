@@ -96,7 +96,14 @@
 				x:Name="TokensList"
 				ItemTemplate="{StaticResource TokensListDataTemplate}"
 				ItemsSource="{Binding CommentTokens, Mode=OneWay}"
-				BorderThickness="0" />
+				BorderThickness="0"
+				AllowDrop="True"
+				PreviewMouseLeftButtonDown="TokensList_PreviewMouseLeftButtonDown"
+				MouseMove="TokensList_MouseMove"
+				DragEnter="TokensList_DragEnter"
+				DragOver="TokensList_DragOver"
+				DragLeave="TokensList_DragLeave"
+				Drop="TokensList_Drop" />
 		</ScrollViewer>
 
 		<Button
