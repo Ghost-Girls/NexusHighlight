@@ -13,7 +13,8 @@ namespace BetterCommentsPlus.Options
       private CommentToken _draggedItem;
       private int _draggedIndex = -1;
       private bool _isDragging;
-      private ListBoxItem _dragAdorner;
+      private ListBoxItem _dragSourceItem;
+      private double _originalOpacity;
 
       public OptionsTokensPageControl()
       {
@@ -59,9 +60,11 @@ namespace BetterCommentsPlus.Options
          if (item != null)
          {
             _draggedItem = item.DataContext as CommentToken;
+            _dragSourceItem = item;
             if (_draggedItem != null)
             {
                _draggedIndex = Settings.Instance.CommentTokens.IndexOf(_draggedItem);
+               _originalOpacity = item.Opacity;
                listBox.CaptureMouse();
             }
          }
@@ -79,6 +82,16 @@ namespace BetterCommentsPlus.Options
             {
                _isDragging = true;
                Settings.Instance.IsDragging = true;
+               if (_dragSourceItem != null)
+               {
+                  _dragSourceItem.Opacity = 0.4;
+               }
+               DropIndicator.Visibility = Visibility.Visible;
+            }
+
+            if (_isDragging)
+            {
+               UpdateDropIndicator(sender as ListBox, e.GetPosition(sender as ListBox));
             }
          }
       }
@@ -109,10 +122,41 @@ namespace BetterCommentsPlus.Options
             Settings.Instance.OnConfigurationChanged();
          }
 
+         if (_dragSourceItem != null)
+         {
+            _dragSourceItem.Opacity = _originalOpacity;
+         }
+         DropIndicator.Visibility = Visibility.Collapsed;
+
          _draggedItem = null;
          _draggedIndex = -1;
          _isDragging = false;
+         _dragSourceItem = null;
          (sender as ListBox)?.ReleaseMouseCapture();
+      }
+
+      private void UpdateDropIndicator(ListBox listBox, Point position)
+      {
+         var targetItem = GetListBoxItemAtPosition(listBox, position);
+         
+         if (targetItem != null)
+         {
+            var transform = targetItem.TransformToVisual(this);
+            var itemPosition = transform.Transform(new Point(0, 0));
+            
+            DropIndicator.Margin = new Thickness(0, itemPosition.Y - 1, 0, 0);
+         }
+         else if (Settings.Instance.CommentTokens.Count > 0)
+         {
+            var lastItem = TokensList.ItemContainerGenerator.ContainerFromIndex(Settings.Instance.CommentTokens.Count - 1) as ListBoxItem;
+            if (lastItem != null)
+            {
+               var transform = lastItem.TransformToVisual(this);
+               var itemPosition = transform.Transform(new Point(0, lastItem.ActualHeight));
+               
+               DropIndicator.Margin = new Thickness(0, itemPosition.Y - 1, 0, 0);
+            }
+         }
       }
 
       private ListBoxItem GetListBoxItemAtPosition(ListBox listBox, Point position)

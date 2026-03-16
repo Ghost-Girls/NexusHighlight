@@ -114,16 +114,27 @@
 				Content="Add" />
 		</StackPanel>
 
-		<ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto">
-			<ListBox
-				x:Name="TokensList"
-				ItemTemplate="{StaticResource TokensListDataTemplate}"
-				ItemsSource="{Binding CommentTokens, Mode=OneWay}"
-				BorderThickness="0"
-				PreviewMouseLeftButtonDown="TokensList_PreviewMouseLeftButtonDown"
-				MouseMove="TokensList_MouseMove"
-				PreviewMouseLeftButtonUp="TokensList_PreviewMouseLeftButtonUp" />
-		</ScrollViewer>
+		<Grid Grid.Row="1" Grid.Column="0">
+			<ScrollViewer VerticalScrollBarVisibility="Auto">
+				<ListBox
+					x:Name="TokensList"
+					ItemTemplate="{StaticResource TokensListDataTemplate}"
+					ItemsSource="{Binding CommentTokens, Mode=OneWay}"
+					BorderThickness="0"
+					PreviewMouseLeftButtonDown="TokensList_PreviewMouseLeftButtonDown"
+					MouseMove="TokensList_MouseMove"
+					PreviewMouseLeftButtonUp="TokensList_PreviewMouseLeftButtonUp" />
+			</ScrollViewer>
+			
+			<Rectangle
+				x:Name="DropIndicator"
+				Height="2"
+				Fill="#FF007ACC"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Top"
+				Margin="0,-1,0,0"
+				Visibility="Collapsed" />
+		</Grid>
 
 		<StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Orientation="Vertical">
 			<Button
