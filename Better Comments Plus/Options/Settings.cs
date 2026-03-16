@@ -16,6 +16,8 @@ namespace BetterCommentsPlus.Options
         private bool highlightTaskKeywordOnly = false;
         private bool underlineImportantComments = false;
         private bool strikethroughDoubleComments = false;
+        
+        public bool IsDragging { get; set; }
 
         private readonly ObservableCollection<CommentToken> commentTokens
             = new ObservableCollection<CommentToken>
@@ -30,7 +32,7 @@ namespace BetterCommentsPlus.Options
 
         public event EventHandler ConfigurationChanged;
 
-        protected virtual void OnConfigurationChanged()
+        public virtual void OnConfigurationChanged()
         {
             ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -278,8 +280,11 @@ namespace BetterCommentsPlus.Options
                 }
             }
 
-            SyncCommentTokensToUnifiedConfig();
-            OnConfigurationChanged();
+            if (!IsDragging)
+            {
+                SyncCommentTokensToUnifiedConfig();
+                OnConfigurationChanged();
+            }
         }
 
         #endregion Private Helpers

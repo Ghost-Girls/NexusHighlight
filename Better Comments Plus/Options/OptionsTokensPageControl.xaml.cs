@@ -10,8 +10,10 @@ namespace BetterCommentsPlus.Options
    public partial class OptionsTokensPageControl
    {
       private Point _dragStartPoint;
-      private object _draggedItem;
-      private ListBox _sourceListBox;
+      private CommentToken _draggedItem;
+      private int _draggedIndex = -1;
+      private bool _isDragging;
+      private ListBoxItem _dragAdorner;
 
       public OptionsTokensPageControl()
       {
@@ -50,88 +52,67 @@ namespace BetterCommentsPlus.Options
       private void TokensList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
       {
          _dragStartPoint = e.GetPosition(null);
-         _sourceListBox = sender as ListBox;
-         _draggedItem = _sourceListBox?.SelectedItem;
+         
+         var listBox = sender as ListBox;
+         var item = GetListBoxItemAtPosition(listBox, e.GetPosition(listBox));
+         
+         if (item != null)
+         {
+            _draggedItem = item.DataContext as CommentToken;
+            if (_draggedItem != null)
+            {
+               _draggedIndex = Settings.Instance.CommentTokens.IndexOf(_draggedItem);
+               listBox.CaptureMouse();
+            }
+         }
       }
 
       private void TokensList_MouseMove(object sender, MouseEventArgs e)
       {
-         if (e.LeftButton == MouseButtonState.Pressed && _draggedItem != null)
+         if (e.LeftButton == MouseButtonState.Pressed && _draggedItem != null && _draggedIndex >= 0)
          {
             Point currentPosition = e.GetPosition(null);
             Vector diff = _dragStartPoint - currentPosition;
 
-            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
-                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+            if (!_isDragging && (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
-               DragDrop.DoDragDrop(_sourceListBox, _draggedItem, DragDropEffects.Move);
+               _isDragging = true;
+               Settings.Instance.IsDragging = true;
             }
          }
       }
 
-      private void TokensList_DragEnter(object sender, DragEventArgs e)
+      private void TokensList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
       {
-         if (e.Data.GetDataPresent(typeof(CommentToken)))
+         if (_isDragging && _draggedIndex >= 0)
          {
-            e.Effects = DragDropEffects.Move;
-         }
-         else
-         {
-            e.Effects = DragDropEffects.None;
-         }
-         e.Handled = true;
-      }
-
-      private void TokensList_DragOver(object sender, DragEventArgs e)
-      {
-         e.Handled = true;
-      }
-
-      private void TokensList_DragLeave(object sender, DragEventArgs e)
-      {
-         e.Handled = true;
-      }
-
-      private void TokensList_Drop(object sender, DragEventArgs e)
-      {
-         if (e.Data.GetDataPresent(typeof(CommentToken)))
-         {
-            var droppedItem = e.Data.GetData(typeof(CommentToken)) as CommentToken;
             var targetListBox = sender as ListBox;
             var settings = DataContext as Settings;
 
-            if (droppedItem != null && targetListBox != null && settings != null)
+            if (targetListBox != null && settings != null)
             {
                var targetItem = GetListBoxItemAtPosition(targetListBox, e.GetPosition(targetListBox));
                var targetToken = targetItem?.DataContext as CommentToken;
 
-               var tokens = settings.CommentTokens.ToList();
-               if (tokens != null)
-               {
-                  int oldIndex = tokens.IndexOf(droppedItem);
-                  int newIndex = targetToken != null ? tokens.IndexOf(targetToken) : tokens.Count - 1;
+               int newIndex = targetToken != null ? settings.CommentTokens.IndexOf(targetToken) : settings.CommentTokens.Count - 1;
 
-                  if (oldIndex >= 0 && newIndex >= 0 && oldIndex != newIndex)
-                  {
-                     tokens.RemoveAt(oldIndex);
-                     tokens.Insert(newIndex, droppedItem);
-                     
-                     settings.CommentTokens.Clear();
-                     foreach (var token in tokens)
-                     {
-                        settings.CommentTokens.Add(token);
-                     }
-                     
-                     TokensList.ItemsSource = settings.CommentTokens;
-                     TokensList.SelectedItem = droppedItem;
-                     Settings.Instance.SyncCommentTokensToUnifiedConfig();
-                  }
+               if (_draggedIndex >= 0 && newIndex >= 0 && _draggedIndex != newIndex)
+               {
+                  settings.CommentTokens.Move(_draggedIndex, newIndex);
+                  TokensList.SelectedItem = _draggedItem;
                }
             }
+
+            Settings.Instance.IsDragging = false;
+            Settings.Instance.SyncCommentTokensToUnifiedConfig();
+            Settings.Instance.OnConfigurationChanged();
          }
-         e.Handled = true;
+
          _draggedItem = null;
-         _sourceListBox = null;
+         _draggedIndex = -1;
+         _isDragging = false;
+         (sender as ListBox)?.ReleaseMouseCapture();
       }
 
       private ListBoxItem GetListBoxItemAtPosition(ListBox listBox, Point position)
