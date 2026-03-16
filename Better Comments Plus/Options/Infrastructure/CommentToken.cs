@@ -1,4 +1,5 @@
-﻿using BetterCommentsPlus.CommentsTagging;
+using BetterCommentsPlus.CommentsTagging;
+using System.Windows.Media;
 
 namespace BetterCommentsPlus.Options
 {
@@ -7,6 +8,7 @@ namespace BetterCommentsPlus.Options
       private CommentType type;
       private string defaultValue;
       private string currentValue;
+      private string colorHex;
 
       public CommentType Type
       {
@@ -25,11 +27,18 @@ namespace BetterCommentsPlus.Options
          get { return defaultValue; }
       }
 
-      public CommentToken(CommentType type, string defaultValue, string value)
+      public string ColorHex
+      {
+         get { return colorHex; }
+         set { SetField(ref colorHex, value); }
+      }
+
+      public CommentToken(CommentType type, string defaultValue, string value, string colorHex = null)
       {
          this.type = type;
          this.defaultValue = defaultValue;
          this.currentValue = value;
+         this.colorHex = colorHex;
       }
 
       public bool IsOfType(string type)
@@ -39,7 +48,7 @@ namespace BetterCommentsPlus.Options
 
       public override string ToString()
       {
-         return $"{type},{currentValue.Trim()}";
+         return $"{type},{currentValue.Trim()},{colorHex}";
       }
    }
 }

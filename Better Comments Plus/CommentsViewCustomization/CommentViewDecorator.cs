@@ -1,4 +1,5 @@
-﻿using BetterCommentsPlus.CommentsClassification;
+using BetterCommentsPlus.CommentsClassification;
+using BetterCommentsPlus.CommentsTagging;
 using BetterCommentsPlus.Options;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
@@ -8,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using TextFormattingRunProperties = Microsoft.VisualStudio.Text.Formatting.TextFormattingRunProperties;
 
 namespace BetterCommentsPlus.CommentsViewCustomization
 {
@@ -124,7 +126,44 @@ namespace BetterCommentsPlus.CommentsViewCustomization
          if (classificationType.IsOfType(CommentNames.IMPORTANT_COMMENT)) //#INFO
             properties = properties.SetTextDecorations(GetTextDecoration(settings));
 
+         // 添加动态颜色设置
+         properties = SetDynamicColor(classificationType, properties);
+
          formatMap.SetTextProperties(classificationType, properties);
+      }
+
+      private TextFormattingRunProperties SetDynamicColor(IClassificationType classificationType, TextFormattingRunProperties properties)
+      {
+         try
+         {
+            CommentType? commentType = null;
+
+            if (classificationType.IsOfType(CommentNames.IMPORTANT_COMMENT))
+               commentType = CommentType.Important;
+            else if (classificationType.IsOfType(CommentNames.QUESTION_COMMENT))
+               commentType = CommentType.Question;
+            else if (classificationType.IsOfType(CommentNames.REMOVE_COMMENT))
+               commentType = CommentType.Remove;
+            else if (classificationType.IsOfType(CommentNames.TASK_COMMENT))
+               commentType = CommentType.Task;
+
+            if (commentType.HasValue)
+            {
+               var token = settings.GetToken(commentType.Value);
+               if (token != null && !string.IsNullOrEmpty(token.ColorHex))
+               {
+                  try
+                  {
+                     var color = (Color)ColorConverter.ConvertFromString(token.ColorHex);
+                     properties = properties.SetForeground(color);
+                  }
+                  catch { }
+               }
+            }
+         }
+         catch { }
+
+         return properties;
       }
 
       private double GetEditorTextSize()

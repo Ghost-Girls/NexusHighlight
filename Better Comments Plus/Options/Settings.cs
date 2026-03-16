@@ -19,10 +19,10 @@ namespace BetterCommentsPlus.Options
         private readonly ObservableCollection<CommentToken> commentTokens
             = new ObservableCollection<CommentToken>
             {
-                new CommentToken(type: CommentType.Important,       defaultValue: "#IMPORTANT",     value: "#IMPORTANT"),
-                new CommentToken(type: CommentType.Remove,          defaultValue: "#REMOVE",        value: "#REMOVE"),
-                new CommentToken(type: CommentType.Question,        defaultValue: "#QUESTION",      value: "#QUESTION"),
-                new CommentToken(type: CommentType.Task,            defaultValue: "#TASK",          value: "#TASK"),
+                new CommentToken(type: CommentType.Important,       defaultValue: "#IMPORTANT",     value: "#IMPORTANT",   colorHex: "#FFFF0000"),
+                new CommentToken(type: CommentType.Remove,          defaultValue: "#REMOVE",        value: "#REMOVE",      colorHex: "#FF808080"),
+                new CommentToken(type: CommentType.Question,        defaultValue: "#QUESTION",      value: "#QUESTION",    colorHex: "#FFFFFF00"),
+                new CommentToken(type: CommentType.Task,            defaultValue: "#TASK",          value: "#TASK",        colorHex: "#FFEB690A"),
             };
 
         #endregion Fields
@@ -166,7 +166,11 @@ namespace BetterCommentsPlus.Options
                 var token = commentTokens.SingleOrDefault(t => t.IsOfType(pair[0]));
 
                 if (token != null)
+                {
                     token.CurrentValue = pair[1].Trim();
+                    if (pair.Length > 2 && !string.IsNullOrWhiteSpace(pair[2]))
+                        token.ColorHex = pair[2].Trim();
+                }
             }
         }
 

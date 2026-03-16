@@ -93,12 +93,20 @@
     <Compile Include="CommentsTagging\Infrastructure\ParseHelper.cs" />
     <Compile Include="Options\Infrastructure\CommentToken.cs" />
     <Compile Include="Options\Infrastructure\EnumToStringConverter.cs" />
+    <Compile Include="Options\Infrastructure\HexToColorConverter.cs" />
     <Compile Include="Options\Infrastructure\RelayCommand.cs" />
+    <Compile Include="Options\Infrastructure\ForegroundStyle.cs" />
+    <Compile Include="Options\Infrastructure\BackgroundStyle.cs" />
+    <Compile Include="Options\Infrastructure\StyleRule.cs" />
+    <Compile Include="Options\Infrastructure\UnifiedConfig.cs" />
     <Compile Include="Options\OptionsPageBase.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Options\OptionsTokensPageControl.xaml.cs">
       <DependentUpon>OptionsTokensPageControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Options\ColorPickerDialog.xaml.cs">
+      <DependentUpon>ColorPickerDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Options\OptionsTokensPage.cs">
       <SubType>Component</SubType>
@@ -123,6 +131,7 @@
     </Compile>
     <Compile Include="Options\Infrastructure\RequiredAndUniqueRule.cs" />
     <Compile Include="Utils\StringExtensions.cs" />
+    <Compile Include="Utils\ColorHelper.cs" />
     <Compile Include="VSPackage.cs" />
     <Compile Include="Options\OptionsGeneralPage.cs">
       <SubType>Component</SubType>
@@ -185,6 +194,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Options\OptionsGeneralPageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Options\ColorPickerDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

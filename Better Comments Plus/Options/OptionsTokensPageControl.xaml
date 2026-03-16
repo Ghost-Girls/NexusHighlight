@@ -5,12 +5,13 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:BetterCommentsPlus.Options"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	Width="420"
+	Width="520"
 	d:DataContext="{d:DesignInstance {x:Type local:Settings}}"
 	mc:Ignorable="d">
 
 	<UserControl.Resources>
 		<local:EnumToStringConverter x:Key="EnumToStringConverter" />
+		<local:HexToColorConverter x:Key="HexToColorConverter" />
 
 		<Style x:Key="TokenValueTextBoxStyle" TargetType="{x:Type TextBox}">
 			<Style.Triggers>
@@ -41,7 +42,6 @@
 		<DataTemplate x:Key="TokensListDataTemplate">
 			<StackPanel Margin="0,0,0,5" Orientation="Horizontal">
 				<Label
-					Grid.Column="0"
 					Width="85"
 					Margin="0,0,5,0"
 					HorizontalAlignment="Right"
@@ -50,7 +50,6 @@
 					Content="{Binding Type, Converter={StaticResource EnumToStringConverter}, Mode=OneWay}" />
 
 				<TextBox
-					Grid.Column="1"
 					Width="200"
 					Padding="3,0"
 					VerticalContentAlignment="Center"
@@ -67,13 +66,28 @@
 						</Binding>
 					</TextBox.Text>
 				</TextBox>
+
+				<Border
+					x:Name="ColorPreviewBorder"
+					Width="30"
+					Height="20"
+					Margin="5,0,0,0"
+					BorderBrush="Gray"
+					BorderThickness="1"
+					CornerRadius="3"
+					Cursor="Hand"
+					MouseLeftButtonDown="ColorPreviewBorder_MouseLeftButtonDown">
+					<Border.Background>
+						<SolidColorBrush Color="{Binding ColorHex, Converter={StaticResource HexToColorConverter}}" />
+					</Border.Background>
+				</Border>
 			</StackPanel>
 		</DataTemplate>
 	</UserControl.Resources>
 
 	<Grid Margin="10,10,10,0">
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="300" />
+			<ColumnDefinition Width="400" />
 			<ColumnDefinition Width="Auto" />
 		</Grid.ColumnDefinitions>
 
