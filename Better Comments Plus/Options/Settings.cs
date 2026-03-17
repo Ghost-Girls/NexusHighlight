@@ -189,27 +189,44 @@ namespace BetterCommentsPlus.Options
 
         private void SetTokensToDefault()
         {
-            foreach (var token in commentTokens)
+            _isSyncing = true;
+            try
             {
-                token.CurrentValue = token.DefaultValue;
-                switch (token.Type)
+                foreach (var token in commentTokens)
                 {
-                    case CommentType.Important:
-                        token.ColorHex = "#FFFF0000";
-                        break;
-                    case CommentType.Question:
-                        token.ColorHex = "#FFFFFF00";
-                        break;
-                    case CommentType.Remove:
-                        token.ColorHex = "#FF808080";
-                        break;
-                    case CommentType.Task:
-                        token.ColorHex = "#FFEB690A";
-                        break;
+                    token.CurrentValue = token.DefaultValue;
+                    token.IsBold = false;
+                    token.IsItalic = false;
+                    token.HasUnderline = false;
+                    token.HasStrikethrough = false;
+                    
+                    switch (token.Type)
+                    {
+                        case CommentType.Important:
+                            token.ColorHex = "#FFFF0000";
+                            token.IsBold = true;
+                            token.IsItalic = false;
+                            break;
+                        case CommentType.Question:
+                            token.ColorHex = "#FFFFFF00";
+                            break;
+                        case CommentType.Remove:
+                            token.ColorHex = "#FF808080";
+                            token.HasStrikethrough = true;
+                            break;
+                        case CommentType.Task:
+                            token.ColorHex = "#FFEB690A";
+                            break;
+                    }
                 }
+                SyncCommentTokensToUnifiedConfig();
+                SyncCommentTokensToStyleRules();
+                OnConfigurationChanged();
             }
-            SyncCommentTokensToUnifiedConfig();
-            OnConfigurationChanged();
+            finally
+            {
+                _isSyncing = false;
+            }
         }
 
         private void UpdateCommentTokens(string tokensString)

@@ -39,7 +39,8 @@ namespace BetterCommentsPlus.CommentsClassification
         }
 
         public void ApplyClassificationFormat(string classificationName, Color? foregroundColor = null, 
-            bool? isItalic = null, bool? isBold = null, double? opacity = null)
+            bool? isItalic = null, bool? isBold = null, bool? hasUnderline = null, 
+            bool? hasStrikethrough = null, double? opacity = null)
         {
             var classificationType = GetOrCreateClassification(classificationName);
             var formatMap = FormatMapService.GetClassificationFormatMap("text");
@@ -60,9 +61,33 @@ namespace BetterCommentsPlus.CommentsClassification
                     properties = properties.SetItalic(isItalic.Value);
                 }
 
+                if (isBold.HasValue)
+                {
+                    properties = properties.SetBold(isBold.Value);
+                }
+
                 if (opacity.HasValue && opacity.Value >= 0.1 && opacity.Value <= 1.0)
                 {
                     properties = properties.SetForegroundOpacity(opacity.Value);
+                }
+
+                var decorations = new TextDecorationCollection();
+                if (hasUnderline.GetValueOrDefault())
+                {
+                    decorations.Add(TextDecorations.Underline);
+                }
+                if (hasStrikethrough.GetValueOrDefault())
+                {
+                    decorations.Add(TextDecorations.Strikethrough);
+                }
+                
+                if (decorations.Count > 0)
+                {
+                    properties = properties.SetTextDecorations(decorations);
+                }
+                else if (hasUnderline.HasValue || hasStrikethrough.HasValue)
+                {
+                    properties = properties.SetTextDecorations(new TextDecorationCollection());
                 }
 
                 formatMap.SetTextProperties(classificationType, properties);
