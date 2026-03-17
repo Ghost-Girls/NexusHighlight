@@ -5,7 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:BetterCommentsPlus.Options"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Width="630"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    Width="850"
     d:DataContext="{d:DesignInstance {x:Type local:Settings}}"
     mc:Ignorable="d">
 
@@ -39,126 +40,234 @@
         </Style>
 
         <DataTemplate x:Key="TokensListDataTemplate">
-            <StackPanel Margin="0,0,0,5" Orientation="Horizontal">
-                <Border
-                    x:Name="DragGrip"
-                    Width="24"
-                    Height="24"
-                    Margin="0,0,5,0"
-                    VerticalAlignment="Center"
-                    Background="Transparent"
-                    Cursor="SizeAll"
-                    PreviewMouseLeftButtonDown="DragGrip_PreviewMouseLeftButtonDown">
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="16"
-                        Foreground="Gray"
-                        Text="☰" />
-                </Border>
+            <Border
+                Margin="0,0,0,5"
+                BorderBrush="LightGray"
+                BorderThickness="1"
+                CornerRadius="3">
+                <StackPanel Margin="5">
+                    <StackPanel Orientation="Horizontal">
+                        <Border
+                            x:Name="DragGrip"
+                            Width="24"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            Cursor="SizeAll"
+                            PreviewMouseLeftButtonDown="DragGrip_PreviewMouseLeftButtonDown">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="16"
+                                Foreground="Gray"
+                                Text="☰" />
+                        </Border>
 
-                <TextBox
-                    Width="200"
-                    Padding="3,0"
-                    VerticalContentAlignment="Center"
-                    Style="{StaticResource TokenValueTextBoxStyle}">
+                        <TextBox
+                            Width="120"
+                            Padding="3,0"
+                            VerticalContentAlignment="Center"
+                            Style="{StaticResource TokenValueTextBoxStyle}">
 
-                    <TextBox.Text>
-                        <Binding
-                            Mode="TwoWay"
-                            Path="CurrentValue"
-                            UpdateSourceTrigger="LostFocus">
-                            <Binding.ValidationRules>
-                                <local:RequiredAndUniqueRule ValidationStep="CommittedValue" />
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
-                </TextBox>
+                            <TextBox.Text>
+                                <Binding
+                                    Mode="TwoWay"
+                                    Path="CurrentValue"
+                                    UpdateSourceTrigger="LostFocus">
+                                    <Binding.ValidationRules>
+                                        <local:RequiredAndUniqueRule ValidationStep="CommittedValue" />
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
 
-                <Border
-                    x:Name="ColorPreviewBorder"
-                    Width="32"
-                    Height="24"
-                    Margin="5,0,0,0"
-                    BorderBrush="Gray"
-                    BorderThickness="1"
-                    CornerRadius="3"
-                    Cursor="Hand"
-                    MouseLeftButtonDown="ColorPreviewBorder_MouseLeftButtonDown">
-                    <Border.Background>
-                        <SolidColorBrush Color="{Binding ColorHex, Converter={StaticResource HexToColorConverter}}" />
-                    </Border.Background>
-                </Border>
+                        <Border
+                            Width="1"
+                            Height="24"
+                            Margin="5,0,5,0"
+                            Background="LightGray" />
 
-                <CheckBox
-                    Width="28"
-                    Height="24"
-                    Margin="5,0,0,0"
-                    Padding="0"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    IsChecked="{Binding IsBold, UpdateSourceTrigger=PropertyChanged}"
-                    ToolTip="B">
-                    <TextBlock
-                        FontSize="14"
-                        FontWeight="Bold"
-                        Text="B" />
-                </CheckBox>
+                        <Border
+                            x:Name="ColorPreviewBorder"
+                            Width="28"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            BorderBrush="Gray"
+                            BorderThickness="1"
+                            CornerRadius="3"
+                            Cursor="Hand"
+                            MouseLeftButtonDown="ColorPreviewBorder_MouseLeftButtonDown">
+                            <Border.Background>
+                                <SolidColorBrush Color="{Binding ColorHex, Converter={StaticResource HexToColorConverter}}" />
+                            </Border.Background>
+                        </Border>
 
-                <CheckBox
-                    Width="28"
-                    Height="24"
-                    Margin="2,0,0,0"
-                    Padding="0"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    IsChecked="{Binding IsItalic, UpdateSourceTrigger=PropertyChanged}"
-                    ToolTip="I">
-                    <TextBlock
-                        FontSize="14"
-                        FontStyle="Italic"
-                        Text="I" />
-                </CheckBox>
+                        <CheckBox
+                            Width="24"
+                            Height="24"
+                            Margin="0,0,3,0"
+                            Padding="0"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsBold, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="粗体">
+                            <TextBlock
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Text="B" />
+                        </CheckBox>
 
-                <CheckBox
-                    Width="28"
-                    Height="24"
-                    Margin="2,0,0,0"
-                    Padding="0"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    IsChecked="{Binding HasUnderline, UpdateSourceTrigger=PropertyChanged}"
-                    ToolTip="U">
-                    <TextBlock
-                        FontSize="14"
-                        Text="U"
-                        TextDecorations="Underline" />
-                </CheckBox>
+                        <CheckBox
+                            Width="24"
+                            Height="24"
+                            Margin="0,0,3,0"
+                            Padding="0"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsItalic, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="斜体">
+                            <TextBlock
+                                FontSize="12"
+                                FontStyle="Italic"
+                                Text="I" />
+                        </CheckBox>
 
-                <CheckBox
-                    Width="28"
-                    Height="24"
-                    Margin="2,0,0,0"
-                    Padding="0"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    IsChecked="{Binding HasStrikethrough, UpdateSourceTrigger=PropertyChanged}"
-                    ToolTip="S">
-                    <TextBlock
-                        FontSize="14"
-                        Text="S"
-                        TextDecorations="Strikethrough" />
-                </CheckBox>
+                        <CheckBox
+                            Width="24"
+                            Height="24"
+                            Margin="0,0,3,0"
+                            Padding="0"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding HasUnderline, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="下划线">
+                            <TextBlock
+                                FontSize="12"
+                                Text="U"
+                                TextDecorations="Underline" />
+                        </CheckBox>
 
-                <Button
-                    Width="50"
-                    Height="24"
-                    Margin="5,0,0,0"
-                    Padding="5,0"
-                    Click="DeleteButton_Click"
-                    Content="Delete"
-                    Tag="{Binding}" />
-            </StackPanel>
+                        <CheckBox
+                            Width="24"
+                            Height="24"
+                            Margin="0,0,3,0"
+                            Padding="0"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding HasStrikethrough, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="删除线">
+                            <TextBlock
+                                FontSize="12"
+                                Text="S"
+                                TextDecorations="Strikethrough" />
+                        </CheckBox>
+
+                        <Border
+                            Width="1"
+                            Height="24"
+                            Margin="5,0,5,0"
+                            Background="LightGray" />
+
+                        <CheckBox
+                            Width="36"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Padding="0"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding BackgroundStyle.IsActive, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="启用背景">
+                            <TextBlock
+                                FontSize="12"
+                                Text="🎨" />
+                        </CheckBox>
+
+                        <Border
+                            Width="28"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            BorderBrush="Gray"
+                            BorderThickness="1"
+                            CornerRadius="3"
+                            Cursor="Hand"
+                            MouseLeftButtonDown="BackgroundColorPreviewBorder_MouseLeftButtonDown">
+                            <Border.Background>
+                                <SolidColorBrush Color="{Binding BackgroundStyle.ColorHex, Converter={StaticResource HexToColorConverter}}" />
+                            </Border.Background>
+                        </Border>
+
+                        <ComboBox
+                            Width="65"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Padding="2"
+                            SelectedItem="{Binding BackgroundStyle.Shape, UpdateSourceTrigger=PropertyChanged}">
+                            <sys:String>Tag</sys:String>
+                            <sys:String>TagUnder</sys:String>
+                            <sys:String>Line</sys:String>
+                            <sys:String>LineUnder</sys:String>
+                        </ComboBox>
+
+                        <ComboBox
+                            Width="55"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Padding="2"
+                            SelectedItem="{Binding BackgroundStyle.Blur, UpdateSourceTrigger=PropertyChanged}">
+                            <sys:String>None</sys:String>
+                            <sys:String>Low</sys:String>
+                            <sys:String>Medium</sys:String>
+                            <sys:String>High</sys:String>
+                            <sys:String>Ultra</sys:String>
+                        </ComboBox>
+
+                        <ComboBox
+                            Width="55"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Padding="2"
+                            SelectedItem="{Binding BackgroundStyle.Alpha, UpdateSourceTrigger=PropertyChanged}">
+                            <sys:String>0/10</sys:String>
+                            <sys:String>1/10</sys:String>
+                            <sys:String>2/10</sys:String>
+                            <sys:String>3/10</sys:String>
+                            <sys:String>4/10</sys:String>
+                            <sys:String>5/10</sys:String>
+                            <sys:String>6/10</sys:String>
+                            <sys:String>7/10</sys:String>
+                            <sys:String>8/10</sys:String>
+                            <sys:String>9/10</sys:String>
+                            <sys:String>10/10</sys:String>
+                        </ComboBox>
+
+                        <CheckBox
+                            Width="70"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Padding="2"
+                            Content="区分大小写"
+                            IsChecked="{Binding BackgroundStyle.IsCaseSensitive, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <CheckBox
+                            Width="70"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Padding="2"
+                            Content="部分匹配"
+                            IsChecked="{Binding BackgroundStyle.AllowPartialMatch, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <Button
+                            Width="50"
+                            Height="24"
+                            Margin="5,0,0,0"
+                            Padding="5,0"
+                            Click="DeleteButton_Click"
+                            Content="Delete"
+                            Tag="{Binding}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
         </DataTemplate>
     </UserControl.Resources>
 
@@ -170,8 +279,8 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition
                 Width="Auto"
-                MinWidth="500"
-                MaxWidth="800" />
+                MinWidth="700"
+                MaxWidth="1000" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 

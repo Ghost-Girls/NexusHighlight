@@ -75,6 +75,20 @@ namespace BetterCommentsPlus.Options
             
             foreach (var token in commentTokens)
             {
+                if (token.BackgroundStyle == null)
+                {
+                    token.BackgroundStyle = new BackgroundStyle();
+                }
+                
+                if (string.IsNullOrEmpty(token.BackgroundStyle.Shape))
+                    token.BackgroundStyle.Shape = "Tag";
+                if (string.IsNullOrEmpty(token.BackgroundStyle.Blur))
+                    token.BackgroundStyle.Blur = "None";
+                if (string.IsNullOrEmpty(token.BackgroundStyle.Alpha))
+                    token.BackgroundStyle.Alpha = "1/10";
+                if (string.IsNullOrEmpty(token.BackgroundStyle.ColorHex))
+                    token.BackgroundStyle.ColorHex = token.ColorHex;
+                
                 token.PropertyChanged += CommentToken_PropertyChanged;
             }
             
@@ -193,33 +207,44 @@ namespace BetterCommentsPlus.Options
             _isSyncing = true;
             try
             {
-                foreach (var token in commentTokens)
+                commentTokens.Clear();
+
+                var defaultTokens = new[]
                 {
-                    token.CurrentValue = token.DefaultValue;
-                    token.IsBold = false;
-                    token.IsItalic = false;
-                    token.HasUnderline = false;
-                    token.HasStrikethrough = false;
-                    
-                    switch (token.Type)
+                    new { Type = CommentType.Important, DefaultValue = "#IMPORTANT", Value = "#IMPORTANT", ColorHex = "#FFFF0000", IsBold = true, IsItalic = false, HasUnderline = false, HasStrikethrough = false },
+                    new { Type = CommentType.Remove, DefaultValue = "#REMOVE", Value = "#REMOVE", ColorHex = "#FF808080", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = true },
+                    new { Type = CommentType.Question, DefaultValue = "#QUESTION", Value = "#QUESTION", ColorHex = "#FFFFFF00", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = false },
+                    new { Type = CommentType.Task, DefaultValue = "#TASK", Value = "#TASK", ColorHex = "#FFEB690A", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = false }
+                };
+
+                foreach (var tokenInfo in defaultTokens)
+                {
+                    var newToken = new CommentToken(
+                        type: tokenInfo.Type,
+                        defaultValue: tokenInfo.DefaultValue,
+                        value: tokenInfo.Value,
+                        colorHex: tokenInfo.ColorHex)
                     {
-                        case CommentType.Important:
-                            token.ColorHex = "#FFFF0000";
-                            token.IsBold = true;
-                            token.IsItalic = false;
-                            break;
-                        case CommentType.Question:
-                            token.ColorHex = "#FFFFFF00";
-                            break;
-                        case CommentType.Remove:
-                            token.ColorHex = "#FF808080";
-                            token.HasStrikethrough = true;
-                            break;
-                        case CommentType.Task:
-                            token.ColorHex = "#FFEB690A";
-                            break;
-                    }
+                        IsBold = tokenInfo.IsBold,
+                        IsItalic = tokenInfo.IsItalic,
+                        HasUnderline = tokenInfo.HasUnderline,
+                        HasStrikethrough = tokenInfo.HasStrikethrough,
+                        BackgroundStyle = new BackgroundStyle
+                        {
+                            IsActive = false,
+                            ColorHex = null,
+                            Shape = "Tag",
+                            Blur = "None",
+                            Alpha = "1/10",
+                            IsCaseSensitive = true,
+                            AllowPartialMatch = false
+                        }
+                    };
+
+                    newToken.PropertyChanged += CommentToken_PropertyChanged;
+                    commentTokens.Add(newToken);
                 }
+
                 SyncCommentTokensToUnifiedConfig();
                 SyncCommentTokensToStyleRules();
                 OnConfigurationChanged();
@@ -310,8 +335,22 @@ namespace BetterCommentsPlus.Options
                     
                     if (newToken != null)
                     {
-                        newToken.PropertyChanged += CommentToken_PropertyChanged;
-                        commentTokens.Add(newToken);
+                        if (newToken.BackgroundStyle == null)
+                    {
+                        newToken.BackgroundStyle = new BackgroundStyle();
+                    }
+                    
+                    if (string.IsNullOrEmpty(newToken.BackgroundStyle.Shape))
+                        newToken.BackgroundStyle.Shape = "Tag";
+                    if (string.IsNullOrEmpty(newToken.BackgroundStyle.Blur))
+                        newToken.BackgroundStyle.Blur = "None";
+                    if (string.IsNullOrEmpty(newToken.BackgroundStyle.Alpha))
+                        newToken.BackgroundStyle.Alpha = "1/10";
+                    if (string.IsNullOrEmpty(newToken.BackgroundStyle.ColorHex))
+                        newToken.BackgroundStyle.ColorHex = newToken.ColorHex;
+                    
+                    newToken.PropertyChanged += CommentToken_PropertyChanged;
+                    commentTokens.Add(newToken);
                     }
                 }
             }
@@ -424,6 +463,20 @@ namespace BetterCommentsPlus.Options
                 {
                     if (item is CommentToken token)
                     {
+                        if (token.BackgroundStyle == null)
+                        {
+                            token.BackgroundStyle = new BackgroundStyle();
+                        }
+                        
+                        if (string.IsNullOrEmpty(token.BackgroundStyle.Shape))
+                            token.BackgroundStyle.Shape = "Tag";
+                        if (string.IsNullOrEmpty(token.BackgroundStyle.Blur))
+                            token.BackgroundStyle.Blur = "None";
+                        if (string.IsNullOrEmpty(token.BackgroundStyle.Alpha))
+                            token.BackgroundStyle.Alpha = "1/10";
+                        if (string.IsNullOrEmpty(token.BackgroundStyle.ColorHex))
+                            token.BackgroundStyle.ColorHex = token.ColorHex;
+                        
                         token.PropertyChanged += CommentToken_PropertyChanged;
                     }
                 }

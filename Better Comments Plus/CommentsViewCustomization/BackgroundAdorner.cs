@@ -15,14 +15,14 @@ namespace BetterCommentsPlus.CommentsViewCustomization
 {
     internal sealed class BackgroundAdorner
     {
-        private const double CornerRadius = 2.0;
+        private const double cornerRadius = 2.0;
 
         private readonly IAdornmentLayer layer;
         private readonly IWpfTextView view;
         private readonly Thickness tBlur = new(2, -3, 2, -3);
         private readonly Thickness tNone = new(0, 0, 0, 0);
         private char[] firstChars;
-        private List<CommentToken> tokens;
+        private List<CommentToken> tags;
         private Performance performance = Performance.Normal;
 
         public BackgroundAdorner(IWpfTextView view)
@@ -42,12 +42,6 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             this.view.ViewportWidthChanged += OnViewportWidthChanged;
 
             Settings.Instance.ConfigurationChanged += OnConfigurationChanged;
-        }
-
-        private void OnConfigurationChanged(object sender, EventArgs e)
-        {
-            layer.RemoveAllAdornments();
-            RefreshCriteria();
 
             try
             {
@@ -59,7 +53,6 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             }
             catch (ObjectDisposedException)
             {
-                return;
             }
         }
 
@@ -81,23 +74,51 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             }
         }
 
+        private void OnConfigurationChanged(object sender, EventArgs e)
+        {
+            layer.RemoveAllAdornments();
+            RefreshCriteria();
+
+            try
+            {
+                foreach (ITextViewLine line in view.TextViewLines)
+                {
+                    if (line.VisibilityState == VisibilityState.FullyVisible)
+                        CreateVisuals(line);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
+        }
+
         private void RefreshCriteria()
         {
             performance = Performance.Normal;
 
-            tokens = Settings.Instance.CommentTokens
-                .Where(x => x.BackgroundStyle != null && x.BackgroundStyle.IsActive && !string.IsNullOrEmpty(x.BackgroundStyle.ColorHex))
+            tags = Settings.Instance.CommentTokens
+                .Where(x => x.BackgroundStyle != null && x.BackgroundStyle.IsActive)
                 .ToList();
 
             List<char> chars = new List<char>();
-            chars.AddRange(tokens.Select(y => y.Criteria[0]));
-            chars.AddRange(tokens.Where(x => !x.BackgroundStyle.IsCaseSensitive).Select(y => y.Criteria.ToUpper()[0]));
+            foreach (var tag in tags)
+            {
+                if (!string.IsNullOrEmpty(tag.CurrentValue))
+                {
+                    chars.Add(tag.CurrentValue[0]);
+                    if (!tag.BackgroundStyle.IsCaseSensitive)
+                    {
+                        chars.Add(char.ToUpperInvariant(tag.CurrentValue[0]));
+                    }
+                }
+            }
             firstChars = chars.ToArray();
         }
 
         internal void OnLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
         {
-            if (tokens == null || !tokens.Any())
+            if (tags == null || !tags.Any())
                 return;
 
             foreach (ITextViewLine line in e.NewOrReformattedLines)
@@ -117,16 +138,30 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             {
                 if (firstChars.Contains(view.TextSnapshot[i]))
                 {
-                    foreach (var token in tokens)
+                    foreach (var tag in tags)
                     {
-                        string keyword = token.Criteria.Trim();
-                        if (FirstCharacterEquals(view.TextSnapshot[i], keyword[0], token.BackgroundStyle.IsCaseSensitive) &&
+                        if (string.IsNullOrEmpty(tag.CurrentValue))
+                            continue;
+
+                        string keyword = tag.CurrentValue.Trim();
+                        if (string.IsNullOrEmpty(keyword))
+                            continue;
+
+                        if (FirstCharacterEquals(view.TextSnapshot[i], keyword[0], tag.BackgroundStyle.IsCaseSensitive) &&
                             i <= end - keyword.Length &&
-                            CompareWords(view.TextSnapshot.GetText(i, keyword.Length), keyword, token.BackgroundStyle.IsCaseSensitive) &&
-                            CheckWholeWordsMatch(view.TextSnapshot, i, keyword, token.BackgroundStyle.AllowPartialMatch))
+                            CompareWords(view.TextSnapshot.GetText(i, keyword.Length), keyword, tag.BackgroundStyle.IsCaseSensitive) &&
+                            CheckWholeWordsMatch(view.TextSnapshot, i, keyword, tag.BackgroundStyle.AllowPartialMatch))
                         {
                             SnapshotSpan span;
-                            TagShape shape = (TagShape)Enum.Parse(typeof(TagShape), token.BackgroundStyle.Shape);
+                            TagShape shape;
+                            try
+                            {
+                                shape = (TagShape)Enum.Parse(typeof(TagShape), tag.BackgroundStyle.Shape ?? "Tag");
+                            }
+                            catch
+                            {
+                                shape = TagShape.Tag;
+                            }
 
                             if (shape == TagShape.Line || shape == TagShape.LineUnder)
                             {
@@ -137,7 +172,16 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                                 span = new SnapshotSpan(view.TextSnapshot, Span.FromBounds(i, i + keyword.Length));
                             }
 
-                            BlurIntensity blur = (BlurIntensity)Enum.Parse(typeof(BlurIntensity), token.BackgroundStyle.Blur);
+                            BlurIntensity blur;
+                            try
+                            {
+                                blur = (BlurIntensity)Enum.Parse(typeof(BlurIntensity), tag.BackgroundStyle.Blur ?? "None");
+                            }
+                            catch
+                            {
+                                blur = BlurIntensity.None;
+                            }
+
                             Geometry markerGeometry = textViewLines.GetMarkerGeometry(span, false,
                                 blur == BlurIntensity.None ? tNone : tBlur);
 
@@ -146,7 +190,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                                 if (!geometries.Any(g => g.FillContainsWithDetail(markerGeometry) > IntersectionDetail.Empty))
                                 {
                                     geometries.Add(markerGeometry);
-                                    AddMarker(span, markerGeometry, token);
+                                    AddMarker(span, markerGeometry, tag);
                                 }
                             }
                         }
@@ -157,12 +201,26 @@ namespace BetterCommentsPlus.CommentsViewCustomization
 
         private static bool FirstCharacterEquals(char text, char keyword, bool isCaseSensitive)
         {
-            return isCaseSensitive ? text == keyword : char.ToUpperInvariant(text) == char.ToUpperInvariant(keyword);
+            if (isCaseSensitive)
+            {
+                return text == keyword;
+            }
+            else
+            {
+                return char.ToUpperInvariant(text) == char.ToUpperInvariant(keyword);
+            }
         }
 
         private static bool CompareWords(string text, string keyword, bool isCaseSensitive)
         {
-            return isCaseSensitive ? text == keyword : string.Equals(text, keyword, StringComparison.OrdinalIgnoreCase);
+            if (isCaseSensitive)
+            {
+                return text == keyword;
+            }
+            else
+            {
+                return string.Equals(text, keyword, StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         public bool CheckWholeWordsMatch(ITextSnapshot textSnapshot, int i, string keyword, bool allowPartialMatch)
@@ -178,14 +236,22 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             }
         }
 
-        private double CalculateDynamicWidth(Geometry markerGeometry, CommentToken token)
+        private double CalculateDynamicWidth(Geometry markerGeometry, CommentToken tag)
         {
             double baseWidth = markerGeometry.Bounds.Width;
 
             if (baseWidth < 0)
                 baseWidth = 0;
 
-            TagShape shape = (TagShape)Enum.Parse(typeof(TagShape), token.BackgroundStyle.Shape);
+            TagShape shape;
+            try
+            {
+                shape = (TagShape)Enum.Parse(typeof(TagShape), tag.BackgroundStyle.Shape ?? "Tag");
+            }
+            catch
+            {
+                shape = TagShape.Tag;
+            }
 
             if (shape == TagShape.Tag || shape == TagShape.TagUnder)
             {
@@ -201,21 +267,77 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             }
         }
 
-        private void AddMarker(SnapshotSpan span, Geometry markerGeometry, CommentToken token)
+        private string ConvertAlphaToEnumFormat(string alphaDisplay)
         {
-            double width = CalculateDynamicWidth(markerGeometry, token);
+            if (alphaDisplay == "0/10") return "Alpha_0_10";
+            if (alphaDisplay == "1/10") return "Alpha_1_10";
+            if (alphaDisplay == "2/10") return "Alpha_2_10";
+            if (alphaDisplay == "3/10") return "Alpha_3_10";
+            if (alphaDisplay == "4/10") return "Alpha_4_10";
+            if (alphaDisplay == "5/10") return "Alpha_5_10";
+            if (alphaDisplay == "6/10") return "Alpha_6_10";
+            if (alphaDisplay == "7/10") return "Alpha_7_10";
+            if (alphaDisplay == "8/10") return "Alpha_8_10";
+            if (alphaDisplay == "9/10") return "Alpha_9_10";
+            if (alphaDisplay == "10/10") return "Alpha_10_10";
+            return "Alpha_1_10";
+        }
+
+        private void AddMarker(SnapshotSpan span, Geometry markerGeometry, CommentToken tag)
+        {
+            double width = CalculateDynamicWidth(markerGeometry, tag);
             double height = markerGeometry.Bounds.Height;
 
-            TagShape shape = (TagShape)Enum.Parse(typeof(TagShape), token.BackgroundStyle.Shape);
-            BlurIntensity blur = (BlurIntensity)Enum.Parse(typeof(BlurIntensity), token.BackgroundStyle.Blur);
-            FillAlpha alpha = (FillAlpha)Enum.Parse(typeof(FillAlpha), token.BackgroundStyle.Alpha);
-            Color color = BackgroundHelper.HexToColor(token.BackgroundStyle.ColorHex);
+            TagShape shape;
+            try
+            {
+                shape = (TagShape)Enum.Parse(typeof(TagShape), tag.BackgroundStyle.Shape ?? "Tag");
+            }
+            catch
+            {
+                shape = TagShape.Tag;
+            }
+
+            BlurIntensity blur;
+            try
+            {
+                blur = (BlurIntensity)Enum.Parse(typeof(BlurIntensity), tag.BackgroundStyle.Blur ?? "None");
+            }
+            catch
+            {
+                blur = BlurIntensity.None;
+            }
+
+            FillAlpha alpha;
+            try
+            {
+                string alphaEnumFormat = ConvertAlphaToEnumFormat(tag.BackgroundStyle.Alpha ?? "1/10");
+                alpha = (FillAlpha)Enum.Parse(typeof(FillAlpha), alphaEnumFormat);
+            }
+            catch
+            {
+                alpha = FillAlpha.Alpha_1_10;
+            }
+
+            Color color;
+            if (!string.IsNullOrEmpty(tag.BackgroundStyle.ColorHex))
+            {
+                color = BackgroundHelper.HexToColor(tag.BackgroundStyle.ColorHex);
+            }
+            else if (!string.IsNullOrEmpty(tag.ColorHex))
+            {
+                color = BackgroundHelper.HexToColor(tag.ColorHex);
+            }
+            else
+            {
+                color = Colors.Red;
+            }
 
             Rectangle r = new()
             {
                 Fill = new SolidColorBrush(color.ChangeAlpha(60)),
-                RadiusX = CornerRadius,
-                RadiusY = CornerRadius,
+                RadiusX = cornerRadius,
+                RadiusY = cornerRadius,
                 Width = width,
                 Height = height,
                 Stroke = new SolidColorBrush(color.ChangeAlpha(255))

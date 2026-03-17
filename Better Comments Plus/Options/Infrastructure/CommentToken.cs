@@ -79,7 +79,18 @@ namespace BetterCommentsPlus.Options
       public BackgroundStyle BackgroundStyle
       {
          get { return backgroundStyle; }
-         set { SetField(ref backgroundStyle, value); }
+         set
+         {
+            if (backgroundStyle != null)
+            {
+               backgroundStyle.PropertyChanged -= OnBackgroundStylePropertyChanged;
+            }
+            SetField(ref backgroundStyle, value);
+            if (backgroundStyle != null)
+            {
+               backgroundStyle.PropertyChanged += OnBackgroundStylePropertyChanged;
+            }
+         }
       }
 
       public CommentToken(CommentType type, string defaultValue, string value, string colorHex = null)
@@ -95,6 +106,12 @@ namespace BetterCommentsPlus.Options
          this.hasUnderline = false;
          this.hasStrikethrough = false;
          this.backgroundStyle = new BackgroundStyle();
+         this.backgroundStyle.PropertyChanged += OnBackgroundStylePropertyChanged;
+      }
+
+      private void OnBackgroundStylePropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+      {
+         OnPropertyChanged(nameof(BackgroundStyle));
       }
 
       public bool IsOfType(string type)

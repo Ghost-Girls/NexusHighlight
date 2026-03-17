@@ -51,6 +51,34 @@ namespace BetterCommentsPlus.Options
          }
       }
 
+      private void BackgroundColorPreviewBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+      {
+         if (sender is Border border && border.DataContext is CommentToken token && token.BackgroundStyle != null)
+         {
+            Color? initialColor = null;
+            if (!string.IsNullOrEmpty(token.BackgroundStyle.ColorHex))
+            {
+               try
+               {
+                  initialColor = (Color)ColorConverter.ConvertFromString(token.BackgroundStyle.ColorHex);
+               }
+               catch { }
+            }
+
+            var dialog = new ColorPickerDialog(initialColor)
+            {
+               Owner = Window.GetWindow(this)
+            };
+
+            if (dialog.ShowDialog() == true && dialog.SelectedColor.HasValue)
+            {
+               token.BackgroundStyle.ColorHex = $"#{dialog.SelectedColor.Value.A:X2}{dialog.SelectedColor.Value.R:X2}{dialog.SelectedColor.Value.G:X2}{dialog.SelectedColor.Value.B:X2}";
+               Settings.Instance.SyncCommentTokensToUnifiedConfig();
+               Settings.Instance.OnConfigurationChanged();
+            }
+         }
+      }
+
       private void DragGrip_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
       {
          _dragStartPoint = e.GetPosition(null);

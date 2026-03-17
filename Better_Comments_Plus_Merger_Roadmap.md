@@ -509,6 +509,93 @@ public class DynamicClassificationManager
 
 ---
 
+### 3.4 阶段四：实现动态CommentToken生成（渐进式激进重构）🔥✅
+
+**目标**：逐步移除固定的CommentType枚举，支持动态添加/删除规则，保持向后兼容
+
+**状态**：✅ **已完成** (2026-03-17)
+
+**策略**：渐进式激进重构 - 保持向后兼容，但积极推进 StyleRule 的使用
+
+#### 任务清单：
+- [x] 4.1 扩展 CommentToken，添加 RuleId 和 IsDynamic 属性（保持 Type 向后兼容）
+- [x] 4.2 修改 Add 按钮，新添加的规则使用动态 StyleRule 方式
+- [x] 4.3 修改 Settings.cs，完善 CommentToken ↔ StyleRule 双向同步
+- [x] 4.4 修改 CommentParser，支持动态规则匹配（向后兼容旧方式）
+- [x] 4.5 修改 CommentTagger，支持动态 ClassificationType
+- [x] 4.6 完善 CommentViewDecorator，主动为动态规则设置样式
+- [x] 4.7 确保预设规则和动态规则都能正常工作
+- [x] 4.8 修复新添加 Criteria 的高亮起始位置偏移问题
+- [x] 4.9 移除 Type 标签和相关的 EnumToStringConverter
+
+**验证点**：
+- [x] 可以动态添加新的 StyleRule
+- [x] 可以删除现有 StyleRule（包括预设规则）
+- [x] 注释高亮能够正确应用动态规则
+- [x] 向后兼容：现有配置继续正常工作
+- [x] 预设规则和动态规则可以混合使用
+- [x] 新添加的 Criteria 高亮位置正确（从 Criteria 第一个字符开始）
+- [x] Type 标签已从界面移除
+
+---
+
+### 3.5 阶段五：完整合并 Highlighter（背景高亮功能）🔥
+
+**目标**：完整合并 Highlighter 项目，实现完整的前景+背景高亮功能
+
+**状态**：🔥 **执行中** (2026-03-17)
+
+**策略**：完整移植 Highlighter 核心代码，整合到 BCP 项目
+
+**Highlighter 项目源码已就绪**：
+- ✅ Highlighter 项目完整源码在 `c:\Users\NexusStudio\source\repos\BetterCommentsPlus\Highlighter`
+- ✅ 核心类：`Adorner.cs`、`HighlightTag.cs`、`Helper.cs`、`Enums.cs`
+- ✅ 配置 UI：`HighlighterOptionsPage.xaml`
+- ✅ 完整的背景高亮实现
+
+#### 任务清单：
+- [x] 5.1 移植 Highlighter 基础设施类 ✅
+  - [x] 5.1.1 移植 `Enums.cs` → 重命名为 `BackgroundEnums.cs`（避免命名冲突）
+  - [x] 5.1.2 移植 `Helper.cs` → 整合到现有 `ColorHelper` 或创建 `BackgroundHelper`
+- [x] 5.2 移植 Highlighter 核心 Adorner 机制 ✅
+  - [x] 5.2.1 移植 `Adorner.cs` → 重命名为 `BackgroundAdorner.cs`
+  - [x] 5.2.2 移植 `AdornerTextViewCreationListener.cs`
+  - [x] 5.2.3 修改命名空间为 `BetterCommentsPlus.CommentsViewCustomization`
+- [x] 5.3 扩展数据结构，支持完整的背景配置 ✅
+  - [x] 5.3.1 完善 `BackgroundStyle.cs`，添加所有属性（Shape、Blur、Alpha 等）
+  - [x] 5.3.2 扩展 `CommentToken.cs`，添加背景配置属性
+  - [x] 5.3.3 扩展 `Settings.cs`，支持背景配置的保存/加载
+- [x] 5.4 在 Options 页面添加完整的背景配置 UI ✅
+  - [x] 5.4.1 添加背景色启用/禁用开关（复选框）
+  - [x] 5.4.2 添加背景色选择按钮（类似前景色）
+  - [x] 5.4.3 添加背景形状选择（Tag、TagUnder、Line、LineUnder）
+  - [x] 5.4.4 添加背景模糊选择（None、Low、Medium、High、Ultra）
+  - [x] 5.4.5 添加背景透明度选择（Alpha_0_10 到 Alpha_10_10，显示为 0/10 到 10/10）
+  - [x] 5.4.6 添加高级选项（大小写敏感、部分匹配）
+- [x] 5.5 整合前景和背景高亮，确保可以独立或同时工作 ✅
+  - [x] 5.5.1 前景和背景可以独立启用/禁用 ✅
+  - [x] 5.5.2 前景和背景可以同时工作 ✅
+  - [x] 5.5.3 配置变更后立即生效 ✅
+- [ ] 5.6 全面测试和优化
+  - [ ] 5.6.1 测试所有背景形状（Tag、TagUnder、Line、LineUnder）
+  - [ ] 5.6.2 测试所有模糊强度（None、Low、Medium、High、Ultra）
+  - [ ] 5.6.3 测试所有透明度级别
+  - [ ] 5.6.4 测试单行和多行注释
+  - [ ] 5.6.5 性能优化（避免卡顿）
+
+**验证点**：
+- [ ] 可以独立启用/禁用前景或背景
+- [ ] 前景和背景可以同时工作
+- [ ] 所有背景形状正常显示（Tag、TagUnder、Line、LineUnder）
+- [ ] 所有模糊强度正常工作
+- [ ] 所有透明度级别正常工作
+- [ ] 单行和多行注释都正常高亮
+- [ ] 配置变更后立即生效
+- [ ] 性能良好，无明显卡顿
+- [ ] 向后兼容：旧配置继续正常工作
+
+---
+
 ## 进度概览
 
 | 阶段 | 状态 | 完成度 |
@@ -516,12 +603,12 @@ public class DynamicClassificationManager
 | 阶段一：解除与VS「字体和颜色」的绑定 | ✅ 已完成 | 100% |
 | 阶段二（原阶段三）：实现可拖拽的ListBox和配置变更实时生效 | ✅ 已完成 | 100% |
 | 阶段三（原阶段四）：实现完整的前景样式配置 | ✅ 已完成 | 100% |
-| 阶段四（原阶段五）：实现动态CommentToken生成（移除CommentType等旧代码） | 📋 待执行 | 0% |
-| 阶段五（原阶段六）：完整的前景+背景配置UI | 📋 待执行 | 0% |
-| **总体进度** | | **60%** |
+| 阶段四：实现动态CommentToken生成（渐进式激进重构） | ✅ 已完成 | 100% |
+| 阶段五：完整合并 Highlighter（背景高亮功能） | 🔥 执行中 | 95% |
+| **总体进度** | | **95%** |
 
 ---
 
-*文档版本: 1.6*
+*文档版本: 1.8*
 *更新日期: 2026-03-17*
-*上次更新: 修复Reset按钮完整重置所有样式属性*
+*上次更新: 完成阶段四，开始完整合并 Highlighter*

@@ -8,6 +8,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
     [ContentType("text")]
     [ContentType("html")]
     [ContentType("XML")]
+    [ContentType("code")]
     [TextViewRole(PredefinedTextViewRoles.Document)]
     internal sealed class BackgroundAdornerTextViewCreationListener : IWpfTextViewCreationListener
     {
@@ -15,7 +16,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
 
         [Export(typeof(AdornmentLayerDefinition))]
         [Name("BackgroundAdorner")]
-        [Order(After = PredefinedAdornmentLayers.Selection, Before = PredefinedAdornmentLayers.Text)]
+        [Order(After = PredefinedAdornmentLayers.Caret, Before = PredefinedAdornmentLayers.Selection)]
         [TextViewRole(PredefinedTextViewRoles.Document)]
         private AdornmentLayerDefinition editorAdornmentLayer;
 

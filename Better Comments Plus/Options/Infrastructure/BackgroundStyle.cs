@@ -60,7 +60,7 @@ namespace BetterCommentsPlus.Options
             colorHex = null;
             shape = "Tag";
             blur = "None";
-            alpha = "Alpha_1_10";
+            alpha = "1/10";
             isCaseSensitive = true;
             allowPartialMatch = false;
         }

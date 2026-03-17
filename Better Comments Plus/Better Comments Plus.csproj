@@ -52,11 +52,9 @@
     <RootNamespace>BetterCommentsPlus</RootNamespace>
     <AssemblyName>Better Comments Plus</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <!-- Start the extension with devenv as external program in the experimental hive.-->
     <StartAction>Program</StartAction>
     <StartProgram>$(DevEnvDir)\devenv.exe</StartProgram>
     <StartArguments>/rootsuffix Exp</StartArguments>
-    <!-- Ends here-->
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
     <IncludeDebugSymbolsInVSIXContainer>true</IncludeDebugSymbolsInVSIXContainer>
@@ -91,6 +89,12 @@
     <Compile Include="CommentsTagging\Parsers\JavaScriptCommentParser.cs" />
     <Compile Include="CommentsTagging\Parsers\MarkupCommentParser.cs" />
     <Compile Include="CommentsTagging\Infrastructure\ParseHelper.cs" />
+    <Compile Include="CommentsViewCustomization\BackgroundAdorner.cs" />
+    <Compile Include="CommentsViewCustomization\BackgroundAdornerTextViewCreationListener.cs" />
+    <Compile Include="CommentsViewCustomization\BackgroundEnums.cs" />
+    <Compile Include="CommentsViewCustomization\BackgroundHelper.cs" />
+    <Compile Include="CommentsViewCustomization\CommentViewDecorator.cs" />
+    <Compile Include="CommentsViewCustomization\CommentViewCreationListener.cs" />
     <Compile Include="Options\Infrastructure\CommentToken.cs" />
     <Compile Include="Options\Infrastructure\EnumToStringConverter.cs" />
     <Compile Include="Options\Infrastructure\HexToColorConverter.cs" />
@@ -121,8 +125,6 @@
     <Compile Include="CommentsTagging\Infrastructure\ICommentParser.cs" />
     <Compile Include="CommentsTagging\Parsers\PythonCommentParser.cs" />
     <Compile Include="CommentsTagging\Parsers\VBCommentParser.cs" />
-    <Compile Include="CommentsViewCustomization\CommentViewDecorator.cs" />
-    <Compile Include="CommentsViewCustomization\CommentViewCreationListener.cs" />
     <Compile Include="Options\Infrastructure\ISettings.cs" />
     <Compile Include="Options\Infrastructure\SettingAttribute.cs" />
     <Compile Include="Options\Settings.cs" />
@@ -270,11 +272,4 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
