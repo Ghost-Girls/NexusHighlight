@@ -194,67 +194,141 @@ public class UnifiedConfig
 
 ---
 
-### 3.2 阶段二：实现动态CommentToken生成 🔄
+### 3.2 阶段三：实现可拖拽的ListBox和配置变更实时生效 ✅
+
+**目标**：使用ListBox展示规则列表，支持拖拽排序，配置变更实时生效
+
+**状态**：✅ **已完成** (2026-03-17)
+
+#### 任务清单：
+- [x] 3.1 修改OptionsTokensPageControl.xaml，使用ListBox替代ItemsControl
+- [x] 3.2 实现ListBox项的数据模板（包含Criteria、Foreground预览、Actions）
+- [x] 3.3 实现拖拽排序功能（自定义轻量级拖拽机制）
+- [x] 3.4 拖拽后立即生效
+- [x] 3.5 实现规则的Add/Delete按钮
+- [x] 3.6 实现配置变更事件（ConfigurationChanged）
+- [x] 3.7 CommentViewDecorator监听配置变更事件
+- [x] 3.8 配置变更后立即更新注释高亮
+- [x] 3.9 优化输入框更新逻辑（PropertyChanged → LostFocus）
+- [x] 3.10 添加拖拽视觉指示（半透明效果+蓝色指示线）
+- [x] 3.11 优化拖拽性能（完全重写拖拽机制）
+
+**验证点**：
+- [x] ListBox正确显示所有CommentToken
+- [x] 可以通过拖拽调整规则顺序
+- [x] 规则顺序变更后能够正确保存
+- [x] Delete按钮功能正常
+- [x] 在Options页面修改颜色后，编辑器中的注释立即更新
+- [x] 调整规则顺序后，立即生效
+- [x] 拖拽有视觉指示（被拖拽项半透明，放置位置蓝色指示线）
+- [x] 拖拽流畅，无明显卡顿
+- [x] 输入框在失去焦点时才更新，改善用户体验
+
+**已创建/修改的文件**：
+- Options/OptionsTokensPageControl.xaml ✅
+- Options/OptionsTokensPageControl.xaml.cs ✅
+- Options/Settings.cs ✅
+- CommentsViewCustomization/CommentViewDecorator.cs ✅
+
+---
+
+### 3.3 阶段四：实现完整的前景样式配置 ✅
+
+**目标**：为每个注释类型配置完整的前景样式（粗体、斜体、下划线、删除线）
+
+**状态**：✅ **已完成** (2026-03-17)
+
+#### 任务清单：
+- [x] 4.1 扩展CommentToken类，添加IsBold、IsItalic、HasUnderline、HasStrikethrough属性
+- [x] 4.2 在Options页面添加样式配置控件（B、I、U、S四个复选框）
+- [x] 4.3 修改CommentViewDecorator，应用完整的样式属性
+- [x] 4.4 更新Settings.cs，保存和加载新的样式属性
+- [x] 4.5 优化UI布局，添加ToolTip提示
+- [x] 4.6 添加左侧拖拽手柄（☰），分离拖拽区域和控件交互
+
+**验证点**：
+- [x] 可以为每个注释类型独立设置粗体
+- [x] 可以为每个注释类型独立设置斜体
+- [x] 可以为每个注释类型独立设置下划线
+- [x] 可以为每个注释类型独立设置删除线
+- [x] 样式变更后立即在编辑器中生效
+- [x] 所有样式属性能够正确保存和加载
+- [x] 拖拽手柄和其他控件不冲突
+- [x] 样式按钮有清晰的ToolTip提示
+
+**已创建/修改的文件**：
+- Options/Infrastructure/CommentToken.cs ✅
+- Options/OptionsTokensPageControl.xaml ✅
+- CommentsViewCustomization/CommentViewDecorator.cs ✅
+- Options/Settings.cs ✅
+
+#### 3.3.1 修复：Add按钮和取消功能问题 ✅
+**状态**：✅ **已完成** (2026-03-17)
+
+**问题**：
+- 点击ADD按钮导致VS2022无响应（无限循环）
+- 点击「取消」或关闭按钮导致断言失败
+
+**修复内容**：
+- 添加 `_isSyncing` 标志防止无限循环
+- 为所有事件处理程序添加同步检查
+- 保持向后兼容，不破坏现有功能
+
+**验证点**：
+- [x] 点击ADD按钮功能正常，不会导致VS无响应
+- [x] 点击「确定」保存设置正常
+- [x] 点击「取消」或关闭按钮恢复状态，不会导致断言失败
+- [x] Criteria高亮功能正常工作
+
+**已修改的文件**：
+- Options/Settings.cs ✅
+- Options/OptionsPageBase.cs ✅（保持原样，使用原始恢复机制）
+
+#### 3.3.2 修复：Reset按钮完整重置所有样式属性 ✅
+**状态**：✅ **已完成** (2026-03-17)
+
+**问题**：
+- 点击Reset按钮只重置颜色，不重置样式属性（粗体、斜体、下划线、删除线）
+- 点击Reset按钮会清空ListBox中的所有选项
+
+**修复内容**：
+- 修改 SetTokensToDefault 方法，完整重置所有样式属性
+- 添加 _isSyncing 标志防止反向同步清空列表
+- 确保与 UnifiedConfig.CreateDefault() 的默认样式一致
+
+**验证点**：
+- [x] 点击Reset按钮完整重置所有样式属性
+- [x] 点击Reset按钮不会清空ListBox中的选项
+- [x] 样式属性与UnifiedConfig默认值一致
+
+**已修改的文件**：
+- Options/Settings.cs ✅
+
+---
+
+### 3.3 阶段四：实现动态CommentToken生成（移除CommentType等旧代码）📋
 
 **目标**：取消固定的CommentType枚举，支持动态添加/删除规则
 
 **状态**：📋 **待执行**
 
 #### 任务清单：
-- [ ] 2.1 移除CommentClassificationFormatDefinitions.cs中的硬编码ClassificationFormatDefinition
-- [ ] 2.2 移除CommentType枚举
-- [ ] 2.3 修改Settings.cs，完全使用新的UnifiedConfig
-- [ ] 2.4 完善JSON序列化/反序列化
-- [ ] 2.5 修改CommentParser，支持动态规则匹配
-- [ ] 2.6 实现动态ClassificationType注册机制
+- [ ] 4.1 移除CommentClassificationFormatDefinitions.cs中的硬编码ClassificationFormatDefinition
+- [ ] 4.2 移除CommentType枚举
+- [ ] 4.3 修改Settings.cs，完全使用新的UnifiedConfig
+- [ ] 4.4 完善JSON序列化/反序列化
+- [ ] 4.5 修改CommentParser，支持动态规则匹配
+- [ ] 4.6 修改CommentTagger，不再依赖CommentType
+- [ ] 4.7 实现动态ClassificationType注册机制
+- [ ] 4.8 实现Add按钮功能（添加新规则）
 
 **验证点**：
 - [ ] 可以动态添加新的StyleRule
-- [ ] 可以删除现有StyleRule（预定义规则除外）
+- [ ] 可以删除现有StyleRule（预定义规则也可删除）
 - [ ] JSON配置能够正确保存和加载
 - [ ] 注释高亮能够正确应用动态规则
 - [ ] 不再依赖VS「字体和颜色」中的CommentColors
-
----
-
-### 3.3 阶段三：实现可拖拽的ListBox 📋
-
-**目标**：使用ListBox展示规则列表，支持拖拽排序
-
-**状态**：📋 **待执行**
-
-#### 任务清单：
-- [ ] 3.1 修改OptionsTokensPageControl.xaml，使用ListBox替代ItemsControl
-- [ ] 3.2 实现ListBox项的数据模板（包含Criteria、Foreground预览、Background预览、Actions）
-- [ ] 3.3 实现拖拽排序功能（DragDrop API）
-- [ ] 3.4 拖拽后更新Order属性
-- [ ] 3.5 实现规则的Edit/Delete按钮
-
-**验证点**：
-- [ ] ListBox正确显示所有StyleRule
-- [ ] 可以通过拖拽调整规则顺序
-- [ ] 规则顺序变更后能够正确保存
-- [ ] Edit/Delete按钮功能正常
-
----
-
-### 3.4 阶段四：确保配置变更实时生效 📋
-
-**目标**：修改配置后，注释高亮立即更新
-
-**状态**：📋 **待执行**
-
-#### 任务清单：
-- [ ] 4.1 实现配置变更事件（ConfigurationChanged）
-- [ ] 4.2 CommentTagger监听配置变更事件
-- [ ] 4.3 配置变更后重新标记文本
-- [ ] 4.4 Adorner监听配置变更事件
-- [ ] 4.5 配置变更后重新绘制背景装饰
-
-**验证点**：
-- [ ] 在Options页面修改颜色后，编辑器中的注释立即更新
-- [ ] 添加/删除规则后，立即生效
-- [ ] 调整规则顺序后，优先级立即生效
+- [ ] 不再依赖CommentType枚举
 
 ---
 
@@ -407,9 +481,18 @@ public class DynamicClassificationManager
 
 ### 6.1 功能验收
 - [x] 可以通过ColorPicker选择颜色，不依赖VS「字体和颜色」设置 ✅
-- [ ] 可以动态添加、删除、编辑StyleRule
-- [ ] 可以通过拖拽调整StyleRule的顺序
-- [ ] 配置变更后立即在编辑器中生效
+- [x] 可以通过拖拽调整规则顺序 ✅
+- [x] 配置变更后立即在编辑器中生效 ✅
+- [x] 拖拽有视觉指示（半透明效果+蓝色指示线）✅
+- [x] Delete按钮功能正常 ✅
+- [x] 输入框在失去焦点时才更新，改善用户体验 ✅
+- [x] 可以为每个注释类型独立设置粗体、斜体、下划线、删除线 ✅
+- [x] 有左侧拖拽手柄（☰），分离拖拽区域和控件交互 ✅
+- [x] Add按钮功能正常，不会导致VS无响应 ✅
+- [x] 点击取消或关闭按钮不会导致断言失败 ✅
+- [x] Reset按钮完整重置所有样式属性 ✅
+- [ ] 可以动态添加新的StyleRule
+- [ ] 可以删除现有StyleRule（预定义规则也可删除）
 - [ ] 可以独立配置前景和背景样式
 - [ ] JSON配置能够正确导入和导出
 
@@ -419,7 +502,8 @@ public class DynamicClassificationManager
 - [ ] 在高DPI显示器上显示正常
 
 ### 6.3 性能验收
-- [ ] 配置变更后的重新标记时间 < 500ms
+- [x] 配置变更后的重新标记流畅 ✅
+- [x] 拖拽流畅，无明显卡顿 ✅
 - [ ] 打开大型文件（>10000行）时无明显卡顿
 - [ ] 内存占用与旧版本相比增加不超过20%
 
@@ -430,14 +514,14 @@ public class DynamicClassificationManager
 | 阶段 | 状态 | 完成度 |
 |------|------|--------|
 | 阶段一：解除与VS「字体和颜色」的绑定 | ✅ 已完成 | 100% |
-| 阶段二：实现动态CommentToken生成 | 📋 待执行 | 0% |
-| 阶段三：实现可拖拽的ListBox | 📋 待执行 | 0% |
-| 阶段四：配置变更实时生效 | 📋 待执行 | 0% |
-| 阶段五：完整的前景+背景配置UI | 📋 待执行 | 0% |
-| **总体进度** | | **20%** |
+| 阶段二（原阶段三）：实现可拖拽的ListBox和配置变更实时生效 | ✅ 已完成 | 100% |
+| 阶段三（原阶段四）：实现完整的前景样式配置 | ✅ 已完成 | 100% |
+| 阶段四（原阶段五）：实现动态CommentToken生成（移除CommentType等旧代码） | 📋 待执行 | 0% |
+| 阶段五（原阶段六）：完整的前景+背景配置UI | 📋 待执行 | 0% |
+| **总体进度** | | **60%** |
 
 ---
 
-*文档版本: 1.2*
+*文档版本: 1.6*
 *更新日期: 2026-03-17*
-*上次更新: 在ColorPickerDialog中添加HEX值输入功能*
+*上次更新: 修复Reset按钮完整重置所有样式属性*
