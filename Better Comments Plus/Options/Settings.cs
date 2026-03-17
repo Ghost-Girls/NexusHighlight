@@ -349,6 +349,17 @@ namespace BetterCommentsPlus.Options
                     rule.Foreground.HasUnderline = token.HasUnderline;
                     rule.Foreground.HasStrikethrough = token.HasStrikethrough;
                 }
+
+                if (rule.Background != null && token.BackgroundStyle != null)
+                {
+                    rule.Background.IsActive = token.BackgroundStyle.IsActive;
+                    rule.Background.ColorHex = token.BackgroundStyle.ColorHex;
+                    rule.Background.Shape = token.BackgroundStyle.Shape;
+                    rule.Background.Blur = token.BackgroundStyle.Blur;
+                    rule.Background.Alpha = token.BackgroundStyle.Alpha;
+                    rule.Background.IsCaseSensitive = token.BackgroundStyle.IsCaseSensitive;
+                    rule.Background.AllowPartialMatch = token.BackgroundStyle.AllowPartialMatch;
+                }
             }
         }
 
@@ -357,13 +368,27 @@ namespace BetterCommentsPlus.Options
             foreach (var rule in unifiedConfig.Comments)
             {
                 var token = commentTokens.FirstOrDefault(t => t.CurrentValue == rule.Criteria);
-                if (token != null && rule.Foreground != null)
+                if (token != null)
                 {
-                    token.ColorHex = rule.Foreground.ColorHex;
-                    token.IsBold = rule.Foreground.IsBold;
-                    token.IsItalic = rule.Foreground.IsItalic;
-                    token.HasUnderline = rule.Foreground.HasUnderline;
-                    token.HasStrikethrough = rule.Foreground.HasStrikethrough;
+                    if (rule.Foreground != null)
+                    {
+                        token.ColorHex = rule.Foreground.ColorHex;
+                        token.IsBold = rule.Foreground.IsBold;
+                        token.IsItalic = rule.Foreground.IsItalic;
+                        token.HasUnderline = rule.Foreground.HasUnderline;
+                        token.HasStrikethrough = rule.Foreground.HasStrikethrough;
+                    }
+
+                    if (rule.Background != null && token.BackgroundStyle != null)
+                    {
+                        token.BackgroundStyle.IsActive = rule.Background.IsActive;
+                        token.BackgroundStyle.ColorHex = rule.Background.ColorHex;
+                        token.BackgroundStyle.Shape = rule.Background.Shape;
+                        token.BackgroundStyle.Blur = rule.Background.Blur;
+                        token.BackgroundStyle.Alpha = rule.Background.Alpha;
+                        token.BackgroundStyle.IsCaseSensitive = rule.Background.IsCaseSensitive;
+                        token.BackgroundStyle.AllowPartialMatch = rule.Background.AllowPartialMatch;
+                    }
                 }
             }
         }
@@ -489,6 +514,17 @@ namespace BetterCommentsPlus.Options
             rule.Foreground.HasUnderline = token.HasUnderline;
             rule.Foreground.HasStrikethrough = token.HasStrikethrough;
 
+            if (token.BackgroundStyle != null)
+            {
+                rule.Background.IsActive = token.BackgroundStyle.IsActive;
+                rule.Background.ColorHex = token.BackgroundStyle.ColorHex;
+                rule.Background.Shape = token.BackgroundStyle.Shape;
+                rule.Background.Blur = token.BackgroundStyle.Blur;
+                rule.Background.Alpha = token.BackgroundStyle.Alpha;
+                rule.Background.IsCaseSensitive = token.BackgroundStyle.IsCaseSensitive;
+                rule.Background.AllowPartialMatch = token.BackgroundStyle.AllowPartialMatch;
+            }
+
             return rule;
         }
 
@@ -528,6 +564,17 @@ namespace BetterCommentsPlus.Options
             token.IsItalic = rule.Foreground.IsItalic;
             token.HasUnderline = rule.Foreground.HasUnderline;
             token.HasStrikethrough = rule.Foreground.HasStrikethrough;
+
+            if (rule.Background != null && token.BackgroundStyle != null)
+            {
+                token.BackgroundStyle.IsActive = rule.Background.IsActive;
+                token.BackgroundStyle.ColorHex = rule.Background.ColorHex;
+                token.BackgroundStyle.Shape = rule.Background.Shape;
+                token.BackgroundStyle.Blur = rule.Background.Blur;
+                token.BackgroundStyle.Alpha = rule.Background.Alpha;
+                token.BackgroundStyle.IsCaseSensitive = rule.Background.IsCaseSensitive;
+                token.BackgroundStyle.AllowPartialMatch = rule.Background.AllowPartialMatch;
+            }
             
             return token;
         }

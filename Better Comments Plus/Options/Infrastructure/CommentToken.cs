@@ -15,6 +15,7 @@ namespace BetterCommentsPlus.Options
       private bool isItalic;
       private bool hasUnderline;
       private bool hasStrikethrough;
+      private BackgroundStyle backgroundStyle;
 
       public CommentType Type
       {
@@ -75,6 +76,12 @@ namespace BetterCommentsPlus.Options
          set { SetField(ref hasStrikethrough, value); }
       }
 
+      public BackgroundStyle BackgroundStyle
+      {
+         get { return backgroundStyle; }
+         set { SetField(ref backgroundStyle, value); }
+      }
+
       public CommentToken(CommentType type, string defaultValue, string value, string colorHex = null)
       {
          this.type = type;
@@ -87,6 +94,7 @@ namespace BetterCommentsPlus.Options
          this.isItalic = true;
          this.hasUnderline = false;
          this.hasStrikethrough = false;
+         this.backgroundStyle = new BackgroundStyle();
       }
 
       public bool IsOfType(string type)
