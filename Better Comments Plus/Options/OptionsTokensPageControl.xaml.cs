@@ -1,9 +1,9 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Linq;
-using System;
 using BetterCommentsPlus.CommentsTagging;
 
 namespace BetterCommentsPlus.Options
@@ -204,6 +204,9 @@ namespace BetterCommentsPlus.Options
              defaultValue: newCriteria,
              value: newCriteria,
              colorHex: "#FFFF0000");
+
+         newToken.RuleId = Guid.NewGuid().ToString();
+         newToken.IsDynamic = true;
 
          settings.CommentTokens.Add(newToken);
          TokensList.SelectedItem = newToken;

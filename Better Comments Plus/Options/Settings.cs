@@ -478,9 +478,9 @@ namespace BetterCommentsPlus.Options
             {
                 Order = order,
                 IsActive = true,
-                IsPredefined = true,
+                IsPredefined = !token.IsDynamic,
                 Criteria = token.CurrentValue,
-                Id = $"comment-{token.Type.ToString().ToLower()}"
+                Id = token.RuleId
             };
 
             rule.Foreground.ColorHex = token.ColorHex;
@@ -495,6 +495,7 @@ namespace BetterCommentsPlus.Options
         private CommentToken ConvertStyleRuleToCommentToken(StyleRule rule)
         {
             CommentType? type = null;
+            bool isDynamic = false;
             
             if (rule.Id != null)
             {
@@ -506,14 +507,23 @@ namespace BetterCommentsPlus.Options
                     type = CommentType.Remove;
                 else if (rule.Id.Contains("task"))
                     type = CommentType.Task;
+                else
+                {
+                    isDynamic = true;
+                    type = CommentType.Important;
+                }
             }
-
-            if (!type.HasValue)
-                return null;
+            else
+            {
+                isDynamic = true;
+                type = CommentType.Important;
+            }
 
             var defaultValue = rule.IsPredefined ? rule.Criteria : "";
             var token = new CommentToken(type.Value, defaultValue, rule.Criteria, rule.Foreground.ColorHex);
             
+            token.RuleId = rule.Id ?? Guid.NewGuid().ToString();
+            token.IsDynamic = isDynamic;
             token.IsBold = rule.Foreground.IsBold;
             token.IsItalic = rule.Foreground.IsItalic;
             token.HasUnderline = rule.Foreground.HasUnderline;

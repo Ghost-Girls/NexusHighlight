@@ -6,6 +6,8 @@ namespace BetterCommentsPlus.Options
    public class CommentToken : PropertyChangeNotifier
    {
       private CommentType type;
+      private string ruleId;
+      private bool isDynamic;
       private string defaultValue;
       private string currentValue;
       private string colorHex;
@@ -18,6 +20,18 @@ namespace BetterCommentsPlus.Options
       {
          get { return type; }
          set { SetField(ref type, value); }
+      }
+
+      public string RuleId
+      {
+         get { return ruleId; }
+         set { SetField(ref ruleId, value); }
+      }
+
+      public bool IsDynamic
+      {
+         get { return isDynamic; }
+         set { SetField(ref isDynamic, value); }
       }
 
       public string CurrentValue
@@ -64,6 +78,8 @@ namespace BetterCommentsPlus.Options
       public CommentToken(CommentType type, string defaultValue, string value, string colorHex = null)
       {
          this.type = type;
+         this.ruleId = $"comment-{type.ToString().ToLower()}";
+         this.isDynamic = false;
          this.defaultValue = defaultValue;
          this.currentValue = value;
          this.colorHex = colorHex;

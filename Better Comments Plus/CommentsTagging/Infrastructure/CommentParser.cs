@@ -2,6 +2,7 @@ using BetterCommentsPlus.Options;
 using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BetterCommentsPlus.CommentsTagging
 {
@@ -15,10 +16,75 @@ namespace BetterCommentsPlus.CommentsTagging
 
         public virtual Comment Parse(SnapshotSpan span)
         {
-            var commentType = GetCommentType(span);
+            var commentInfo = GetCommentInfo(span);
 
-            if (commentType == CommentType.Normal)
+            if (commentInfo.Token == null)
                 return new Comment(new List<SnapshotSpan> { span }, CommentType.Normal);
+
+            if (commentInfo.Token.IsDynamic)
+            {
+                var commentSpans = new List<SnapshotSpan>();
+                var firstLineNumber = span.Snapshot.GetLineFromPosition(span.Start).LineNumber;
+                var lastLineNumber = span.Snapshot.GetLineFromPosition(span.End).LineNumber;
+                var spanText = span.GetText().ToLower();
+                var token = commentInfo.Token.CurrentValue;
+                var tokenLower = token.ToLower();
+
+                if (firstLineNumber == lastLineNumber)
+                {
+                    var startOffset = 0;
+                    if (spanText.StartsWith("//", OrdinalIgnoreCase))
+                    {
+                        startOffset = spanText.IndexOf(tokenLower, OrdinalIgnoreCase);
+                        if (startOffset < 0) startOffset = 2;
+                    }
+                    else if (spanText.StartsWith("/*", OrdinalIgnoreCase))
+                    {
+                        startOffset = spanText.IndexOf(tokenLower, OrdinalIgnoreCase);
+                        if (startOffset < 0) startOffset = 2;
+                    }
+                    
+                    var spanLength = span.Length - startOffset;
+                    if (spanLength > 0)
+                        commentSpans.Add(new SnapshotSpan(span.Snapshot, span.Start + startOffset, spanLength));
+                }
+                else
+                {
+                    for (var curr = firstLineNumber; curr <= lastLineNumber; curr++)
+                    {
+                        var line = span.Snapshot.GetLineFromLineNumber(curr);
+                        var lineText = line.GetText().ToLower();
+
+                        if (curr == firstLineNumber)
+                        {
+                            var startOffset = lineText.IndexOf(tokenLower, OrdinalIgnoreCase);
+                            if (startOffset < 0) startOffset = lineText.IndexOfFirstChar();
+                            
+                            commentSpans.Add(new SnapshotSpan(span.Snapshot, line.Start + startOffset, line.Length - startOffset));
+                        }
+                        else if (curr > firstLineNumber && curr < lastLineNumber)
+                        {
+                            if (!string.IsNullOrWhiteSpace(lineText))
+                            {
+                                var startOffset = lineText.IndexOfFirstChar();
+                                commentSpans.Add(new SnapshotSpan(span.Snapshot, line.Start + startOffset, line.Length - startOffset));
+                            }
+                        }
+                        else if (lineText.Contains("*/") && !lineText.Trim().StartsWith("*/", OrdinalIgnoreCase))
+                        {
+                            var startOffset = lineText.IndexOfFirstChar();
+                            var closerIndex = lineText.IndexOf("*/", OrdinalIgnoreCase);
+                            var spanLength = lineText.IndexOfFirstCharReverse(closerIndex - 1) - startOffset + 1;
+
+                            commentSpans.Add(new SnapshotSpan(span.Snapshot, line.Start + startOffset, spanLength));
+                        }
+                    }
+                }
+
+                return new Comment(commentSpans, commentInfo.Token.RuleId, commentInfo.Token.CurrentValue);
+            }
+
+            var commentType = commentInfo.Token.Type;
 
             // Color only the "Todo" keyword.
             if (Settings.HighlightTaskKeywordOnly && commentType == CommentType.Task)
@@ -39,23 +105,38 @@ namespace BetterCommentsPlus.CommentsTagging
 
         #endregion ICommentParser Members
 
-        protected virtual CommentType GetCommentType(SnapshotSpan span) //#TASK: This should be add some logic to determine the comment type.
+        protected struct CommentInfo
+        {
+            public CommentToken Token;
+            public int MatchStart;
+            public int MatchLength;
+        }
+
+        protected virtual CommentInfo GetCommentInfo(SnapshotSpan span)
         {
             var commentText = SpanTextWithoutCommentStarter(span).ToLower().Trim();
+            
+            foreach (var token in Settings.CommentTokens.OrderBy(t => t.IsDynamic ? 1 : 0))
+            {
+                var criteria = token.CurrentValue.ToLower();
+                if (commentText.StartsWith(criteria, OrdinalIgnoreCase))
+                {
+                    return new CommentInfo
+                    {
+                        Token = token,
+                        MatchStart = 0,
+                        MatchLength = criteria.Length
+                    };
+                }
+            }
 
-            if (commentText.StartsWith(Settings.GetTokenValue(CommentType.Important), OrdinalIgnoreCase))
-                return CommentType.Important;
+            return new CommentInfo { Token = null };
+        }
 
-            if (commentText.StartsWith(Settings.GetTokenValue(CommentType.Question), OrdinalIgnoreCase))
-                return CommentType.Question;
-
-            if (commentText.StartsWith(Settings.GetTokenValue(CommentType.Remove), OrdinalIgnoreCase))
-                return CommentType.Remove;
-
-            if (commentText.StartsWith(Settings.GetTokenValue(CommentType.Task), OrdinalIgnoreCase))
-                return CommentType.Task;
-
-            return CommentType.Normal;
+        protected virtual CommentType GetCommentType(SnapshotSpan span)
+        {
+            var commentInfo = GetCommentInfo(span);
+            return commentInfo.Token?.Type ?? CommentType.Normal;
         }
 
         protected abstract Comment SpecificParse(SnapshotSpan span, CommentType commentType);

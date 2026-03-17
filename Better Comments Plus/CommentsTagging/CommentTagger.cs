@@ -73,7 +73,24 @@ namespace BetterCommentsPlus.CommentsTagging
 
         public IEnumerable<TagSpan<ClassificationTag>> CreateTagSpans(Comment comment)
         {
-            return comment.Spans.Select(s => new TagSpan<ClassificationTag>(s, CreateTag(comment.Type)));
+            return comment.Spans.Select(s => new TagSpan<ClassificationTag>(s, CreateTag(comment)));
+        }
+
+        private ClassificationTag CreateTag(Comment comment)
+        {
+            if (!string.IsNullOrEmpty(comment.RuleId))
+            {
+                var classificationType = classRegistry.GetClassificationType(comment.RuleId);
+                if (classificationType == null)
+                {
+                    classificationType = classRegistry.CreateClassificationType(
+                        comment.RuleId,
+                        new[] { classRegistry.GetClassificationType("comment") });
+                }
+                return new ClassificationTag(classificationType);
+            }
+
+            return CreateTag(comment.Type);
         }
 
         private ClassificationTag CreateTag(CommentType type)

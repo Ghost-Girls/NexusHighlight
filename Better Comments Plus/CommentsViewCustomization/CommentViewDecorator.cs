@@ -79,6 +79,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             isDecorating = true;
             DecorateKnownClassificationTypes();
             DecorateUnknowClassificationTypes();
+            DecorateDynamicRules();
          }
          catch (Exception ex)
          {
@@ -88,6 +89,24 @@ namespace BetterCommentsPlus.CommentsViewCustomization
          finally
          {
             isDecorating = false;
+         }
+      }
+
+      private void DecorateDynamicRules()
+      {
+         foreach (var token in settings.CommentTokens)
+         {
+            if (!string.IsNullOrEmpty(token.RuleId))
+            {
+               var classificationType = regService.GetClassificationType(token.RuleId);
+               if (classificationType == null)
+               {
+                  classificationType = regService.CreateClassificationType(
+                      token.RuleId,
+                      new[] { regService.GetClassificationType("comment") });
+               }
+               SetProperties(classificationType);
+            }
          }
       }
 
@@ -145,6 +164,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
          {
             CommentType? commentType = null;
             string criteria = null;
+            string ruleId = classificationType.Classification;
 
             if (classificationType.IsOfType(CommentNames.IMPORTANT_COMMENT))
             {
@@ -173,9 +193,9 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             bool? hasUnderline = null;
             bool? hasStrikethrough = null;
 
-            if (settings.UnifiedConfig != null && !string.IsNullOrEmpty(criteria))
+            if (settings.UnifiedConfig != null)
             {
-               var rule = settings.UnifiedConfig.Comments.FirstOrDefault(r => r.Criteria == criteria);
+               var rule = settings.UnifiedConfig.Comments.FirstOrDefault(r => r.Id == ruleId);
                if (rule != null && rule.Foreground != null)
                {
                   colorHex = rule.Foreground.ColorHex;
@@ -184,11 +204,35 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                   hasUnderline = rule.Foreground.HasUnderline;
                   hasStrikethrough = rule.Foreground.HasStrikethrough;
                }
+               else if (!string.IsNullOrEmpty(criteria))
+               {
+                  rule = settings.UnifiedConfig.Comments.FirstOrDefault(r => r.Criteria == criteria);
+                  if (rule != null && rule.Foreground != null)
+                  {
+                     colorHex = rule.Foreground.ColorHex;
+                     isBold = rule.Foreground.IsBold;
+                     isItalic = rule.Foreground.IsItalic;
+                     hasUnderline = rule.Foreground.HasUnderline;
+                     hasStrikethrough = rule.Foreground.HasStrikethrough;
+                  }
+               }
             }
 
-            if (commentType.HasValue)
+            var token = settings.CommentTokens.FirstOrDefault(t => t.RuleId == ruleId);
+            if (token != null)
             {
-               var token = settings.GetToken(commentType.Value);
+               if (string.IsNullOrEmpty(colorHex) && !string.IsNullOrEmpty(token.ColorHex))
+               {
+                  colorHex = token.ColorHex;
+               }
+               isBold = token.IsBold;
+               isItalic = token.IsItalic;
+               hasUnderline = token.HasUnderline;
+               hasStrikethrough = token.HasStrikethrough;
+            }
+            else if (commentType.HasValue)
+            {
+               token = settings.GetToken(commentType.Value);
                if (token != null)
                {
                   if (string.IsNullOrEmpty(colorHex) && !string.IsNullOrEmpty(token.ColorHex))
