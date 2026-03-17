@@ -258,5 +258,37 @@ namespace BetterCommentsPlus.Options
             }
          }
       }
+
+      private void MoveUpButton_Click(object sender, RoutedEventArgs e)
+      {
+         var settings = DataContext as Settings;
+         if (settings == null || TokensList.SelectedItem == null)
+            return;
+
+         int selectedIndex = TokensList.SelectedIndex;
+         if (selectedIndex > 0)
+         {
+            settings.CommentTokens.Move(selectedIndex, selectedIndex - 1);
+            TokensList.SelectedIndex = selectedIndex - 1;
+            Settings.Instance.SyncCommentTokensToUnifiedConfig();
+            Settings.Instance.OnConfigurationChanged();
+         }
+      }
+
+      private void MoveDownButton_Click(object sender, RoutedEventArgs e)
+      {
+         var settings = DataContext as Settings;
+         if (settings == null || TokensList.SelectedItem == null)
+            return;
+
+         int selectedIndex = TokensList.SelectedIndex;
+         if (selectedIndex >= 0 && selectedIndex < settings.CommentTokens.Count - 1)
+         {
+            settings.CommentTokens.Move(selectedIndex, selectedIndex + 1);
+            TokensList.SelectedIndex = selectedIndex + 1;
+            Settings.Instance.SyncCommentTokensToUnifiedConfig();
+            Settings.Instance.OnConfigurationChanged();
+         }
+      }
    }
 }

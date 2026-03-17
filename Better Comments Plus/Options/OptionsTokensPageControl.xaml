@@ -339,6 +339,22 @@
                 Margin="5"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
+                Click="MoveUpButton_Click"
+                Content="↑ 上移" />
+            <Button
+                Width="94"
+                Height="24"
+                Margin="5"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Click="MoveDownButton_Click"
+                Content="↓ 下移" />
+            <Button
+                Width="94"
+                Height="24"
+                Margin="5"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
                 Command="{Binding ResetTokens}"
                 Content="_Reset" />
         </StackPanel>
