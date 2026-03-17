@@ -9,6 +9,10 @@ namespace BetterCommentsPlus.Options
       private string defaultValue;
       private string currentValue;
       private string colorHex;
+      private bool isBold;
+      private bool isItalic;
+      private bool hasUnderline;
+      private bool hasStrikethrough;
 
       public CommentType Type
       {
@@ -33,12 +37,40 @@ namespace BetterCommentsPlus.Options
          set { SetField(ref colorHex, value); }
       }
 
+      public bool IsBold
+      {
+         get { return isBold; }
+         set { SetField(ref isBold, value); }
+      }
+
+      public bool IsItalic
+      {
+         get { return isItalic; }
+         set { SetField(ref isItalic, value); }
+      }
+
+      public bool HasUnderline
+      {
+         get { return hasUnderline; }
+         set { SetField(ref hasUnderline, value); }
+      }
+
+      public bool HasStrikethrough
+      {
+         get { return hasStrikethrough; }
+         set { SetField(ref hasStrikethrough, value); }
+      }
+
       public CommentToken(CommentType type, string defaultValue, string value, string colorHex = null)
       {
          this.type = type;
          this.defaultValue = defaultValue;
          this.currentValue = value;
          this.colorHex = colorHex;
+         this.isBold = false;
+         this.isItalic = true;
+         this.hasUnderline = false;
+         this.hasStrikethrough = false;
       }
 
       public bool IsOfType(string type)
@@ -48,7 +80,7 @@ namespace BetterCommentsPlus.Options
 
       public override string ToString()
       {
-         return $"{type},{currentValue.Trim()},{colorHex}";
+         return $"{type},{currentValue.Trim()},{colorHex},{isBold},{isItalic},{hasUnderline},{hasStrikethrough}";
       }
    }
 }

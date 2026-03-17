@@ -168,6 +168,10 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             }
 
             string colorHex = null;
+            bool? isBold = null;
+            bool? isItalic = null;
+            bool? hasUnderline = null;
+            bool? hasStrikethrough = null;
 
             if (settings.UnifiedConfig != null && !string.IsNullOrEmpty(criteria))
             {
@@ -175,15 +179,26 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                if (rule != null && rule.Foreground != null)
                {
                   colorHex = rule.Foreground.ColorHex;
+                  isBold = rule.Foreground.IsBold;
+                  isItalic = rule.Foreground.IsItalic;
+                  hasUnderline = rule.Foreground.HasUnderline;
+                  hasStrikethrough = rule.Foreground.HasStrikethrough;
                }
             }
 
-            if (string.IsNullOrEmpty(colorHex) && commentType.HasValue)
+            if (commentType.HasValue)
             {
                var token = settings.GetToken(commentType.Value);
-               if (token != null && !string.IsNullOrEmpty(token.ColorHex))
+               if (token != null)
                {
-                  colorHex = token.ColorHex;
+                  if (string.IsNullOrEmpty(colorHex) && !string.IsNullOrEmpty(token.ColorHex))
+                  {
+                     colorHex = token.ColorHex;
+                  }
+                  isBold = token.IsBold;
+                  isItalic = token.IsItalic;
+                  hasUnderline = token.HasUnderline;
+                  hasStrikethrough = token.HasStrikethrough;
                }
             }
 
@@ -195,6 +210,30 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                   properties = properties.SetForeground(color);
                }
                catch { }
+            }
+
+            if (isBold.HasValue)
+            {
+               properties = properties.SetBold(isBold.Value);
+            }
+
+            if (isItalic.HasValue)
+            {
+               properties = properties.SetItalic(isItalic.Value);
+            }
+
+            var decorations = new TextDecorationCollection();
+            if (hasUnderline.GetValueOrDefault())
+            {
+               decorations.Add(TextDecorations.Underline);
+            }
+            if (hasStrikethrough.GetValueOrDefault())
+            {
+               decorations.Add(TextDecorations.Strikethrough);
+            }
+            if (decorations.Count > 0)
+            {
+               properties = properties.SetTextDecorations(decorations);
             }
          }
          catch { }

@@ -4,11 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Windows.Media;
+using TextFormattingRunProperties = Microsoft.VisualStudio.Text.Formatting.TextFormattingRunProperties;
 
 namespace BetterCommentsPlus.CommentsClassification
 {
-    [Export]
-    public class DynamicClassificationManager
+    [Export(typeof(DynamicClassificationManager))]
+    internal class DynamicClassificationManager
     {
         [Import]
         internal IClassificationTypeRegistryService ClassificationRegistry { get; set; }
@@ -16,28 +17,29 @@ namespace BetterCommentsPlus.CommentsClassification
         [Import]
         internal IClassificationFormatMapService FormatMapService { get; set; }
 
-        private readonly Dictionary<string, IClassificationType> registeredClassifications = new Dictionary<string, IClassificationType>();
+        private readonly Dictionary<string, IClassificationType> _classificationTypes 
+            = new Dictionary<string, IClassificationType>();
+
+        private const string TextClassification = "text";
 
         public IClassificationType GetOrCreateClassification(string classificationName)
         {
-            if (registeredClassifications.TryGetValue(classificationName, out var existingType))
+            if (_classificationTypes.TryGetValue(classificationName, out var existingType))
             {
                 return existingType;
             }
 
-            var classificationType = ClassificationRegistry.GetClassificationType(classificationName);
-            if (classificationType == null)
-            {
-                classificationType = ClassificationRegistry.CreateClassificationType(
-                    classificationName,
-                    new[] { ClassificationRegistry.GetClassificationType("comment") });
-            }
+            var baseType = ClassificationRegistry.GetClassificationType(TextClassification);
+            var newType = ClassificationRegistry.CreateClassificationType(
+                classificationName, 
+                new[] { baseType });
 
-            registeredClassifications[classificationName] = classificationType;
-            return classificationType;
+            _classificationTypes[classificationName] = newType;
+            return newType;
         }
 
-        public void ApplyClassificationFormat(string classificationName, Color? foregroundColor, bool isBold = false, bool isItalic = false, bool hasUnderline = false, bool hasStrikethrough = false)
+        public void ApplyClassificationFormat(string classificationName, Color? foregroundColor = null, 
+            bool? isItalic = null, bool? isBold = null, double? opacity = null)
         {
             var classificationType = GetOrCreateClassification(classificationName);
             var formatMap = FormatMapService.GetClassificationFormatMap("text");
@@ -53,28 +55,14 @@ namespace BetterCommentsPlus.CommentsClassification
                     properties = properties.SetForeground(foregroundColor.Value);
                 }
 
-                if (isBold)
+                if (isItalic.HasValue)
                 {
-                    properties = properties.SetBold(true);
+                    properties = properties.SetItalic(isItalic.Value);
                 }
 
-                if (isItalic)
+                if (opacity.HasValue && opacity.Value >= 0.1 && opacity.Value <= 1.0)
                 {
-                    properties = properties.SetItalic(true);
-                }
-
-                if (hasUnderline || hasStrikethrough)
-                {
-                    var textDecorations = new TextDecorationCollection();
-                    if (hasUnderline)
-                    {
-                        textDecorations.Add(TextDecorations.Underline);
-                    }
-                    if (hasStrikethrough)
-                    {
-                        textDecorations.Add(TextDecorations.Strikethrough);
-                    }
-                    properties = properties.SetTextDecorations(textDecorations);
+                    properties = properties.SetForegroundOpacity(opacity.Value);
                 }
 
                 formatMap.SetTextProperties(classificationType, properties);
@@ -87,19 +75,27 @@ namespace BetterCommentsPlus.CommentsClassification
 
         public void ClearClassificationFormat(string classificationName)
         {
-            var classificationType = GetOrCreateClassification(classificationName);
+            if (!_classificationTypes.ContainsKey(classificationName))
+                return;
+
+            var classificationType = _classificationTypes[classificationName];
             var formatMap = FormatMapService.GetClassificationFormatMap("text");
 
             try
             {
                 formatMap.BeginBatchUpdate();
-                var defaultProperties = formatMap.DefaultTextProperties;
-                formatMap.SetTextProperties(classificationType, defaultProperties);
+                formatMap.SetTextProperties(classificationType, TextFormattingRunProperties.Empty);
             }
             finally
             {
                 formatMap.EndBatchUpdate();
             }
+        }
+
+        public bool ClassificationExists(string classificationName)
+        {
+            return _classificationTypes.ContainsKey(classificationName) ||
+                   ClassificationRegistry.GetClassificationType(classificationName) != null;
         }
     }
 }

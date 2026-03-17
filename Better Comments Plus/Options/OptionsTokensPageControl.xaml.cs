@@ -50,24 +50,35 @@ namespace BetterCommentsPlus.Options
          }
       }
 
-      private void TokensList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+      private void DragGrip_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
       {
          _dragStartPoint = e.GetPosition(null);
          
-         var listBox = sender as ListBox;
-         var item = GetListBoxItemAtPosition(listBox, e.GetPosition(listBox));
-         
-         if (item != null)
+         if (sender is Border grip && grip.DataContext is CommentToken token)
          {
-            _draggedItem = item.DataContext as CommentToken;
-            _dragSourceItem = item;
-            if (_draggedItem != null)
+            _draggedItem = token;
+            _draggedIndex = Settings.Instance.CommentTokens.IndexOf(token);
+            
+            var listBoxItem = GetListBoxItemAncestor(grip);
+            if (listBoxItem != null)
             {
-               _draggedIndex = Settings.Instance.CommentTokens.IndexOf(_draggedItem);
-               _originalOpacity = item.Opacity;
-               listBox.CaptureMouse();
+               _dragSourceItem = listBoxItem;
+               _originalOpacity = listBoxItem.Opacity;
             }
+            
+            TokensList.CaptureMouse();
+            e.Handled = true;
          }
+      }
+
+      private ListBoxItem GetListBoxItemAncestor(DependencyObject element)
+      {
+         DependencyObject obj = element;
+         while (obj != null && !(obj is ListBoxItem))
+         {
+            obj = VisualTreeHelper.GetParent(obj);
+         }
+         return obj as ListBoxItem;
       }
 
       private void TokensList_MouseMove(object sender, MouseEventArgs e)

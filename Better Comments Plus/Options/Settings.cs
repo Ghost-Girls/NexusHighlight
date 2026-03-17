@@ -28,6 +28,9 @@ namespace BetterCommentsPlus.Options
                 new CommentToken(type: CommentType.Task,            defaultValue: "#TASK",          value: "#TASK",        colorHex: "#FFEB690A"),
             };
 
+        private readonly ObservableCollection<StyleRule> styleRules
+            = new ObservableCollection<StyleRule>();
+
         private UnifiedConfig unifiedConfig;
 
         public event EventHandler ConfigurationChanged;
@@ -67,6 +70,7 @@ namespace BetterCommentsPlus.Options
             unifiedConfig = UnifiedConfig.CreateDefault();
             SettingsStore.LoadSettings(this);
             SyncCommentTokensToUnifiedConfig();
+            SyncCommentTokensToStyleRules();
             
             foreach (var token in commentTokens)
             {
@@ -74,6 +78,7 @@ namespace BetterCommentsPlus.Options
             }
             
             commentTokens.CollectionChanged += CommentTokens_CollectionChanged;
+            styleRules.CollectionChanged += StyleRules_CollectionChanged;
         }
 
         #endregion Singleton
@@ -147,6 +152,11 @@ namespace BetterCommentsPlus.Options
             get { return commentTokens; }
         }
 
+        public ObservableCollection<StyleRule> StyleRules
+        {
+            get { return styleRules; }
+        }
+
         public UnifiedConfig UnifiedConfig
         {
             get { return unifiedConfig; }
@@ -215,6 +225,14 @@ namespace BetterCommentsPlus.Options
                     token.CurrentValue = pair[1].Trim();
                     if (pair.Length > 2 && !string.IsNullOrWhiteSpace(pair[2]))
                         token.ColorHex = pair[2].Trim();
+                    if (pair.Length > 3 && bool.TryParse(pair[3], out bool isBold))
+                        token.IsBold = isBold;
+                    if (pair.Length > 4 && bool.TryParse(pair[4], out bool isItalic))
+                        token.IsItalic = isItalic;
+                    if (pair.Length > 5 && bool.TryParse(pair[5], out bool hasUnderline))
+                        token.HasUnderline = hasUnderline;
+                    if (pair.Length > 6 && bool.TryParse(pair[6], out bool hasStrikethrough))
+                        token.HasStrikethrough = hasStrikethrough;
                 }
             }
         }
@@ -233,6 +251,10 @@ namespace BetterCommentsPlus.Options
                 if (rule != null && rule.Foreground != null)
                 {
                     rule.Foreground.ColorHex = token.ColorHex;
+                    rule.Foreground.IsBold = token.IsBold;
+                    rule.Foreground.IsItalic = token.IsItalic;
+                    rule.Foreground.HasUnderline = token.HasUnderline;
+                    rule.Foreground.HasStrikethrough = token.HasStrikethrough;
                 }
             }
             OnConfigurationChanged();
@@ -246,6 +268,10 @@ namespace BetterCommentsPlus.Options
                 if (token != null && rule.Foreground != null)
                 {
                     token.ColorHex = rule.Foreground.ColorHex;
+                    token.IsBold = rule.Foreground.IsBold;
+                    token.IsItalic = rule.Foreground.IsItalic;
+                    token.HasUnderline = rule.Foreground.HasUnderline;
+                    token.HasStrikethrough = rule.Foreground.HasStrikethrough;
                 }
             }
         }
@@ -283,8 +309,103 @@ namespace BetterCommentsPlus.Options
             if (!IsDragging)
             {
                 SyncCommentTokensToUnifiedConfig();
+                SyncCommentTokensToStyleRules();
                 OnConfigurationChanged();
             }
+        }
+
+        private void StyleRules_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (!IsDragging)
+            {
+                SyncStyleRulesToCommentTokens();
+                SyncStyleRulesToUnifiedConfig();
+                OnConfigurationChanged();
+            }
+        }
+
+        public void SyncCommentTokensToStyleRules()
+        {
+            styleRules.Clear();
+            int order = 1;
+            foreach (var token in commentTokens)
+            {
+                var rule = ConvertCommentTokenToStyleRule(token, order);
+                styleRules.Add(rule);
+                order++;
+            }
+        }
+
+        public void SyncStyleRulesToCommentTokens()
+        {
+            commentTokens.Clear();
+            foreach (var rule in styleRules)
+            {
+                var token = ConvertStyleRuleToCommentToken(rule);
+                if (token != null)
+                {
+                    commentTokens.Add(token);
+                }
+            }
+        }
+
+        public void SyncStyleRulesToUnifiedConfig()
+        {
+            unifiedConfig.Comments.Clear();
+            foreach (var rule in styleRules)
+            {
+                unifiedConfig.Comments.Add(rule);
+            }
+        }
+
+        private StyleRule ConvertCommentTokenToStyleRule(CommentToken token, int order)
+        {
+            var rule = new StyleRule
+            {
+                Order = order,
+                IsActive = true,
+                IsPredefined = true,
+                Criteria = token.CurrentValue,
+                Id = $"comment-{token.Type.ToString().ToLower()}"
+            };
+
+            rule.Foreground.ColorHex = token.ColorHex;
+            rule.Foreground.IsBold = token.IsBold;
+            rule.Foreground.IsItalic = token.IsItalic;
+            rule.Foreground.HasUnderline = token.HasUnderline;
+            rule.Foreground.HasStrikethrough = token.HasStrikethrough;
+
+            return rule;
+        }
+
+        private CommentToken ConvertStyleRuleToCommentToken(StyleRule rule)
+        {
+            CommentType? type = null;
+            
+            if (rule.Id != null)
+            {
+                if (rule.Id.Contains("important"))
+                    type = CommentType.Important;
+                else if (rule.Id.Contains("question"))
+                    type = CommentType.Question;
+                else if (rule.Id.Contains("remove"))
+                    type = CommentType.Remove;
+                else if (rule.Id.Contains("task"))
+                    type = CommentType.Task;
+            }
+
+            if (!type.HasValue)
+                return null;
+
+            var defaultValue = rule.IsPredefined ? rule.Criteria : "";
+            var token = new CommentToken(type.Value, defaultValue, rule.Criteria, rule.Foreground.ColorHex);
+            
+            token.IsBold = rule.Foreground.IsBold;
+            token.IsItalic = rule.Foreground.IsItalic;
+            token.HasUnderline = rule.Foreground.HasUnderline;
+            token.HasStrikethrough = rule.Foreground.HasStrikethrough;
+            
+            return token;
         }
 
         #endregion Private Helpers
