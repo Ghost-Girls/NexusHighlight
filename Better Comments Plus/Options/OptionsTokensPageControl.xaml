@@ -10,7 +10,6 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <local:EnumToStringConverter x:Key="EnumToStringConverter" />
         <local:HexToColorConverter x:Key="HexToColorConverter" />
 
         <Style x:Key="TokenValueTextBoxStyle" TargetType="{x:Type TextBox}">
@@ -57,14 +56,6 @@
                         Foreground="Gray"
                         Text="☰" />
                 </Border>
-
-                <Label
-                    Width="85"
-                    Margin="0,0,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    HorizontalContentAlignment="Right"
-                    Content="{Binding Type, Converter={StaticResource EnumToStringConverter}, Mode=OneWay}" />
 
                 <TextBox
                     Width="200"
