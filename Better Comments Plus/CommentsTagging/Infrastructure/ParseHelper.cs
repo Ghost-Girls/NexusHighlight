@@ -1,4 +1,4 @@
-﻿using BetterCommentsPlus.Options;
+using BetterCommentsPlus.Options;
 using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ namespace BetterCommentsPlus.CommentsTagging
 {
    public static class ParseHelper
    {
-      private static Settings settings = Settings.Instance;
+      private static Options.Settings settings = Options.Settings.Instance;
 
 
       public static int SingleLineCommentStartIndex(string comment, string doubleCommentStarter, CommentType type)
@@ -22,6 +22,11 @@ namespace BetterCommentsPlus.CommentsTagging
          }
 
          var start = comment.IndexOf(token, StringComparison.OrdinalIgnoreCase);
+         
+         if (settings.HighlightCriteriaItself)
+         {
+            return start;
+         }
 
          return comment.IndexOfFirstChar(start + token.Length);
       }
@@ -30,6 +35,11 @@ namespace BetterCommentsPlus.CommentsTagging
       {
          var token = settings.GetTokenValue(type);
          var start = comment.IndexOf(token, StringComparison.OrdinalIgnoreCase);
+         
+         if (settings.HighlightCriteriaItself)
+         {
+            return start;
+         }
 
          return comment.IndexOfFirstChar(start + token.Length);
       }

@@ -10,7 +10,7 @@ namespace BetterCommentsPlus.CommentsTagging
     {
         protected readonly StringComparison OrdinalIgnoreCase = StringComparison.OrdinalIgnoreCase;
 
-        protected readonly Settings Settings = Settings.Instance;
+        protected readonly Options.Settings Settings = Options.Settings.Instance;
 
         #region ICommentParser Members
 
@@ -44,9 +44,13 @@ namespace BetterCommentsPlus.CommentsTagging
                         if (startOffset < 0) startOffset = 2;
                     }
                     
-                    var spanLength = span.Length - startOffset;
+                    int actualStartOffset = Settings.HighlightCriteriaItself 
+                        ? startOffset 
+                        : spanText.IndexOfFirstChar(startOffset + token.Length);
+                    
+                    var spanLength = span.Length - actualStartOffset;
                     if (spanLength > 0)
-                        commentSpans.Add(new SnapshotSpan(span.Snapshot, span.Start + startOffset, spanLength));
+                        commentSpans.Add(new SnapshotSpan(span.Snapshot, span.Start + actualStartOffset, spanLength));
                 }
                 else
                 {
@@ -60,7 +64,11 @@ namespace BetterCommentsPlus.CommentsTagging
                             var startOffset = lineText.IndexOf(tokenLower, OrdinalIgnoreCase);
                             if (startOffset < 0) startOffset = lineText.IndexOfFirstChar();
                             
-                            commentSpans.Add(new SnapshotSpan(span.Snapshot, line.Start + startOffset, line.Length - startOffset));
+                            int actualStartOffset = Settings.HighlightCriteriaItself 
+                                ? startOffset 
+                                : lineText.IndexOfFirstChar(startOffset + token.Length);
+                            
+                            commentSpans.Add(new SnapshotSpan(span.Snapshot, line.Start + actualStartOffset, line.Length - actualStartOffset));
                         }
                         else if (curr > firstLineNumber && curr < lastLineNumber)
                         {

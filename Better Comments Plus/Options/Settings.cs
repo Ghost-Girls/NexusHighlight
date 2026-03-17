@@ -16,6 +16,7 @@ namespace BetterCommentsPlus.Options
         private bool highlightTaskKeywordOnly = false;
         private bool underlineImportantComments = false;
         private bool strikethroughDoubleComments = false;
+        private bool highlightCriteriaItself = false;
         
         public bool IsDragging { get; set; }
         private bool _isSyncing;
@@ -147,6 +148,13 @@ namespace BetterCommentsPlus.Options
         {
             get { return strikethroughDoubleComments; }
             set { SetField(ref strikethroughDoubleComments, value); }
+        }
+
+        [Setting]
+        public bool HighlightCriteriaItself
+        {
+            get { return highlightCriteriaItself; }
+            set { SetField(ref highlightCriteriaItself, value); }
         }
 
         [Setting]

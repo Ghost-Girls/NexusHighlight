@@ -19,7 +19,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
       private readonly IClassificationFormatMap formatMap;
       private readonly IClassificationTypeRegistryService regService;
 
-      private readonly Settings settings = Settings.Instance;
+      private readonly Options.Settings settings = Options.Settings.Instance;
 
       private static readonly List<string> commentTypes = new List<string>()
             {
@@ -291,7 +291,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                          .FontRenderingEmSize;
       }
 
-      private TextDecorationCollection GetTextDecoration(Settings settings)
+      private TextDecorationCollection GetTextDecoration(Options.Settings settings)
       {
          return settings.UnderlineImportantComments
                     ? new TextDecorationCollection { TextDecorations.Underline }

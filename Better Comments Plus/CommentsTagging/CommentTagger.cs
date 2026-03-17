@@ -22,7 +22,7 @@ namespace BetterCommentsPlus.CommentsTagging
 
     internal class CommentTagger : ITagger<ClassificationTag>, IDisposable
     {
-        private readonly Settings settings = Settings.Instance;
+        private readonly Options.Settings settings = Options.Settings.Instance;
 
         private readonly IClassificationTypeRegistryService classRegistry;
         private readonly ITagAggregator<IClassificationTag> tagAggregator;
