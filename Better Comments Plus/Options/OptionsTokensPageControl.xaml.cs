@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Linq;
 using System;
+using BetterCommentsPlus.CommentsTagging;
 
 namespace BetterCommentsPlus.Options
 {
@@ -186,8 +187,26 @@ namespace BetterCommentsPlus.Options
 
       private void AddButton_Click(object sender, RoutedEventArgs e)
       {
-         MessageBox.Show("添加新规则的功能将在后续版本中实现（需要移除CommentType枚举限制）。", "提示",
-             MessageBoxButton.OK, MessageBoxImage.Information);
+         var settings = DataContext as Settings;
+         if (settings == null)
+            return;
+
+         int counter = 1;
+         string newCriteria;
+         do
+         {
+            newCriteria = $"#NEW{counter}";
+            counter++;
+         } while (settings.CommentTokens.Any(t => t.CurrentValue == newCriteria));
+
+         var newToken = new CommentToken(
+             type: CommentType.Important,
+             defaultValue: newCriteria,
+             value: newCriteria,
+             colorHex: "#FFFF0000");
+
+         settings.CommentTokens.Add(newToken);
+         TokensList.SelectedItem = newToken;
       }
 
       private void DeleteButton_Click(object sender, RoutedEventArgs e)

@@ -18,6 +18,7 @@ namespace BetterCommentsPlus.Options
         private bool strikethroughDoubleComments = false;
         
         public bool IsDragging { get; set; }
+        private bool _isSyncing;
 
         private readonly ObservableCollection<CommentToken> commentTokens
             = new ObservableCollection<CommentToken>
@@ -248,7 +249,20 @@ namespace BetterCommentsPlus.Options
             foreach (var token in commentTokens)
             {
                 var rule = unifiedConfig.Comments.FirstOrDefault(r => r.Criteria == token.CurrentValue);
-                if (rule != null && rule.Foreground != null)
+                if (rule == null)
+                {
+                    rule = new StyleRule
+                    {
+                        Order = unifiedConfig.Comments.Count + 1,
+                        IsActive = true,
+                        IsPredefined = true,
+                        Criteria = token.CurrentValue,
+                        Id = $"comment-{token.Type.ToString().ToLower()}"
+                    };
+                    unifiedConfig.Comments.Add(rule);
+                }
+                
+                if (rule.Foreground != null)
                 {
                     rule.Foreground.ColorHex = token.ColorHex;
                     rule.Foreground.IsBold = token.IsBold;
@@ -257,7 +271,6 @@ namespace BetterCommentsPlus.Options
                     rule.Foreground.HasStrikethrough = token.HasStrikethrough;
                 }
             }
-            OnConfigurationChanged();
         }
 
         public void SyncUnifiedConfigToCommentTokens()
@@ -278,12 +291,18 @@ namespace BetterCommentsPlus.Options
 
         private void CommentToken_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (_isSyncing)
+                return;
+
             SyncCommentTokensToUnifiedConfig();
             OnConfigurationChanged();
         }
 
         private void CommentTokens_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            if (_isSyncing)
+                return;
+
             if (e.OldItems != null)
             {
                 foreach (var item in e.OldItems)
@@ -308,19 +327,35 @@ namespace BetterCommentsPlus.Options
 
             if (!IsDragging)
             {
-                SyncCommentTokensToUnifiedConfig();
-                SyncCommentTokensToStyleRules();
-                OnConfigurationChanged();
+                _isSyncing = true;
+                try
+                {
+                    SyncCommentTokensToUnifiedConfig();
+                    SyncCommentTokensToStyleRules();
+                    OnConfigurationChanged();
+                }
+                finally
+                {
+                    _isSyncing = false;
+                }
             }
         }
 
         private void StyleRules_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            if (!IsDragging)
+            if (_isSyncing || IsDragging)
+                return;
+
+            _isSyncing = true;
+            try
             {
                 SyncStyleRulesToCommentTokens();
                 SyncStyleRulesToUnifiedConfig();
                 OnConfigurationChanged();
+            }
+            finally
+            {
+                _isSyncing = false;
             }
         }
 

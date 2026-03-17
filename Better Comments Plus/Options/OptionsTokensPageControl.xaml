@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:BetterCommentsPlus.Options"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Width="520"
+    Width="630"
     d:DataContext="{d:DesignInstance {x:Type local:Settings}}"
     mc:Ignorable="d">
 
@@ -106,9 +106,12 @@
                     Padding="0"
                     HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center"
-                    ToolTip="B"
-                    IsChecked="{Binding IsBold, UpdateSourceTrigger=PropertyChanged}">
-                    <TextBlock FontWeight="Bold" Text="B" FontSize="14" />
+                    IsChecked="{Binding IsBold, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="B">
+                    <TextBlock
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Text="B" />
                 </CheckBox>
 
                 <CheckBox
@@ -118,9 +121,12 @@
                     Padding="0"
                     HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center"
-                    ToolTip="I"
-                    IsChecked="{Binding IsItalic, UpdateSourceTrigger=PropertyChanged}">
-                    <TextBlock FontStyle="Italic" Text="I" FontSize="14" />
+                    IsChecked="{Binding IsItalic, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="I">
+                    <TextBlock
+                        FontSize="14"
+                        FontStyle="Italic"
+                        Text="I" />
                 </CheckBox>
 
                 <CheckBox
@@ -130,9 +136,12 @@
                     Padding="0"
                     HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center"
-                    ToolTip="U"
-                    IsChecked="{Binding HasUnderline, UpdateSourceTrigger=PropertyChanged}">
-                    <TextBlock Text="U" TextDecorations="Underline" FontSize="14" />
+                    IsChecked="{Binding HasUnderline, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="U">
+                    <TextBlock
+                        FontSize="14"
+                        Text="U"
+                        TextDecorations="Underline" />
                 </CheckBox>
 
                 <CheckBox
@@ -142,9 +151,12 @@
                     Padding="0"
                     HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center"
-                    ToolTip="S"
-                    IsChecked="{Binding HasStrikethrough, UpdateSourceTrigger=PropertyChanged}">
-                    <TextBlock Text="S" TextDecorations="Strikethrough" FontSize="14" />
+                    IsChecked="{Binding HasStrikethrough, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="S">
+                    <TextBlock
+                        FontSize="14"
+                        Text="S"
+                        TextDecorations="Strikethrough" />
                 </CheckBox>
 
                 <Button
@@ -165,7 +177,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="400" />
+            <ColumnDefinition
+                Width="Auto"
+                MinWidth="500"
+                MaxWidth="800" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
