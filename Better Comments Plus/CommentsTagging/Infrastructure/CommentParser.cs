@@ -1,4 +1,4 @@
-﻿using BetterCommentsPlus.Options;
+using BetterCommentsPlus.Options;
 using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections.Generic;

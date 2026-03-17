@@ -175,12 +175,13 @@ namespace BetterCommentsPlus.Options
 
         public CommentToken GetToken(CommentType type)
         {
-            return commentTokens.Single(t => t.Type == type);
+            return commentTokens.FirstOrDefault(t => t.Type == type);
         }
 
         public string GetTokenValue(CommentType type)
         {
-            return GetToken(type).CurrentValue;
+            var token = GetToken(type);
+            return token?.CurrentValue ?? "";
         }
 
         #endregion Public Methods
@@ -234,23 +235,84 @@ namespace BetterCommentsPlus.Options
             if (tokensString.IsNullOrWhiteSpace())
                 return;
 
-            foreach (var pair in tokensString.Split('|').Select(p => p.Split(',')))
+            _isSyncing = true;
+            try
             {
-                var token = commentTokens.SingleOrDefault(t => t.IsOfType(pair[0]));
-
-                if (token != null)
+                var pairs = tokensString.Split('|').Select(p => p.Split(',')).ToList();
+                
+                foreach (var pair in pairs)
                 {
-                    token.CurrentValue = pair[1].Trim();
-                    if (pair.Length > 2 && !string.IsNullOrWhiteSpace(pair[2]))
-                        token.ColorHex = pair[2].Trim();
-                    if (pair.Length > 3 && bool.TryParse(pair[3], out bool isBold))
-                        token.IsBold = isBold;
-                    if (pair.Length > 4 && bool.TryParse(pair[4], out bool isItalic))
-                        token.IsItalic = isItalic;
-                    if (pair.Length > 5 && bool.TryParse(pair[5], out bool hasUnderline))
-                        token.HasUnderline = hasUnderline;
-                    if (pair.Length > 6 && bool.TryParse(pair[6], out bool hasStrikethrough))
-                        token.HasStrikethrough = hasStrikethrough;
+                    if (pair.Length < 2) continue;
+                    
+                    var token = commentTokens.FirstOrDefault(t => t.IsOfType(pair[0]));
+
+                    if (token != null)
+                    {
+                        token.CurrentValue = pair[1].Trim();
+                        if (pair.Length > 2 && !string.IsNullOrWhiteSpace(pair[2]))
+                            token.ColorHex = pair[2].Trim();
+                        if (pair.Length > 3 && bool.TryParse(pair[3], out bool isBold))
+                            token.IsBold = isBold;
+                        if (pair.Length > 4 && bool.TryParse(pair[4], out bool isItalic))
+                            token.IsItalic = isItalic;
+                        if (pair.Length > 5 && bool.TryParse(pair[5], out bool hasUnderline))
+                            token.HasUnderline = hasUnderline;
+                        if (pair.Length > 6 && bool.TryParse(pair[6], out bool hasStrikethrough))
+                            token.HasStrikethrough = hasStrikethrough;
+                    }
+                }
+                
+                EnsureDefaultTokensExist();
+            }
+            finally
+            {
+                _isSyncing = false;
+            }
+        }
+        
+        private void EnsureDefaultTokensExist()
+        {
+            var defaultTypes = new[] 
+            { 
+                CommentType.Important, 
+                CommentType.Question, 
+                CommentType.Remove, 
+                CommentType.Task 
+            };
+            
+            foreach (var type in defaultTypes)
+            {
+                if (!commentTokens.Any(t => t.Type == type))
+                {
+                    CommentToken newToken = null;
+                    switch (type)
+                    {
+                        case CommentType.Important:
+                            newToken = new CommentToken(type, "#IMPORTANT", "#IMPORTANT", "#FFFF0000")
+                            {
+                                IsBold = true,
+                                IsItalic = false
+                            };
+                            break;
+                        case CommentType.Question:
+                            newToken = new CommentToken(type, "#QUESTION", "#QUESTION", "#FFFFFF00");
+                            break;
+                        case CommentType.Remove:
+                            newToken = new CommentToken(type, "#REMOVE", "#REMOVE", "#FF808080")
+                            {
+                                HasStrikethrough = true
+                            };
+                            break;
+                        case CommentType.Task:
+                            newToken = new CommentToken(type, "#TASK", "#TASK", "#FFEB690A");
+                            break;
+                    }
+                    
+                    if (newToken != null)
+                    {
+                        newToken.PropertyChanged += CommentToken_PropertyChanged;
+                        commentTokens.Add(newToken);
+                    }
                 }
             }
         }

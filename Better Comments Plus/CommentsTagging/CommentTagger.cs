@@ -1,4 +1,4 @@
-﻿using BetterCommentsPlus.CommentsClassification;
+using BetterCommentsPlus.CommentsClassification;
 using BetterCommentsPlus.Options;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -76,7 +76,7 @@ namespace BetterCommentsPlus.CommentsTagging
             return comment.Spans.Select(s => new TagSpan<ClassificationTag>(s, CreateTag(comment.Type)));
         }
 
-        private ClassificationTag CreateTag(CommentType type) //#TASK
+        private ClassificationTag CreateTag(CommentType type)
         {
             switch (type)
             {
