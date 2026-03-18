@@ -18,10 +18,9 @@ namespace BetterCommentsPlus.Options
         private bool underlineImportantComments = false;
         private bool strikethroughDoubleComments = false;
         private bool highlightCriteriaItself = false;
-        
+
         public bool IsDragging { get; set; }
         private bool _isSyncing;
-        private string solutionSettingsPath = null;
 
         private readonly ObservableCollection<CommentToken> globalCommentTokens
             = new ObservableCollection<CommentToken>
@@ -77,13 +76,13 @@ namespace BetterCommentsPlus.Options
             ResetSolutionTokens = new RelayCommand(ClearSolutionTokens);
             unifiedConfig = UnifiedConfig.CreateDefault();
             SettingsStore.LoadSettings(this);
-            
+
             InitializeTokenCollection(globalCommentTokens);
             InitializeTokenCollection(solutionCommentTokens);
-            
+
             SyncCommentTokensToUnifiedConfig();
             SyncCommentTokensToStyleRules();
-            
+
             globalCommentTokens.CollectionChanged += CommentTokens_CollectionChanged;
             solutionCommentTokens.CollectionChanged += CommentTokens_CollectionChanged;
             styleRules.CollectionChanged += StyleRules_CollectionChanged;
@@ -97,7 +96,7 @@ namespace BetterCommentsPlus.Options
                 {
                     token.BackgroundStyle = new BackgroundStyle();
                 }
-                
+
                 if (string.IsNullOrEmpty(token.BackgroundStyle.Shape))
                     token.BackgroundStyle.Shape = "Tag";
                 if (string.IsNullOrEmpty(token.BackgroundStyle.Blur))
@@ -106,7 +105,7 @@ namespace BetterCommentsPlus.Options
                     token.BackgroundStyle.Alpha = "1/10";
                 if (string.IsNullOrEmpty(token.BackgroundStyle.ColorHex))
                     token.BackgroundStyle.ColorHex = token.ColorHex;
-                
+
                 token.PropertyChanged += CommentToken_PropertyChanged;
             }
         }
@@ -357,11 +356,11 @@ namespace BetterCommentsPlus.Options
             try
             {
                 var pairs = tokensString.Split('|').Select(p => p.Split(',')).ToList();
-                
+
                 foreach (var pair in pairs)
                 {
                     if (pair.Length < 2) continue;
-                    
+
                     var token = targetCollection.FirstOrDefault(t => t.IsOfType(pair[0]));
 
                     if (token != null)
@@ -381,7 +380,7 @@ namespace BetterCommentsPlus.Options
                             token.IsForegroundActive = isForegroundActive;
                     }
                 }
-                
+
                 EnsureDefaultTokensExist(targetCollection);
             }
             finally
@@ -389,19 +388,19 @@ namespace BetterCommentsPlus.Options
                 _isSyncing = false;
             }
         }
-        
+
         private void EnsureDefaultTokensExist(ObservableCollection<CommentToken> targetCollection)
         {
             if (targetCollection != globalCommentTokens) return;
-            
-            var defaultTypes = new[] 
-            { 
-                CommentType.Important, 
-                CommentType.Question, 
-                CommentType.Remove, 
-                CommentType.Task 
+
+            var defaultTypes = new[]
+            {
+                CommentType.Important,
+                CommentType.Question,
+                CommentType.Remove,
+                CommentType.Task
             };
-            
+
             foreach (var type in defaultTypes)
             {
                 if (!targetCollection.Any(t => t.Type == type))
@@ -429,14 +428,14 @@ namespace BetterCommentsPlus.Options
                             newToken = new CommentToken(type, "#TASK", "#TASK", "#FFEB690A");
                             break;
                     }
-                    
+
                     if (newToken != null)
                     {
                         if (newToken.BackgroundStyle == null)
                         {
                             newToken.BackgroundStyle = new BackgroundStyle();
                         }
-                        
+
                         if (string.IsNullOrEmpty(newToken.BackgroundStyle.Shape))
                             newToken.BackgroundStyle.Shape = "Tag";
                         if (string.IsNullOrEmpty(newToken.BackgroundStyle.Blur))
@@ -445,7 +444,7 @@ namespace BetterCommentsPlus.Options
                             newToken.BackgroundStyle.Alpha = "1/10";
                         if (string.IsNullOrEmpty(newToken.BackgroundStyle.ColorHex))
                             newToken.BackgroundStyle.ColorHex = newToken.ColorHex;
-                        
+
                         newToken.PropertyChanged += CommentToken_PropertyChanged;
                         targetCollection.Add(newToken);
                     }
@@ -463,7 +462,7 @@ namespace BetterCommentsPlus.Options
         {
             unifiedConfig.Comments.Clear();
             int order = 1;
-            
+
             foreach (var token in solutionCommentTokens.Concat(globalCommentTokens))
             {
                 var rule = unifiedConfig.Comments.FirstOrDefault(r => r.Criteria == token.CurrentValue);
@@ -479,7 +478,7 @@ namespace BetterCommentsPlus.Options
                     };
                     unifiedConfig.Comments.Add(rule);
                 }
-                
+
                 if (rule.Foreground != null)
                 {
                     rule.Foreground.ColorHex = token.ColorHex;
@@ -542,7 +541,7 @@ namespace BetterCommentsPlus.Options
                         {
                             token.BackgroundStyle = new BackgroundStyle();
                         }
-                        
+
                         if (string.IsNullOrEmpty(token.BackgroundStyle.Shape))
                             token.BackgroundStyle.Shape = "Tag";
                         if (string.IsNullOrEmpty(token.BackgroundStyle.Blur))
@@ -551,7 +550,7 @@ namespace BetterCommentsPlus.Options
                             token.BackgroundStyle.Alpha = "1/10";
                         if (string.IsNullOrEmpty(token.BackgroundStyle.ColorHex))
                             token.BackgroundStyle.ColorHex = token.ColorHex;
-                        
+
                         token.PropertyChanged += CommentToken_PropertyChanged;
                     }
                 }

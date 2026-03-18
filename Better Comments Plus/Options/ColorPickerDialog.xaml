@@ -5,11 +5,40 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="选择颜色"
-    Width="590"
-    Height="520"
+    Width="510"
+    Height="450"
+    ResizeMode="NoResize"
     WindowStartupLocation="CenterOwner"
     mc:Ignorable="d">
+    <Window.Resources>
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="25" />
+            <Setter Property="Foreground" Value="#050F0F" />
+            <!--  补充边框色，方便看效果  -->
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Margin" Value="6" />
+            <Setter Property="Padding" Value="6,2" />
+            <!--  默认Padding  -->
+            <Setter Property="Background" Value="#F5F5F5" />
+            <!--  补充背景色  -->
 
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="2">
+                            <!--  最终版：ContentPresenter绑定Padding + 对齐方式  -->
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -36,40 +65,44 @@
                 <TextBox
                     x:Name="HexTextBox"
                     Grid.Column="0"
-                    Margin="0,0,10,0"
+                    Margin="0,0,3,0"
                     TextChanged="HexTextBox_TextChanged"
                     ToolTip="输入HEX颜色值，例如：#FF0000 或 FF0000" />
 
-                <Border
-                    x:Name="PreviewBorder"
-                    Grid.Column="1"
-                    Width="40"
-                    Height="25"
-                    Margin="0,0,10,0"
-                    BorderBrush="Gray"
-                    BorderThickness="1"
-                    CornerRadius="3" />
 
-                <Button
-                    x:Name="ConfirmHexButton"
-                    Grid.Column="2"
-                    Width="80"
-                    Click="ConfirmHexButton_Click"
-                    Content="确认"
-                    IsEnabled="False" />
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Border
+                        x:Name="PreviewBorder"
+                        Grid.Column="1"
+                        Width="25"
+                        Height="25"
+                        Margin="0,0,5,0"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        CornerRadius="3" />
+                    <Button
+                        x:Name="ConfirmHexButton"
+                        Width="60"
+                        Margin="5,0"
+                        Click="ConfirmHexButton_Click"
+                        Content="确认"
+                        IsEnabled="False"
+                        Style="{StaticResource ButtonStyle}" />
+                    <Button
+                        Width="60"
+                        Margin="5,0"
+                        Click="CancelButton_Click"
+                        Content="取消"
+                        Style="{StaticResource ButtonStyle}" />
+                </StackPanel>
+
             </Grid>
         </GroupBox>
 
         <StackPanel
             Grid.Row="2"
             HorizontalAlignment="Right"
-            Orientation="Horizontal">
-            <Button
-                Width="80"
-                Height="30"
-                Margin="10,0,10,0"
-                Click="CancelButton_Click"
-                Content="取消" />
-        </StackPanel>
+            Orientation="Horizontal" />
     </Grid>
 </Window>

@@ -60,10 +60,17 @@ namespace BetterCommentsPlus.Options
             cboBlur.SelectedIndex = GetBlurIndex(RuleToEdit.Background.Blur);
             cboAlpha.SelectedIndex = GetAlphaIndex(RuleToEdit.Background.Alpha);
 
+            // 添加所有控件事件监听，包括 Active 复选框
             txtCriteria.TextChanged += (_, _) => CreatePreview();
             cboShape.SelectionChanged += (_, _) => CreatePreview();
             cboBlur.SelectionChanged += (_, _) => CreatePreview();
             cboAlpha.SelectionChanged += (_, _) => CreatePreview();
+            
+            chkFgActive.Checked += (_, _) => CreatePreview();
+            chkFgActive.Unchecked += (_, _) => CreatePreview();
+            chkBgActive.Checked += (_, _) => CreatePreview();
+            chkBgActive.Unchecked += (_, _) => CreatePreview();
+            
             chkFgBold.Checked += (_, _) => CreatePreview();
             chkFgBold.Unchecked += (_, _) => CreatePreview();
             chkFgItalic.Checked += (_, _) => CreatePreview();
@@ -116,7 +123,7 @@ namespace BetterCommentsPlus.Options
 
         private void InitializeColorLists()
         {
-            string fgHexMatch = RuleToEdit.Foreground.GetColor()?.ToString() ?? "#000000";
+            string fgHexMatch = RuleToEdit.Foreground.GetColor()?.ToString() ?? "#57a64a";
             string bgHexMatch = RuleToEdit.Background.GetColor()?.ToString() ?? "#FF0000";
             
             // 使用 ColorPickerDialog 的颜色矩阵
@@ -344,54 +351,69 @@ namespace BetterCommentsPlus.Options
                 if (RuleToEdit == null)
                     return;
 
-                Color fgColor = GetSelectedFgColor() ?? RuleToEdit.Foreground.GetColor() ?? Colors.Black;
-                Color bgColor = GetSelectedBgColor() ?? RuleToEdit.Background.GetColor() ?? Colors.Transparent;
+                // 获取选中的颜色，如果没有选中则使用默认颜色（绿色 #57a64a）
+                Color fgColor = GetSelectedFgColor() ?? Color.FromRgb(87, 166, 74); // #57a64a
+                Color bgColor = GetSelectedBgColor() ?? Colors.Transparent;
 
                 string shape = GetShapeString(cboShape.SelectedIndex);
                 string blur = GetBlurString(cboBlur.SelectedIndex);
-                string alpha = GetAlphaString(cboBlur.SelectedIndex);
+                string alpha = GetAlphaString(cboAlpha.SelectedIndex);
 
                 t.Text = string.IsNullOrEmpty(txtCriteria.Text) ? "Sample Text" : txtCriteria.Text;
 
                 bool isLine = shape == "Line" || shape == "LineUnder";
+                
+                // 检查 Active 状态
+                bool isFgActive = chkFgActive.IsChecked == true;
+                bool isBgActive = chkBgActive.IsChecked == true;
 
                 r.Effect = null;
 
-                r.Fill = new SolidColorBrush(Color.FromArgb(60, bgColor.R, bgColor.G, bgColor.B));
-                r.Stroke = new SolidColorBrush(Color.FromArgb(200, bgColor.R, bgColor.G, bgColor.B));
-
-                if (blur != "None")
+                // 背景样式
+                if (isBgActive)
                 {
-                    r.Effect = new BlurEffect
+                    r.Fill = new SolidColorBrush(Color.FromArgb(60, bgColor.R, bgColor.G, bgColor.B));
+                    r.Stroke = new SolidColorBrush(Color.FromArgb(200, bgColor.R, bgColor.G, bgColor.B));
+
+                    if (blur != "None")
                     {
-                        KernelType = KernelType.Gaussian,
-                        RenderingBias = RenderingBias.Performance
-                    };
+                        r.Effect = new BlurEffect
+                        {
+                            KernelType = KernelType.Gaussian,
+                            RenderingBias = RenderingBias.Performance
+                        };
 
-                    switch (blur)
-                    {
-                        case "Low":
-                            ((BlurEffect)r.Effect).Radius = isLine ? 1 : 4.0;
-                            break;
+                        switch (blur)
+                        {
+                            case "Low":
+                                ((BlurEffect)r.Effect).Radius = isLine ? 1 : 4.0;
+                                break;
 
-                        case "Medium":
-                            ((BlurEffect)r.Effect).Radius = isLine ? 2 : 7.0;
-                            break;
+                            case "Medium":
+                                ((BlurEffect)r.Effect).Radius = isLine ? 2 : 7.0;
+                                break;
 
-                        case "High":
-                            ((BlurEffect)r.Effect).Radius = isLine ? 4 : 11.0;
-                            break;
+                            case "High":
+                                ((BlurEffect)r.Effect).Radius = isLine ? 4 : 11.0;
+                                break;
 
-                        case "Ultra":
-                            ((BlurEffect)r.Effect).Radius = isLine ? 6 : 20.0;
-                            break;
+                            case "Ultra":
+                                ((BlurEffect)r.Effect).Radius = isLine ? 6 : 20.0;
+                                break;
+                        }
+
+                        r.Stroke = null;
                     }
 
-                    r.Stroke = null;
+                    int alphaValue = GetAlphaValue(alpha);
+                    r.Fill = new SolidColorBrush(Color.FromArgb((byte)(255 * alphaValue / 10), bgColor.R, bgColor.G, bgColor.B));
                 }
-
-                int alphaValue = GetAlphaValue(alpha);
-                r.Fill = new SolidColorBrush(Color.FromArgb((byte)(255 * alphaValue / 10), bgColor.R, bgColor.G, bgColor.B));
+                else
+                {
+                    // Background 未激活时，使用透明背景
+                    r.Fill = Brushes.Transparent;
+                    r.Stroke = Brushes.Transparent;
+                }
 
                 double Vert = blur != "None" ? 4 : 2;
                 const double Horz = 2;
@@ -400,23 +422,41 @@ namespace BetterCommentsPlus.Options
                 t.Text = string.IsNullOrEmpty(txtCriteria.Text) ? "Sample Text" : txtCriteria.Text;
                 t.Padding = new Thickness(Horz, Vert, Horz, Vert);
 
-                t.Foreground = new SolidColorBrush(fgColor);
+                // 前景样式
+                if (isFgActive)
+                {
+                    t.Foreground = new SolidColorBrush(fgColor);
+                    
+                    // Active 启用时，应用所有样式
+                    if (chkFgBold.IsChecked == true)
+                        t.FontWeight = FontWeights.Bold;
+                    else
+                        t.FontWeight = FontWeights.Normal;
 
-                if (chkFgBold.IsChecked == true)
-                    t.FontWeight = FontWeights.Bold;
+                    if (chkFgItalic.IsChecked == true)
+                        t.FontStyle = FontStyles.Italic;
+                    else
+                        t.FontStyle = FontStyles.Normal;
+
+                    // Underline 和 Strikethrough 可以共存
+                    t.TextDecorations = new TextDecorationCollection();
+                    if (chkFgUnderline.IsChecked == true)
+                    {
+                        t.TextDecorations.Add(TextDecorations.Underline);
+                    }
+                    if (chkFgStrikethrough.IsChecked == true)
+                    {
+                        t.TextDecorations.Add(TextDecorations.Strikethrough);
+                    }
+                }
                 else
+                {
+                    // Active 禁用时，使用默认注释颜色（灰色），并禁用所有样式效果
+                    t.Foreground = Brushes.Gray;
                     t.FontWeight = FontWeights.Normal;
-
-                if (chkFgItalic.IsChecked == true)
-                    t.FontStyle = FontStyles.Italic;
-                else
                     t.FontStyle = FontStyles.Normal;
-
-                t.TextDecorations = null;
-                if (chkFgUnderline.IsChecked == true)
-                    t.TextDecorations = TextDecorations.Underline;
-                if (chkFgStrikethrough.IsChecked == true)
-                    t.TextDecorations = TextDecorations.Strikethrough;
+                    t.TextDecorations = null;
+                }
 
                 if (shape == "TagUnder" || shape == "LineUnder")
                 {
