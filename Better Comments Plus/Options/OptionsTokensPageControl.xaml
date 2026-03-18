@@ -399,7 +399,7 @@
                     <StackPanel
                         Grid.Row="1"
                         Grid.Column="1"
-                        Margin="5"
+                        Margin="0,0,0,0"
                         HorizontalAlignment="Right"
                         Orientation="Vertical">
                         <Button
@@ -443,7 +443,7 @@
 
                     <StackPanel
                         Grid.Row="0"
-                        Grid.ColumnSpan="3"
+                        Grid.ColumnSpan="2"
                         Margin="5,0,5,0"
                         Orientation="Horizontal">
                         <Button
@@ -496,7 +496,6 @@
                     <Grid
                         Grid.Row="1"
                         Grid.Column="0"
-                        Grid.ColumnSpan="2"
                         Margin="0,5,0,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
@@ -513,9 +512,9 @@
                         </ScrollViewer>
                     </Grid>
                     <StackPanel
-                        Grid.RowSpan="2"
-                        Grid.Column="2"
-                        Margin="0,25,0,0"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="0,0,0,0"
                         HorizontalAlignment="Center"
                         Orientation="Vertical">
                         <Button

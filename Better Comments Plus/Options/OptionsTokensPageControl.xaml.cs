@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Linq;
+using System.Windows.Documents;
 using BetterCommentsPlus.CommentsTagging;
 using System.Collections.ObjectModel;
 using Microsoft.Win32;
@@ -21,6 +22,8 @@ namespace BetterCommentsPlus.Options
       private ListBoxItem _dragSourceItem;
       private double _originalOpacity;
       private ListBox _currentDraggingListBox;
+      private AdornerLayer _adornerLayer;
+      private InsertionAdorner _insertionAdorner;
 
       public OptionsTokensPageControl()
       {
@@ -164,7 +167,42 @@ namespace BetterCommentsPlus.Options
                   _dragSourceItem.Opacity = 0.4;
                }
             }
+            
+            // 显示插入指示器
+            if (_isDragging && listBox != null)
+            {
+               var mousePos = e.GetPosition(listBox);
+               int targetIndex = GetInsertionIndex(listBox, mousePos);
+               
+               if (targetIndex >= 0 && targetIndex != _draggedIndex)
+               {
+                  ShowInsertionAdorner(listBox, targetIndex);
+               }
+            }
          }
+      }
+      
+      private int GetInsertionIndex(ListBox listBox, Point mousePos)
+      {
+         for (int i = 0; i < listBox.Items.Count; i++)
+         {
+            var container = listBox.ItemContainerGenerator.ContainerFromIndex(i) as ListBoxItem;
+            if (container == null) continue;
+            
+            var itemRect = new Rect(
+                container.TranslatePoint(new Point(0, 0), listBox),
+                container.RenderSize);
+            
+            // 如果鼠标在项的上半部分，插入到该项之前
+            // 如果鼠标在项的下半部分，插入到该项之后
+            if (mousePos.Y < itemRect.Top + itemRect.Height / 2)
+            {
+               return i;
+            }
+         }
+         
+         // 如果鼠标在所有项的下方，插入到末尾
+         return listBox.Items.Count;
       }
 
       private void GlobalTokensList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -186,11 +224,14 @@ namespace BetterCommentsPlus.Options
 
             if (targetListBox != null && settings != null)
             {
-               var targetItem = GetListBoxItemAtPosition(targetListBox, e.GetPosition(targetListBox));
-               var targetToken = targetItem?.DataContext as CommentToken;
-
-               int newIndex = targetToken != null ? targetTokens.IndexOf(targetToken) : targetTokens.Count - 1;
-
+               // 使用相同的算法计算放置位置
+               var mousePos = e.GetPosition(targetListBox);
+               int newIndex = GetInsertionIndex(targetListBox, mousePos);
+               
+               // 调整索引，因为拖拽项本身也占一个位置
+               if (newIndex > _draggedIndex)
+                  newIndex--;
+               
                if (_draggedIndex >= 0 && newIndex >= 0 && _draggedIndex != newIndex)
                {
                   targetTokens.Move(_draggedIndex, newIndex);
@@ -202,6 +243,9 @@ namespace BetterCommentsPlus.Options
             Settings.Instance.SyncCommentTokensToUnifiedConfig();
             Settings.Instance.OnConfigurationChanged();
          }
+
+         // 移除插入指示器
+         RemoveInsertionAdorner();
 
          if (_dragSourceItem != null)
          {
@@ -634,6 +678,92 @@ namespace BetterCommentsPlus.Options
 
       private void CommentToken_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
       {
+      }
+      
+      #region 插入指示器 Adorner
+
+      private void ShowInsertionAdorner(ListBox listBox, int index)
+      {
+         if (listBox == null) return;
+         
+         _adornerLayer = AdornerLayer.GetAdornerLayer(listBox);
+         if (_adornerLayer == null) return;
+         
+         // 移除旧的指示器
+         RemoveInsertionAdorner();
+         
+         // 计算插入位置的 Y 坐标（相对于 ListBox）
+         double y;
+         if (index <= 0)
+         {
+            y = 0;
+         }
+         else if (index >= listBox.Items.Count)
+         {
+            // 在最后位置
+            var lastContainer = listBox.ItemContainerGenerator.ContainerFromIndex(listBox.Items.Count - 1) as ListBoxItem;
+            if (lastContainer != null)
+            {
+               y = lastContainer.TranslatePoint(new Point(0, lastContainer.RenderSize.Height), listBox).Y;
+            }
+            else
+            {
+               y = listBox.RenderSize.Height;
+            }
+         }
+         else
+         {
+            var container = listBox.ItemContainerGenerator.ContainerFromIndex(index) as ListBoxItem;
+            if (container != null)
+            {
+               y = container.TranslatePoint(new Point(0, 0), listBox).Y;
+            }
+            else
+            {
+               y = index * 40; // 估算值
+            }
+         }
+         
+         // 在 ListBox 上创建 Adorner
+         _insertionAdorner = new InsertionAdorner(listBox, y, listBox.RenderSize.Width);
+         _adornerLayer.Add(_insertionAdorner);
+      }
+      
+      private void RemoveInsertionAdorner()
+      {
+         if (_insertionAdorner != null && _adornerLayer != null)
+         {
+            _adornerLayer.Remove(_insertionAdorner);
+            _insertionAdorner = null;
+         }
+      }
+      
+      #endregion
+   }
+   
+   /// <summary>
+   /// 插入位置指示器 Adorner（蓝色线条）
+   /// </summary>
+   public class InsertionAdorner : Adorner
+   {
+      private readonly double _y;
+      private readonly double _width;
+      private readonly Pen _pen;
+      
+      public InsertionAdorner(UIElement adornedElement, double y, double width)
+          : base(adornedElement)
+      {
+         _y = y;
+         _width = width;
+         _pen = new Pen(Brushes.Blue, 2);
+      }
+      
+      protected override void OnRender(DrawingContext drawingContext)
+      {
+         base.OnRender(drawingContext);
+         
+         // 绘制蓝色水平线
+         drawingContext.DrawLine(_pen, new Point(0, _y), new Point(_width, _y));
       }
    }
 
