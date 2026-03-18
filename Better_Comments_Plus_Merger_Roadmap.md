@@ -473,6 +473,12 @@ public class UnifiedConfig
   - [x] 6.6.1 修改 RequiredAndUniqueRule，允许 Global 和 Solution 有相同 Criteria ✅
   - [x] 6.6.2 修改 ValidateTokens，分别验证 Global 和 Solution 集合 ✅
   - [x] 6.6.3 确保 Solution Rules 优先级高于 Global Rules ✅
+  - [x] 6.6.4 修改 CommentViewDecorator，根据 Criteria 查找时优先 Solution Rules ✅
+- [x] 6.7 优化用户体验 ✅
+  - [x] 6.7.1 移除删除确认弹窗，直接删除 ✅
+  - [x] 6.7.2 恢复拖拽视觉优化（半透明 + 蓝色指示线）✅
+  - [x] 6.7.3 修复拖拽算法，支持任意位置拖拽（步进 1）✅
+  - [x] 6.7.4 优化 Adorner 渲染逻辑，使用绝对坐标 ✅
 
 **验证点**：
 - [x] 选中任意文本时，右键菜单显示两个菜单项：「Create/Edit Foreground Styles Rule」和「Create/Edit Background Styles Rule」
@@ -483,11 +489,14 @@ public class UnifiedConfig
 - [x] 可以选择 Global 或 Solution 级别
 - [x] 新建规则立即生效
 - [x] 编辑现有规则立即生效
-- [x] 可以删除规则
+- [x] 可以删除规则（无确认弹窗）
 - [x] 记住用户最后使用的设置（形状、模糊、透明度等）
 - [x] Global 和 Solution 中允许有相同的 Criteria
 - [x] Solution Rules 优先级高于 Global Rules
 - [x] 验证逻辑正确：各自集合内部唯一，但两个集合之间允许重复
+- [x] 拖拽支持任意位置（步进 1，不是 2）
+- [x] 拖拽时有视觉反馈（半透明 + 蓝色指示线）
+- [x] 蓝色指示线精确显示在目标位置
 
 **预计创建/修改的文件**：
 - Options/EditStyleRuleDialog.xaml（新建）✅
@@ -500,6 +509,8 @@ public class UnifiedConfig
 - VSPackage.cs（修改，注册命令）✅
 - Options/Infrastructure/RequiredAndUniqueRule.cs（修改，修复验证逻辑）✅
 - Options/OptionsPageBase.cs（修改，分别验证 Global 和 Solution）✅
+- CommentsViewCustomization/CommentViewDecorator.cs（修改，实现优先级逻辑）✅
+- Options/OptionsTokensPageControl.xaml.cs（修改，优化拖拽算法和视觉）✅
 
 **交互设计要点**（来自 Merger_Interaction_Discussion.md）：
 
@@ -765,6 +776,7 @@ internal sealed class CreateEditStyleRule : BaseCommand<CreateEditStyleRule>
 ### 6.3 性能验收
 - [x] 配置变更后的重新标记流畅 ✅
 - [x] 拖拽流畅，无明显卡顿 ✅
+- [x] 拖拽视觉优化：半透明效果 + 蓝色指示线 ✅
 - [ ] 打开大型文件（>10000 行）时无明显卡顿
 - [ ] 内存占用与旧版本相比增加不超过 20%
 
@@ -784,6 +796,6 @@ internal sealed class CreateEditStyleRule : BaseCommand<CreateEditStyleRule>
 
 ---
 
-*文档版本：3.2*
-*更新日期：2026-03-18*
-*上次更新：完成前景色启用/禁用功能，修复所有编译错误，实现完整的前景样式控制；修复 Global 和 Solution 规则优先级问题*
+*文档版本：3.3*
+*更新日期：2026-03-19*
+*上次更新：完成前景色启用/禁用功能；修复 Global 和 Solution 规则优先级问题（Solution > Global）；优化拖拽视觉体验（蓝色指示线 + 半透明效果）；移除删除确认弹窗*

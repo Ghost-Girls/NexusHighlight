@@ -64,8 +64,6 @@ namespace BetterCommentsPlus.Options
             cboShape.SelectionChanged += (_, _) => CreatePreview();
             cboBlur.SelectionChanged += (_, _) => CreatePreview();
             cboAlpha.SelectionChanged += (_, _) => CreatePreview();
-            lstFgColors.SelectionChanged += (_, _) => CreatePreview();
-            lstBgColors.SelectionChanged += (_, _) => CreatePreview();
             chkFgBold.Checked += (_, _) => CreatePreview();
             chkFgBold.Unchecked += (_, _) => CreatePreview();
             chkFgItalic.Checked += (_, _) => CreatePreview();
@@ -92,20 +90,20 @@ namespace BetterCommentsPlus.Options
             RuleToEdit.Foreground.HasUnderline = chkFgUnderline.IsChecked == true;
             RuleToEdit.Foreground.HasStrikethrough = chkFgStrikethrough.IsChecked == true;
 
-            if (lstFgColors.SelectedItem != null)
+            var fgColor = GetSelectedFgColor();
+            if (fgColor.HasValue)
             {
-                Color fgColor = (Color)(lstFgColors.SelectedItem as ListBoxItem).Tag;
-                RuleToEdit.Foreground.SetColor(fgColor);
+                RuleToEdit.Foreground.SetColor(fgColor.Value);
             }
 
             RuleToEdit.Background.IsActive = chkBgActive.IsChecked == true;
             RuleToEdit.Background.IsCaseSensitive = chkCaseSensitive.IsChecked == true;
             RuleToEdit.Background.AllowPartialMatch = chkPartialMatch.IsChecked == true;
 
-            if (lstBgColors.SelectedItem != null)
+            var bgColor = GetSelectedBgColor();
+            if (bgColor.HasValue)
             {
-                Color bgColor = (Color)(lstBgColors.SelectedItem as ListBoxItem).Tag;
-                RuleToEdit.Background.SetColor(bgColor);
+                RuleToEdit.Background.SetColor(bgColor.Value);
             }
 
             RuleToEdit.Background.Shape = GetShapeString(cboShape.SelectedIndex);
@@ -120,27 +118,154 @@ namespace BetterCommentsPlus.Options
         {
             string fgHexMatch = RuleToEdit.Foreground.GetColor()?.ToString() ?? "#000000";
             string bgHexMatch = RuleToEdit.Background.GetColor()?.ToString() ?? "#FF0000";
-
-            foreach (Color color in Helper.colors)
+            
+            // 使用 ColorPickerDialog 的颜色矩阵
+            var colors = new[]
             {
-                ListBoxItem fgItem = new()
-                {
-                    Foreground = new SolidColorBrush(color),
-                    Background = new SolidColorBrush(color),
-                    Tag = color,
-                    IsSelected = fgHexMatch == color.ToString()
-                };
-                lstFgColors.Items.Add(fgItem);
+                "#FEF2ED","#FDECEF","#F7E9F7","#F3EDF9","#ECEFF8","#EAF5FF","#E9F7FD","#E5F7F8","#E4F7F4","#ECF7EC","#F3F8EC","#F2FAE6","#FFFDEA","#FEFBEB","#FFF8EA","#F9F9F9",
+                "#FEDDD2","#FBCFD8","#EFCAF0","#E2D1F4","#D1D8F0","#CBE7FE","#C9ECFC","#C2EFF0","#C0F0E8","#D0F0D1","#E3F0D0","#E3F6C5","#FEFBCB","#FCF5CE","#FEEECC","#E6E8EA",
+                "#FDB7A5","#F6A0B5","#DD9BE0","#C4A7E9","#A7B3E1","#98CDFD","#95D8F8","#8ADDE2","#87E0D3","#A4E0A7","#C8E2A5","#CBED8E","#FDF398","#F9E89E","#FED998","#C6CACD",
+                "#FB9078","#F27396","#C96FD1","#A67FDD","#8090D3","#65B2FC","#62C3F5","#58CBD3","#54D1C1","#7DD182","#ADD37E","#B7E35B","#FCE865","#F6D86F","#FDC165","#A7ABB0",
+                "#FA664C","#ED487B","#B449C2","#885BD2","#5E6FC4","#3295FB","#30ACF1","#2CB8C5","#27C2B0","#5AC262","#93C55B","#A7DA2C","#FBDA32","#F3C641","#FDA633","#888D92",
+                "#F93920","#E91E63","#9E28B3","#6A3AC7","#3F51B5","#0064FA","#0095EE","#05A4B6","#00B3A1","#3BB346","#7BB63C","#9BD100","#FAC800","#F0B114","#FC8800","#6B7075",
+                "#D52515","#C51356","#871E9E","#572FB3","#3342A1","#0062D6","#007BCA","#038698","#009589","#30953B","#649830","#7EAE00","#D0AA00","#C88A0F","#D26700","#555B61",
+                "#B2140C","#A20B48","#71168A","#46259E","#28348C","#004FB3","#0063A7","#016979","#00776F","#25772F","#4E7926","#638B00","#A78B00","#A0660A","#A84A00","#41464C",
+                "#8E0805","#7E053A","#5C0F75","#361C8A","#1F2878","#003D8F","#004B83","#004D5B","#005955","#1B5924","#395B1B","#486800","#7D6A00","#784606","#7E3100","#2E3238",
+                "#6A0103","#5A012B","#490A61","#281475","#171D63","#002C6B","#00355F","#00323D","#003C3A","#113C18","#253D12","#2F4600","#534800","#502B03","#541D00","#1C1F23"
+            };
+            
+            Border selectedFgBorder = null;
+            Border selectedBgBorder = null;
 
-                ListBoxItem bgItem = new()
+            foreach (var colorHex in colors)
+            {
+                try
                 {
-                    Foreground = new SolidColorBrush(color),
-                    Background = new SolidColorBrush(color),
-                    Tag = color,
-                    IsSelected = bgHexMatch == color.ToString()
-                };
-                lstBgColors.Items.Add(bgItem);
+                    var color = (Color)ColorConverter.ConvertFromString(colorHex);
+                    
+                    // 创建前景色选择器
+                    var fgBorder = new Border
+                    {
+                        Width = 30,
+                        Height = 30,
+                        Margin = new Thickness(2),
+                        BorderBrush = Brushes.Gray,
+                        BorderThickness = new Thickness(1),
+                        CornerRadius = new CornerRadius(3),
+                        Cursor = System.Windows.Input.Cursors.Hand,
+                        Tag = colorHex,
+                        Background = new SolidColorBrush(color)
+                    };
+                    
+                    fgBorder.MouseLeftButtonDown += (s, e) =>
+                    {
+                        // 清除其他选中状态
+                        foreach (var child in FgColorsWrapPanel.Children)
+                        {
+                            if (child is Border b) b.BorderThickness = new Thickness(1);
+                        }
+                        
+                        // 设置当前选中
+                        fgBorder.BorderThickness = new Thickness(3);
+                        fgBorder.BorderBrush = Brushes.Black;
+                        
+                        // 更新预览
+                        if (!loading) CreatePreview();
+                    };
+                    
+                    FgColorsWrapPanel.Children.Add(fgBorder);
+                    
+                    // 检查是否匹配当前颜色
+                    if (color.ToString() == fgHexMatch)
+                    {
+                        selectedFgBorder = fgBorder;
+                    }
+                    
+                    // 创建背景色选择器
+                    var bgBorder = new Border
+                    {
+                        Width = 30,
+                        Height = 30,
+                        Margin = new Thickness(2),
+                        BorderBrush = Brushes.Gray,
+                        BorderThickness = new Thickness(1),
+                        CornerRadius = new CornerRadius(3),
+                        Cursor = System.Windows.Input.Cursors.Hand,
+                        Tag = colorHex,
+                        Background = new SolidColorBrush(color)
+                    };
+                    
+                    bgBorder.MouseLeftButtonDown += (s, e) =>
+                    {
+                        // 清除其他选中状态
+                        foreach (var child in BgColorsWrapPanel.Children)
+                        {
+                            if (child is Border b) b.BorderThickness = new Thickness(1);
+                        }
+                        
+                        // 设置当前选中
+                        bgBorder.BorderThickness = new Thickness(3);
+                        bgBorder.BorderBrush = Brushes.Black;
+                        
+                        // 更新预览
+                        if (!loading) CreatePreview();
+                    };
+                    
+                    BgColorsWrapPanel.Children.Add(bgBorder);
+                    
+                    // 检查是否匹配当前颜色
+                    if (color.ToString() == bgHexMatch)
+                    {
+                        selectedBgBorder = bgBorder;
+                    }
+                }
+                catch { }
             }
+            
+            // 设置初始选中状态
+            if (selectedFgBorder != null)
+            {
+                selectedFgBorder.BorderThickness = new Thickness(3);
+                selectedFgBorder.BorderBrush = Brushes.Black;
+            }
+            
+            if (selectedBgBorder != null)
+            {
+                selectedBgBorder.BorderThickness = new Thickness(3);
+                selectedBgBorder.BorderBrush = Brushes.Black;
+            }
+        }
+        
+        private Color? GetSelectedFgColor()
+        {
+            foreach (var child in FgColorsWrapPanel.Children)
+            {
+                if (child is Border border && border.BorderThickness == new Thickness(3) && border.Tag is string hex)
+                {
+                    try
+                    {
+                        return (Color)ColorConverter.ConvertFromString(hex);
+                    }
+                    catch { }
+                }
+            }
+            return null;
+        }
+        
+        private Color? GetSelectedBgColor()
+        {
+            foreach (var child in BgColorsWrapPanel.Children)
+            {
+                if (child is Border border && border.BorderThickness == new Thickness(3) && border.Tag is string hex)
+                {
+                    try
+                    {
+                        return (Color)ColorConverter.ConvertFromString(hex);
+                    }
+                    catch { }
+                }
+            }
+            return null;
         }
 
         private int GetShapeIndex(string shape)
@@ -219,12 +344,12 @@ namespace BetterCommentsPlus.Options
                 if (RuleToEdit == null)
                     return;
 
-                Color fgColor = lstFgColors.SelectedItem != null ? (Color)(lstFgColors.SelectedItem as ListBoxItem).Tag : RuleToEdit.Foreground.GetColor() ?? Colors.Black;
-                Color bgColor = lstBgColors.SelectedItem != null ? (Color)(lstBgColors.SelectedItem as ListBoxItem).Tag : RuleToEdit.Background.GetColor() ?? Colors.Transparent;
+                Color fgColor = GetSelectedFgColor() ?? RuleToEdit.Foreground.GetColor() ?? Colors.Black;
+                Color bgColor = GetSelectedBgColor() ?? RuleToEdit.Background.GetColor() ?? Colors.Transparent;
 
                 string shape = GetShapeString(cboShape.SelectedIndex);
                 string blur = GetBlurString(cboBlur.SelectedIndex);
-                string alpha = GetAlphaString(cboAlpha.SelectedIndex);
+                string alpha = GetAlphaString(cboBlur.SelectedIndex);
 
                 t.Text = string.IsNullOrEmpty(txtCriteria.Text) ? "Sample Text" : txtCriteria.Text;
 
