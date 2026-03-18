@@ -235,9 +235,9 @@ public class UnifiedConfig
 
 ### 3.3 阶段四：实现完整的前景样式配置 ✅
 
-**目标**：为每个注释类型配置完整的前景样式（粗体、斜体、下划线、删除线）
+**目标**：为每个注释类型配置完整的前景样式（粗体、斜体、下划线、删除线），并支持启用/禁用前景色
 
-**状态**：✅ **已完成** (2026-03-17)
+**状态**：✅ **已完成** (2026-03-18)
 
 #### 任务清单：
 - [x] 4.1 扩展 CommentToken 类，添加 IsBold、IsItalic、HasUnderline、HasStrikethrough 属性
@@ -246,6 +246,10 @@ public class UnifiedConfig
 - [x] 4.4 更新 Settings.cs，保存和加载新的样式属性
 - [x] 4.5 优化 UI 布局，添加 ToolTip 提示
 - [x] 4.6 添加左侧拖拽手柄（☰），分离拖拽区域和控件交互
+- [x] 4.7 添加前景色启用/禁用 CheckBox（显示为"A"）
+- [x] 4.8 扩展 CommentToken 类，添加 IsForegroundActive 属性
+- [x] 4.9 修改 CommentViewDecorator，实现前景色禁用时恢复默认注释颜色
+- [x] 4.10 修复类型转换错误（Brush → Color）
 
 **验证点**：
 - [x] 可以为每个注释类型独立设置粗体
@@ -256,12 +260,20 @@ public class UnifiedConfig
 - [x] 所有样式属性能够正确保存和加载
 - [x] 拖拽手柄和其他控件不冲突
 - [x] 样式按钮有清晰的 ToolTip 提示
+- [x] 可以启用/禁用前景色（通过"A"复选框）
+- [x] 禁用前景色时，文字恢复为 VS 默认注释颜色
+- [x] 禁用前景色时，粗体/斜体/下划线/删除线效果也被禁用
+- [x] 启用前景色时，正常显示自定义颜色
 
 **已创建/修改的文件**：
 - Options/Infrastructure/CommentToken.cs ✅
 - Options/OptionsTokensPageControl.xaml ✅
 - CommentsViewCustomization/CommentViewDecorator.cs ✅
 - Options/Settings.cs ✅
+- Options/EditStyleRuleDialog.xaml ✅（添加前景色启用 CheckBox）
+- Options/EditStyleRuleDialog.xaml.cs ✅
+- Commands/CreateEditStyleRule.cs ✅（支持 IsForegroundActive）
+- Options/OptionsTokensPageControl.xaml.cs ✅（导入导出支持 IsForegroundActive）
 
 #### 3.3.1 修复：Add 按钮和取消功能问题 ✅
 **状态**：✅ **已完成** (2026-03-17)
@@ -763,6 +775,6 @@ internal sealed class CreateEditStyleRule : BaseCommand<CreateEditStyleRule>
 
 ---
 
-*文档版本：3.0*
+*文档版本：3.1*
 *更新日期：2026-03-18*
-*上次更新：完成阶段六（右键菜单功能）所有开发，编译错误已修复，所有功能已实现*
+*上次更新：完成前景色启用/禁用功能，修复所有编译错误，实现完整的前景样式控制*
