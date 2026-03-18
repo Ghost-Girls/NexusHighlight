@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -30,7 +30,8 @@ namespace BetterCommentsPlus.Options
             return new ValidationResult(false, "Value is required.");
          }
 
-         if (Settings.Instance.CommentTokens.Count(t => t.CurrentValue.Equals(str)) > 1)
+         if (Settings.Instance.GlobalCommentTokens.Count(t => t.CurrentValue.Equals(str)) + 
+             Settings.Instance.SolutionCommentTokens.Count(t => t.CurrentValue.Equals(str)) > 1)
          {
             return new ValidationResult(false, "Value must be unique.");
          }

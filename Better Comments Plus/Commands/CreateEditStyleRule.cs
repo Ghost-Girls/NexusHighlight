@@ -117,19 +117,23 @@ namespace BetterCommentsPlus.Commands
                 {
                     if (isNew)
                     {
-                        settings.StyleRules.Add(found);
+                        if (editor.SaveToGlobal)
+                        {
+                            var token = ConvertStyleRuleToCommentToken(found, isGlobal: true);
+                            settings.GlobalCommentTokens.Add(token);
+                        }
+                        if (editor.SaveToSolution)
+                        {
+                            var token = ConvertStyleRuleToCommentToken(found, isGlobal: false);
+                            settings.SolutionCommentTokens.Add(token);
+                        }
                     }
                     else
                     {
-                        var existingRule = settings.StyleRules.FirstOrDefault(r => r.Id == found.Id);
-                        if (existingRule != null)
-                        {
-                            int index = settings.StyleRules.IndexOf(existingRule);
-                            settings.StyleRules[index] = found;
-                        }
+                        UpdateRuleInCollections(found, editor.SaveToGlobal, editor.SaveToSolution, settings);
                     }
 
-                    settings.SyncStyleRulesToUnifiedConfig();
+                    settings.SyncCommentTokensToUnifiedConfig();
                     SettingsStore.SaveSettings(settings);
                     settings.OnConfigurationChanged();
                 }
@@ -137,20 +141,114 @@ namespace BetterCommentsPlus.Commands
                 {
                     if (editor.delete)
                     {
-                        var ruleToRemove = settings.StyleRules.FirstOrDefault(r => r.Id == found.Id);
-                        if (ruleToRemove != null)
-                        {
-                            settings.StyleRules.Remove(ruleToRemove);
-                            settings.SyncStyleRulesToUnifiedConfig();
-                            SettingsStore.SaveSettings(settings);
-                            settings.OnConfigurationChanged();
-                        }
+                        RemoveRuleFromCollections(found, settings);
+                        settings.SyncCommentTokensToUnifiedConfig();
+                        SettingsStore.SaveSettings(settings);
+                        settings.OnConfigurationChanged();
                     }
                 }
             }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private static CommentToken ConvertStyleRuleToCommentToken(StyleRule rule, bool isGlobal)
+        {
+            var token = new CommentToken(
+                type: CommentsTagging.CommentType.Important,
+                defaultValue: rule.Criteria,
+                value: rule.Criteria,
+                colorHex: rule.Foreground.ColorHex ?? "#FFFF0000")
+            {
+                IsBold = rule.Foreground.IsBold,
+                IsItalic = rule.Foreground.IsItalic,
+                HasUnderline = rule.Foreground.HasUnderline,
+                HasStrikethrough = rule.Foreground.HasStrikethrough,
+                IsForegroundActive = rule.Foreground.IsActive,
+                IsDynamic = true,
+                RuleId = rule.Id,
+                BackgroundStyle = new BackgroundStyle
+                {
+                    IsActive = rule.Background.IsActive,
+                    ColorHex = rule.Background.ColorHex,
+                    Shape = rule.Background.Shape ?? "Tag",
+                    Blur = rule.Background.Blur ?? "None",
+                    Alpha = rule.Background.Alpha ?? "1/10",
+                    IsCaseSensitive = rule.Background.IsCaseSensitive,
+                    AllowPartialMatch = rule.Background.AllowPartialMatch
+                }
+            };
+            return token;
+        }
+
+        private static void UpdateRuleInCollections(StyleRule rule, bool saveToGlobal, bool saveToSolution, Settings settings)
+        {
+            var globalToken = settings.GlobalCommentTokens.FirstOrDefault(t => t.RuleId == rule.Id);
+            var solutionToken = settings.SolutionCommentTokens.FirstOrDefault(t => t.RuleId == rule.Id);
+
+            if (saveToGlobal && globalToken == null)
+            {
+                settings.GlobalCommentTokens.Add(ConvertStyleRuleToCommentToken(rule, isGlobal: true));
+            }
+            else if (!saveToGlobal && globalToken != null)
+            {
+                settings.GlobalCommentTokens.Remove(globalToken);
+            }
+            else if (saveToGlobal && globalToken != null)
+            {
+                UpdateCommentTokenFromStyleRule(globalToken, rule);
+            }
+
+            if (saveToSolution && solutionToken == null)
+            {
+                settings.SolutionCommentTokens.Add(ConvertStyleRuleToCommentToken(rule, isGlobal: false));
+            }
+            else if (!saveToSolution && solutionToken != null)
+            {
+                settings.SolutionCommentTokens.Remove(solutionToken);
+            }
+            else if (saveToSolution && solutionToken != null)
+            {
+                UpdateCommentTokenFromStyleRule(solutionToken, rule);
+            }
+        }
+
+        private static void UpdateCommentTokenFromStyleRule(CommentToken token, StyleRule rule)
+        {
+            token.CurrentValue = rule.Criteria;
+            token.ColorHex = rule.Foreground.ColorHex;
+            token.IsBold = rule.Foreground.IsBold;
+            token.IsItalic = rule.Foreground.IsItalic;
+            token.HasUnderline = rule.Foreground.HasUnderline;
+            token.HasStrikethrough = rule.Foreground.HasStrikethrough;
+            token.IsForegroundActive = rule.Foreground.IsActive;
+            
+            if (token.BackgroundStyle != null)
+            {
+                token.BackgroundStyle.IsActive = rule.Background.IsActive;
+                token.BackgroundStyle.ColorHex = rule.Background.ColorHex;
+                token.BackgroundStyle.Shape = rule.Background.Shape;
+                token.BackgroundStyle.Blur = rule.Background.Blur;
+                token.BackgroundStyle.Alpha = rule.Background.Alpha;
+                token.BackgroundStyle.IsCaseSensitive = rule.Background.IsCaseSensitive;
+                token.BackgroundStyle.AllowPartialMatch = rule.Background.AllowPartialMatch;
+            }
+        }
+
+        private static void RemoveRuleFromCollections(StyleRule rule, Settings settings)
+        {
+            var globalToken = settings.GlobalCommentTokens.FirstOrDefault(t => t.RuleId == rule.Id);
+            if (globalToken != null)
+            {
+                settings.GlobalCommentTokens.Remove(globalToken);
+            }
+
+            var solutionToken = settings.SolutionCommentTokens.FirstOrDefault(t => t.RuleId == rule.Id);
+            if (solutionToken != null)
+            {
+                settings.SolutionCommentTokens.Remove(solutionToken);
             }
         }
     }

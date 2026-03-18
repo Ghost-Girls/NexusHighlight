@@ -7,7 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     Width="850"
-    d:DataContext="{d:DesignInstance {x:Type local:Settings}}"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -87,6 +86,20 @@
                             Height="24"
                             Margin="5,0,5,0"
                             Background="LightGray" />
+
+                        <CheckBox
+                            Width="36"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Padding="0"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsForegroundActive, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="启用前景色">
+                            <TextBlock
+                                FontSize="12"
+                                Text="A" />
+                        </CheckBox>
 
                         <Border
                             x:Name="ColorPreviewBorder"
@@ -276,30 +289,15 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition
-                Width="Auto"
-                MinWidth="700"
-                MaxWidth="1000" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
 
         <StackPanel
             Grid.Row="0"
-            Grid.Column="0"
             Margin="0,0,0,5"
             Orientation="Horizontal">
-            <Button
-                x:Name="AddButton"
-                Width="70"
-                Height="24"
-                Margin="0,0,5,0"
-                Click="AddButton_Click"
-                Content="Add" />
             <CheckBox
                 Width="120"
                 Height="24"
-                Margin="5,0,0,0"
+                Margin="0,0,0,0"
                 Padding="5,0"
                 VerticalContentAlignment="Center"
                 IsChecked="{Binding HighlightCriteriaItself, UpdateSourceTrigger=PropertyChanged}"
@@ -307,56 +305,194 @@
                 ToolTip="启用后，匹配的 Criteria 文本本身也会应用样式（如 &quot;#IMPORTANT&quot;）" />
         </StackPanel>
 
-        <Grid Grid.Row="1" Grid.Column="0">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <ListBox
-                    x:Name="TokensList"
-                    BorderThickness="0"
-                    ItemTemplate="{StaticResource TokensListDataTemplate}"
-                    ItemsSource="{Binding CommentTokens, Mode=OneWay}"
-                    MouseMove="TokensList_MouseMove"
-                    PreviewMouseLeftButtonUp="TokensList_PreviewMouseLeftButtonUp" />
-            </ScrollViewer>
+        <TabControl Grid.Row="1" Margin="0">
+            <TabItem Header="Global Rules">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-            <Rectangle
-                x:Name="DropIndicator"
-                Height="2"
-                Margin="0,-1,0,0"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Top"
-                Fill="#FF007ACC"
-                Visibility="Collapsed" />
-        </Grid>
+                    <TextBlock
+                        Grid.Row="0"
+                        Margin="5"
+                        FontStyle="Italic"
+                        Text="这些规则适用于所有项目。" />
 
-        <StackPanel
-            Grid.Row="0"
-            Grid.RowSpan="2"
-            Grid.Column="1"
-            Orientation="Vertical">
-            <Button
-                Width="94"
-                Height="24"
-                Margin="5"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Click="MoveUpButton_Click"
-                Content="↑ 上移" />
-            <Button
-                Width="94"
-                Height="24"
-                Margin="5"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Click="MoveDownButton_Click"
-                Content="↓ 下移" />
-            <Button
-                Width="94"
-                Height="24"
-                Margin="5"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Command="{Binding ResetTokens}"
-                Content="_Reset" />
-        </StackPanel>
+                    <StackPanel
+                        Grid.Row="0"
+                        Margin="5"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                        <Button
+                            x:Name="AddGlobalButton"
+                            Width="90"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Click="AddGlobalButton_Click"
+                            Content="Add Global" />
+                        <Button
+                            x:Name="ExportGlobalButton"
+                            Width="100"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Click="ExportGlobalButton_Click"
+                            Content="Export Global" />
+                        <Button
+                            x:Name="ImportGlobalButton"
+                            Width="100"
+                            Height="24"
+                            Click="ImportGlobalButton_Click"
+                            Content="Import Global" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" Margin="0,5,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ListBox
+                                x:Name="GlobalTokensList"
+                                BorderThickness="0"
+                                ItemTemplate="{StaticResource TokensListDataTemplate}"
+                                ItemsSource="{Binding GlobalCommentTokens, Mode=OneWay}"
+                                MouseMove="GlobalTokensList_MouseMove"
+                                PreviewMouseLeftButtonUp="GlobalTokensList_PreviewMouseLeftButtonUp" />
+                        </ScrollViewer>
+                    </Grid>
+
+                    <StackPanel
+                        Grid.Row="2"
+                        Margin="5"
+                        HorizontalAlignment="Right"
+                        Orientation="Vertical">
+                        <Button
+                            Width="94"
+                            Height="24"
+                            Margin="5"
+                            HorizontalAlignment="Right"
+                            Click="MoveUpGlobalButton_Click"
+                            Content="↑ 上移" />
+                        <Button
+                            Width="94"
+                            Height="24"
+                            Margin="5"
+                            HorizontalAlignment="Right"
+                            Click="MoveDownGlobalButton_Click"
+                            Content="↓ 下移" />
+                        <Button
+                            Width="94"
+                            Height="24"
+                            Margin="5"
+                            HorizontalAlignment="Right"
+                            Command="{Binding ResetTokens}"
+                            Content="_Reset" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Solution Rules">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Margin="5"
+                        FontStyle="Italic"
+                        Text="这些规则仅适用于当前解决方案。" />
+
+                    <StackPanel
+                        Grid.Row="0"
+                        Margin="5"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                        <Button
+                            x:Name="CopyAllFromGlobalButton"
+                            Width="120"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Click="CopyAllFromGlobalButton_Click"
+                            Content="Copy from Global" />
+                        <Button
+                            x:Name="ImportFromGlobalButton"
+                            Width="130"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Click="ImportFromGlobalButton_Click"
+                            Content="Import from Global" />
+                        <Button
+                            x:Name="ClearSolutionButton"
+                            Width="80"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Click="ClearSolutionButton_Click"
+                            Content="Clear" />
+                        <Button
+                            x:Name="ExportSolutionButton"
+                            Width="80"
+                            Height="24"
+                            Margin="0,0,5,0"
+                            Click="ExportSolutionButton_Click"
+                            Content="Export" />
+                        <Button
+                            x:Name="ImportSolutionButton"
+                            Width="80"
+                            Height="24"
+                            Click="ImportSolutionButton_Click"
+                            Content="Import" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" Margin="0,5,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ListBox
+                                x:Name="SolutionTokensList"
+                                BorderThickness="0"
+                                ItemTemplate="{StaticResource TokensListDataTemplate}"
+                                ItemsSource="{Binding SolutionCommentTokens, Mode=OneWay}"
+                                MouseMove="SolutionTokensList_MouseMove"
+                                PreviewMouseLeftButtonUp="SolutionTokensList_PreviewMouseLeftButtonUp" />
+                        </ScrollViewer>
+                    </Grid>
+
+                    <StackPanel
+                        Grid.Row="2"
+                        Margin="5"
+                        HorizontalAlignment="Right"
+                        Orientation="Vertical">
+                        <Button
+                            Width="94"
+                            Height="24"
+                            Margin="5"
+                            HorizontalAlignment="Right"
+                            Click="MoveUpSolutionButton_Click"
+                            Content="↑ 上移" />
+                        <Button
+                            Width="94"
+                            Height="24"
+                            Margin="5"
+                            HorizontalAlignment="Right"
+                            Click="MoveDownSolutionButton_Click"
+                            Content="↓ 下移" />
+                        <Button
+                            Width="94"
+                            Height="24"
+                            Margin="5"
+                            HorizontalAlignment="Right"
+                            Command="{Binding ResetSolutionTokens}"
+                            Content="_Clear" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

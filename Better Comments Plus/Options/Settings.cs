@@ -2,6 +2,7 @@ using BetterCommentsPlus.CommentsTagging;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.IO;
 
 namespace BetterCommentsPlus.Options
 {
@@ -20,8 +21,9 @@ namespace BetterCommentsPlus.Options
         
         public bool IsDragging { get; set; }
         private bool _isSyncing;
+        private string solutionSettingsPath = null;
 
-        private readonly ObservableCollection<CommentToken> commentTokens
+        private readonly ObservableCollection<CommentToken> globalCommentTokens
             = new ObservableCollection<CommentToken>
             {
                 new CommentToken(type: CommentType.Important,       defaultValue: "#IMPORTANT",     value: "#IMPORTANT",   colorHex: "#FFFF0000"),
@@ -29,6 +31,9 @@ namespace BetterCommentsPlus.Options
                 new CommentToken(type: CommentType.Question,        defaultValue: "#QUESTION",      value: "#QUESTION",    colorHex: "#FFFFFF00"),
                 new CommentToken(type: CommentType.Task,            defaultValue: "#TASK",          value: "#TASK",        colorHex: "#FFEB690A"),
             };
+
+        private readonly ObservableCollection<CommentToken> solutionCommentTokens
+            = new ObservableCollection<CommentToken>();
 
         private readonly ObservableCollection<StyleRule> styleRules
             = new ObservableCollection<StyleRule>();
@@ -69,12 +74,24 @@ namespace BetterCommentsPlus.Options
         private Settings()
         {
             ResetTokens = new RelayCommand(SetTokensToDefault);
+            ResetSolutionTokens = new RelayCommand(ClearSolutionTokens);
             unifiedConfig = UnifiedConfig.CreateDefault();
             SettingsStore.LoadSettings(this);
+            
+            InitializeTokenCollection(globalCommentTokens);
+            InitializeTokenCollection(solutionCommentTokens);
+            
             SyncCommentTokensToUnifiedConfig();
             SyncCommentTokensToStyleRules();
             
-            foreach (var token in commentTokens)
+            globalCommentTokens.CollectionChanged += CommentTokens_CollectionChanged;
+            solutionCommentTokens.CollectionChanged += CommentTokens_CollectionChanged;
+            styleRules.CollectionChanged += StyleRules_CollectionChanged;
+        }
+
+        private void InitializeTokenCollection(ObservableCollection<CommentToken> tokens)
+        {
+            foreach (var token in tokens)
             {
                 if (token.BackgroundStyle == null)
                 {
@@ -92,9 +109,6 @@ namespace BetterCommentsPlus.Options
                 
                 token.PropertyChanged += CommentToken_PropertyChanged;
             }
-            
-            commentTokens.CollectionChanged += CommentTokens_CollectionChanged;
-            styleRules.CollectionChanged += StyleRules_CollectionChanged;
         }
 
         #endregion Singleton
@@ -158,10 +172,10 @@ namespace BetterCommentsPlus.Options
         }
 
         [Setting]
-        public string CommentTokensAsString
+        public string GlobalCommentTokensAsString
         {
-            get { return ConvertCommentTokensToString(); }
-            set { UpdateCommentTokens(value); }
+            get { return ConvertCommentTokensToString(globalCommentTokens); }
+            set { UpdateCommentTokens(value, globalCommentTokens); }
         }
 
         #endregion Settings Properties
@@ -169,15 +183,26 @@ namespace BetterCommentsPlus.Options
         #region Non-Settings Properties & Commands
 
         public RelayCommand ResetTokens { get; }
+        public RelayCommand ResetSolutionTokens { get; }
 
-        public ObservableCollection<CommentToken> CommentTokens
+        public ObservableCollection<CommentToken> GlobalCommentTokens
         {
-            get { return commentTokens; }
+            get { return globalCommentTokens; }
+        }
+
+        public ObservableCollection<CommentToken> SolutionCommentTokens
+        {
+            get { return solutionCommentTokens; }
         }
 
         public ObservableCollection<StyleRule> StyleRules
         {
             get { return styleRules; }
+        }
+
+        public System.Collections.Generic.IEnumerable<CommentToken> CommentTokens
+        {
+            get { return solutionCommentTokens.Concat(globalCommentTokens); }
         }
 
         public UnifiedConfig UnifiedConfig
@@ -197,13 +222,73 @@ namespace BetterCommentsPlus.Options
 
         public CommentToken GetToken(CommentType type)
         {
-            return commentTokens.FirstOrDefault(t => t.Type == type);
+            return globalCommentTokens.FirstOrDefault(t => t.Type == type);
         }
 
         public string GetTokenValue(CommentType type)
         {
             var token = GetToken(type);
             return token?.CurrentValue ?? "";
+        }
+
+        public void ClearSolutionTokens()
+        {
+            _isSyncing = true;
+            try
+            {
+                solutionCommentTokens.Clear();
+                SyncCommentTokensToUnifiedConfig();
+                SyncCommentTokensToStyleRules();
+                OnConfigurationChanged();
+            }
+            finally
+            {
+                _isSyncing = false;
+            }
+        }
+
+        public void CopyAllFromGlobalToSolution()
+        {
+            _isSyncing = true;
+            try
+            {
+                foreach (var globalToken in globalCommentTokens)
+                {
+                    var newToken = new CommentToken(
+                        type: globalToken.Type,
+                        defaultValue: globalToken.DefaultValue,
+                        value: globalToken.CurrentValue,
+                        colorHex: globalToken.ColorHex)
+                    {
+                        IsBold = globalToken.IsBold,
+                        IsItalic = globalToken.IsItalic,
+                        HasUnderline = globalToken.HasUnderline,
+                        HasStrikethrough = globalToken.HasStrikethrough,
+                        IsForegroundActive = globalToken.IsForegroundActive,
+                        IsDynamic = true,
+                        RuleId = Guid.NewGuid().ToString(),
+                        BackgroundStyle = new BackgroundStyle
+                        {
+                            IsActive = globalToken.BackgroundStyle?.IsActive ?? false,
+                            ColorHex = globalToken.BackgroundStyle?.ColorHex,
+                            Shape = globalToken.BackgroundStyle?.Shape ?? "Tag",
+                            Blur = globalToken.BackgroundStyle?.Blur ?? "None",
+                            Alpha = globalToken.BackgroundStyle?.Alpha ?? "1/10",
+                            IsCaseSensitive = globalToken.BackgroundStyle?.IsCaseSensitive ?? true,
+                            AllowPartialMatch = globalToken.BackgroundStyle?.AllowPartialMatch ?? false
+                        }
+                    };
+                    newToken.PropertyChanged += CommentToken_PropertyChanged;
+                    solutionCommentTokens.Add(newToken);
+                }
+                SyncCommentTokensToUnifiedConfig();
+                SyncCommentTokensToStyleRules();
+                OnConfigurationChanged();
+            }
+            finally
+            {
+                _isSyncing = false;
+            }
         }
 
         #endregion Public Methods
@@ -215,7 +300,7 @@ namespace BetterCommentsPlus.Options
             _isSyncing = true;
             try
             {
-                commentTokens.Clear();
+                globalCommentTokens.Clear();
 
                 var defaultTokens = new[]
                 {
@@ -250,7 +335,7 @@ namespace BetterCommentsPlus.Options
                     };
 
                     newToken.PropertyChanged += CommentToken_PropertyChanged;
-                    commentTokens.Add(newToken);
+                    globalCommentTokens.Add(newToken);
                 }
 
                 SyncCommentTokensToUnifiedConfig();
@@ -263,7 +348,7 @@ namespace BetterCommentsPlus.Options
             }
         }
 
-        private void UpdateCommentTokens(string tokensString)
+        private void UpdateCommentTokens(string tokensString, ObservableCollection<CommentToken> targetCollection)
         {
             if (tokensString.IsNullOrWhiteSpace())
                 return;
@@ -277,7 +362,7 @@ namespace BetterCommentsPlus.Options
                 {
                     if (pair.Length < 2) continue;
                     
-                    var token = commentTokens.FirstOrDefault(t => t.IsOfType(pair[0]));
+                    var token = targetCollection.FirstOrDefault(t => t.IsOfType(pair[0]));
 
                     if (token != null)
                     {
@@ -292,10 +377,12 @@ namespace BetterCommentsPlus.Options
                             token.HasUnderline = hasUnderline;
                         if (pair.Length > 6 && bool.TryParse(pair[6], out bool hasStrikethrough))
                             token.HasStrikethrough = hasStrikethrough;
+                        if (pair.Length > 7 && bool.TryParse(pair[7], out bool isForegroundActive))
+                            token.IsForegroundActive = isForegroundActive;
                     }
                 }
                 
-                EnsureDefaultTokensExist();
+                EnsureDefaultTokensExist(targetCollection);
             }
             finally
             {
@@ -303,8 +390,10 @@ namespace BetterCommentsPlus.Options
             }
         }
         
-        private void EnsureDefaultTokensExist()
+        private void EnsureDefaultTokensExist(ObservableCollection<CommentToken> targetCollection)
         {
+            if (targetCollection != globalCommentTokens) return;
+            
             var defaultTypes = new[] 
             { 
                 CommentType.Important, 
@@ -315,7 +404,7 @@ namespace BetterCommentsPlus.Options
             
             foreach (var type in defaultTypes)
             {
-                if (!commentTokens.Any(t => t.Type == type))
+                if (!targetCollection.Any(t => t.Type == type))
                 {
                     CommentToken newToken = null;
                     switch (type)
@@ -344,46 +433,49 @@ namespace BetterCommentsPlus.Options
                     if (newToken != null)
                     {
                         if (newToken.BackgroundStyle == null)
-                    {
-                        newToken.BackgroundStyle = new BackgroundStyle();
-                    }
-                    
-                    if (string.IsNullOrEmpty(newToken.BackgroundStyle.Shape))
-                        newToken.BackgroundStyle.Shape = "Tag";
-                    if (string.IsNullOrEmpty(newToken.BackgroundStyle.Blur))
-                        newToken.BackgroundStyle.Blur = "None";
-                    if (string.IsNullOrEmpty(newToken.BackgroundStyle.Alpha))
-                        newToken.BackgroundStyle.Alpha = "1/10";
-                    if (string.IsNullOrEmpty(newToken.BackgroundStyle.ColorHex))
-                        newToken.BackgroundStyle.ColorHex = newToken.ColorHex;
-                    
-                    newToken.PropertyChanged += CommentToken_PropertyChanged;
-                    commentTokens.Add(newToken);
+                        {
+                            newToken.BackgroundStyle = new BackgroundStyle();
+                        }
+                        
+                        if (string.IsNullOrEmpty(newToken.BackgroundStyle.Shape))
+                            newToken.BackgroundStyle.Shape = "Tag";
+                        if (string.IsNullOrEmpty(newToken.BackgroundStyle.Blur))
+                            newToken.BackgroundStyle.Blur = "None";
+                        if (string.IsNullOrEmpty(newToken.BackgroundStyle.Alpha))
+                            newToken.BackgroundStyle.Alpha = "1/10";
+                        if (string.IsNullOrEmpty(newToken.BackgroundStyle.ColorHex))
+                            newToken.BackgroundStyle.ColorHex = newToken.ColorHex;
+                        
+                        newToken.PropertyChanged += CommentToken_PropertyChanged;
+                        targetCollection.Add(newToken);
                     }
                 }
             }
         }
 
-        private string ConvertCommentTokensToString()
+        private string ConvertCommentTokensToString(ObservableCollection<CommentToken> tokens)
         {
-            var r = string.Join("|", commentTokens.Select(t => t.ToString()));
+            var r = string.Join("|", tokens.Select(t => t.ToString()));
             return r;
         }
 
         public void SyncCommentTokensToUnifiedConfig()
         {
-            foreach (var token in commentTokens)
+            unifiedConfig.Comments.Clear();
+            int order = 1;
+            
+            foreach (var token in solutionCommentTokens.Concat(globalCommentTokens))
             {
                 var rule = unifiedConfig.Comments.FirstOrDefault(r => r.Criteria == token.CurrentValue);
                 if (rule == null)
                 {
                     rule = new StyleRule
                     {
-                        Order = unifiedConfig.Comments.Count + 1,
+                        Order = order++,
                         IsActive = true,
-                        IsPredefined = true,
+                        IsPredefined = !token.IsDynamic,
                         Criteria = token.CurrentValue,
-                        Id = $"comment-{token.Type.ToString().ToLower()}"
+                        Id = token.RuleId
                     };
                     unifiedConfig.Comments.Add(rule);
                 }
@@ -395,6 +487,7 @@ namespace BetterCommentsPlus.Options
                     rule.Foreground.IsItalic = token.IsItalic;
                     rule.Foreground.HasUnderline = token.HasUnderline;
                     rule.Foreground.HasStrikethrough = token.HasStrikethrough;
+                    rule.Foreground.IsActive = token.IsForegroundActive;
                 }
 
                 if (rule.Background != null && token.BackgroundStyle != null)
@@ -412,32 +505,6 @@ namespace BetterCommentsPlus.Options
 
         public void SyncUnifiedConfigToCommentTokens()
         {
-            foreach (var rule in unifiedConfig.Comments)
-            {
-                var token = commentTokens.FirstOrDefault(t => t.CurrentValue == rule.Criteria);
-                if (token != null)
-                {
-                    if (rule.Foreground != null)
-                    {
-                        token.ColorHex = rule.Foreground.ColorHex;
-                        token.IsBold = rule.Foreground.IsBold;
-                        token.IsItalic = rule.Foreground.IsItalic;
-                        token.HasUnderline = rule.Foreground.HasUnderline;
-                        token.HasStrikethrough = rule.Foreground.HasStrikethrough;
-                    }
-
-                    if (rule.Background != null && token.BackgroundStyle != null)
-                    {
-                        token.BackgroundStyle.IsActive = rule.Background.IsActive;
-                        token.BackgroundStyle.ColorHex = rule.Background.ColorHex;
-                        token.BackgroundStyle.Shape = rule.Background.Shape;
-                        token.BackgroundStyle.Blur = rule.Background.Blur;
-                        token.BackgroundStyle.Alpha = rule.Background.Alpha;
-                        token.BackgroundStyle.IsCaseSensitive = rule.Background.IsCaseSensitive;
-                        token.BackgroundStyle.AllowPartialMatch = rule.Background.AllowPartialMatch;
-                    }
-                }
-            }
         }
 
         private void CommentToken_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -528,7 +595,7 @@ namespace BetterCommentsPlus.Options
         {
             styleRules.Clear();
             int order = 1;
-            foreach (var token in commentTokens)
+            foreach (var token in solutionCommentTokens.Concat(globalCommentTokens))
             {
                 var rule = ConvertCommentTokenToStyleRule(token, order);
                 styleRules.Add(rule);
@@ -538,15 +605,6 @@ namespace BetterCommentsPlus.Options
 
         public void SyncStyleRulesToCommentTokens()
         {
-            commentTokens.Clear();
-            foreach (var rule in styleRules)
-            {
-                var token = ConvertStyleRuleToCommentToken(rule);
-                if (token != null)
-                {
-                    commentTokens.Add(token);
-                }
-            }
         }
 
         public void SyncStyleRulesToUnifiedConfig()
@@ -574,6 +632,7 @@ namespace BetterCommentsPlus.Options
             rule.Foreground.IsItalic = token.IsItalic;
             rule.Foreground.HasUnderline = token.HasUnderline;
             rule.Foreground.HasStrikethrough = token.HasStrikethrough;
+            rule.Foreground.IsActive = token.IsForegroundActive;
 
             if (token.BackgroundStyle != null)
             {
@@ -591,53 +650,7 @@ namespace BetterCommentsPlus.Options
 
         private CommentToken ConvertStyleRuleToCommentToken(StyleRule rule)
         {
-            CommentType? type = null;
-            bool isDynamic = false;
-            
-            if (rule.Id != null)
-            {
-                if (rule.Id.Contains("important"))
-                    type = CommentType.Important;
-                else if (rule.Id.Contains("question"))
-                    type = CommentType.Question;
-                else if (rule.Id.Contains("remove"))
-                    type = CommentType.Remove;
-                else if (rule.Id.Contains("task"))
-                    type = CommentType.Task;
-                else
-                {
-                    isDynamic = true;
-                    type = CommentType.Important;
-                }
-            }
-            else
-            {
-                isDynamic = true;
-                type = CommentType.Important;
-            }
-
-            var defaultValue = rule.IsPredefined ? rule.Criteria : "";
-            var token = new CommentToken(type.Value, defaultValue, rule.Criteria, rule.Foreground.ColorHex);
-            
-            token.RuleId = rule.Id ?? Guid.NewGuid().ToString();
-            token.IsDynamic = isDynamic;
-            token.IsBold = rule.Foreground.IsBold;
-            token.IsItalic = rule.Foreground.IsItalic;
-            token.HasUnderline = rule.Foreground.HasUnderline;
-            token.HasStrikethrough = rule.Foreground.HasStrikethrough;
-
-            if (rule.Background != null && token.BackgroundStyle != null)
-            {
-                token.BackgroundStyle.IsActive = rule.Background.IsActive;
-                token.BackgroundStyle.ColorHex = rule.Background.ColorHex;
-                token.BackgroundStyle.Shape = rule.Background.Shape;
-                token.BackgroundStyle.Blur = rule.Background.Blur;
-                token.BackgroundStyle.Alpha = rule.Background.Alpha;
-                token.BackgroundStyle.IsCaseSensitive = rule.Background.IsCaseSensitive;
-                token.BackgroundStyle.AllowPartialMatch = rule.Background.AllowPartialMatch;
-            }
-            
-            return token;
+            return null;
         }
 
         #endregion Private Helpers

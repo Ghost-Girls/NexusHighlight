@@ -57,6 +57,12 @@
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Background="#F5F5F5" DockPanel.Dock="Top">
+                <GroupBox Header="保存位置" Margin="8,8,8,0">
+                    <StackPanel Margin="4" Orientation="Horizontal">
+                        <CheckBox x:Name="chkSaveToGlobal" Content="Global Rules" Margin="0,0,16,0" IsChecked="True" />
+                        <CheckBox x:Name="chkSaveToSolution" Content="Solution Rules" IsChecked="False" />
+                    </StackPanel>
+                </GroupBox>
                 <GroupBox Header="Criteria" Margin="8,8,8,0">
                     <TextBox x:Name="txtCriteria" 
                              Margin="4" 

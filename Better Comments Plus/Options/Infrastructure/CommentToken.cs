@@ -16,6 +16,7 @@ namespace BetterCommentsPlus.Options
       private bool hasUnderline;
       private bool hasStrikethrough;
       private BackgroundStyle backgroundStyle;
+      private bool isForegroundActive;
 
       public CommentType Type
       {
@@ -50,6 +51,12 @@ namespace BetterCommentsPlus.Options
       {
          get { return colorHex; }
          set { SetField(ref colorHex, value); }
+      }
+
+      public bool IsForegroundActive
+      {
+         get { return isForegroundActive; }
+         set { SetField(ref isForegroundActive, value); }
       }
 
       public bool IsBold
@@ -105,6 +112,7 @@ namespace BetterCommentsPlus.Options
          this.isItalic = true;
          this.hasUnderline = false;
          this.hasStrikethrough = false;
+         this.isForegroundActive = true;
          this.backgroundStyle = new BackgroundStyle();
          this.backgroundStyle.PropertyChanged += OnBackgroundStylePropertyChanged;
       }
@@ -121,7 +129,7 @@ namespace BetterCommentsPlus.Options
 
       public override string ToString()
       {
-         return $"{type},{currentValue.Trim()},{colorHex},{isBold},{isItalic},{hasUnderline},{hasStrikethrough}";
+         return $"{type},{currentValue.Trim()},{colorHex},{isBold},{isItalic},{hasUnderline},{hasStrikethrough},{isForegroundActive}";
       }
    }
 }

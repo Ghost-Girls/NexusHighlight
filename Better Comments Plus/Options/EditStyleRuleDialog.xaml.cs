@@ -33,6 +33,9 @@ namespace BetterCommentsPlus.Options
         internal bool delete;
         public StyleRule RuleToEdit { get; set; }
         
+        public bool SaveToGlobal => chkSaveToGlobal.IsChecked == true;
+        public bool SaveToSolution => chkSaveToSolution.IsChecked == true;
+        
         public Button ModifyButton => btnModify;
         public Button DeleteButton => btnDelete;
 

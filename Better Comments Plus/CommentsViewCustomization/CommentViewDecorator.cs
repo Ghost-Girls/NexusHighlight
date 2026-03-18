@@ -146,9 +146,6 @@ namespace BetterCommentsPlus.CommentsViewCustomization
          if (properties.Italic != settings.Italic)
             properties = properties.SetItalic(settings.Italic);
 
-         if (settings.Opacity >= 0.1 && settings.Opacity <= 1)
-            properties = properties.SetForegroundOpacity(settings.Opacity);
-
          if (classificationType.IsOfType(CommentNames.IMPORTANT_COMMENT)) //#INFO
             properties = properties.SetTextDecorations(GetTextDecoration(settings));
 
@@ -192,6 +189,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             bool? isItalic = null;
             bool? hasUnderline = null;
             bool? hasStrikethrough = null;
+            bool? isForegroundActive = null;
 
             if (settings.UnifiedConfig != null)
             {
@@ -203,6 +201,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                   isItalic = rule.Foreground.IsItalic;
                   hasUnderline = rule.Foreground.HasUnderline;
                   hasStrikethrough = rule.Foreground.HasStrikethrough;
+                  isForegroundActive = rule.Foreground.IsActive;
                }
                else if (!string.IsNullOrEmpty(criteria))
                {
@@ -214,6 +213,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                      isItalic = rule.Foreground.IsItalic;
                      hasUnderline = rule.Foreground.HasUnderline;
                      hasStrikethrough = rule.Foreground.HasStrikethrough;
+                     isForegroundActive = rule.Foreground.IsActive;
                   }
                }
             }
@@ -229,6 +229,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                isItalic = token.IsItalic;
                hasUnderline = token.HasUnderline;
                hasStrikethrough = token.HasStrikethrough;
+               isForegroundActive = token.IsForegroundActive;
             }
             else if (commentType.HasValue)
             {
@@ -243,41 +244,78 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                   isItalic = token.IsItalic;
                   hasUnderline = token.HasUnderline;
                   hasStrikethrough = token.HasStrikethrough;
+                  isForegroundActive = token.IsForegroundActive;
                }
             }
 
-            if (!string.IsNullOrEmpty(colorHex))
+            bool shouldApplyForeground = isForegroundActive.GetValueOrDefault(true);
+
+            if (shouldApplyForeground)
             {
-               try
+               if (!string.IsNullOrEmpty(colorHex))
                {
-                  var color = (Color)ColorConverter.ConvertFromString(colorHex);
-                  properties = properties.SetForeground(color);
+                  try
+                  {
+                     var color = (Color)ColorConverter.ConvertFromString(colorHex);
+                     properties = properties.SetForeground(color);
+                  }
+                  catch { }
                }
-               catch { }
-            }
 
-            if (isBold.HasValue)
-            {
-               properties = properties.SetBold(isBold.Value);
-            }
+               if (settings.Opacity >= 0.1 && settings.Opacity <= 1)
+               {
+                  properties = properties.SetForegroundOpacity(settings.Opacity);
+               }
 
-            if (isItalic.HasValue)
-            {
-               properties = properties.SetItalic(isItalic.Value);
-            }
+               if (isBold.HasValue)
+               {
+                  properties = properties.SetBold(isBold.Value);
+               }
 
-            var decorations = new TextDecorationCollection();
-            if (hasUnderline.GetValueOrDefault())
-            {
-               decorations.Add(TextDecorations.Underline);
+               if (isItalic.HasValue)
+               {
+                  properties = properties.SetItalic(isItalic.Value);
+               }
+
+               var decorations = new TextDecorationCollection();
+               if (hasUnderline.GetValueOrDefault())
+               {
+                  decorations.Add(TextDecorations.Underline);
+               }
+               if (hasStrikethrough.GetValueOrDefault())
+               {
+                  decorations.Add(TextDecorations.Strikethrough);
+               }
+               if (decorations.Count > 0)
+               {
+                  properties = properties.SetTextDecorations(decorations);
+               }
             }
-            if (hasStrikethrough.GetValueOrDefault())
+            else
             {
-               decorations.Add(TextDecorations.Strikethrough);
-            }
-            if (decorations.Count > 0)
-            {
-               properties = properties.SetTextDecorations(decorations);
+               var defaultCommentType = regService.GetClassificationType("comment");
+               if (defaultCommentType != null)
+               {
+                  var defaultProperties = formatMap.GetTextProperties(defaultCommentType);
+                  if (defaultProperties.ForegroundBrush is SolidColorBrush solidColorBrush)
+                  {
+                     properties = properties.SetForeground(solidColorBrush.Color);
+                  }
+               }
+
+               properties = properties.SetForegroundOpacity(1.0);
+
+               if (isBold.HasValue)
+               {
+                  properties = properties.SetBold(false);
+               }
+
+               if (isItalic.HasValue)
+               {
+                  properties = properties.SetItalic(false);
+               }
+
+               properties = properties.SetTextDecorations(new TextDecorationCollection());
             }
          }
          catch { }

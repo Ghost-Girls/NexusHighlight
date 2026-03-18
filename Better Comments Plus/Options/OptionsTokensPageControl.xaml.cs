@@ -5,6 +5,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Linq;
 using BetterCommentsPlus.CommentsTagging;
+using System.Collections.ObjectModel;
+using Microsoft.Win32;
+using System.IO;
+using System.Text.Json;
 
 namespace BetterCommentsPlus.Options
 {
@@ -16,13 +20,15 @@ namespace BetterCommentsPlus.Options
       private bool _isDragging;
       private ListBoxItem _dragSourceItem;
       private double _originalOpacity;
+      private ListBox _currentDraggingListBox;
 
       public OptionsTokensPageControl()
       {
          DataContext = Settings.Instance;
-
          InitializeComponent();
       }
+
+      #region 颜色选择器相关
 
       private void ColorPreviewBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
       {
@@ -79,6 +85,10 @@ namespace BetterCommentsPlus.Options
          }
       }
 
+      #endregion
+
+      #region 拖拽相关
+
       private void DragGrip_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
       {
          _dragStartPoint = e.GetPosition(null);
@@ -86,7 +96,12 @@ namespace BetterCommentsPlus.Options
          if (sender is Border grip && grip.DataContext is CommentToken token)
          {
             _draggedItem = token;
-            _draggedIndex = Settings.Instance.CommentTokens.IndexOf(token);
+            _currentDraggingListBox = FindParentListBox(grip);
+            
+            if (_currentDraggingListBox == GlobalTokensList)
+                _draggedIndex = Settings.Instance.GlobalCommentTokens.IndexOf(token);
+            else if (_currentDraggingListBox == SolutionTokensList)
+                _draggedIndex = Settings.Instance.SolutionCommentTokens.IndexOf(token);
             
             var listBoxItem = GetListBoxItemAncestor(grip);
             if (listBoxItem != null)
@@ -95,9 +110,21 @@ namespace BetterCommentsPlus.Options
                _originalOpacity = listBoxItem.Opacity;
             }
             
-            TokensList.CaptureMouse();
+            _currentDraggingListBox?.CaptureMouse();
             e.Handled = true;
          }
+      }
+
+      private ListBox FindParentListBox(DependencyObject element)
+      {
+         DependencyObject obj = element;
+         while (obj != null)
+         {
+            if (obj is ListBox listBox)
+               return listBox;
+            obj = VisualTreeHelper.GetParent(obj);
+         }
+         return null;
       }
 
       private ListBoxItem GetListBoxItemAncestor(DependencyObject element)
@@ -110,7 +137,17 @@ namespace BetterCommentsPlus.Options
          return obj as ListBoxItem;
       }
 
-      private void TokensList_MouseMove(object sender, MouseEventArgs e)
+      private void GlobalTokensList_MouseMove(object sender, MouseEventArgs e)
+      {
+         HandleListBoxMouseMove(sender as ListBox, e, Settings.Instance.GlobalCommentTokens);
+      }
+
+      private void SolutionTokensList_MouseMove(object sender, MouseEventArgs e)
+      {
+         HandleListBoxMouseMove(sender as ListBox, e, Settings.Instance.SolutionCommentTokens);
+      }
+
+      private void HandleListBoxMouseMove(ListBox listBox, MouseEventArgs e, ObservableCollection<CommentToken> tokens)
       {
          if (e.LeftButton == MouseButtonState.Pressed && _draggedItem != null && _draggedIndex >= 0)
          {
@@ -126,34 +163,38 @@ namespace BetterCommentsPlus.Options
                {
                   _dragSourceItem.Opacity = 0.4;
                }
-               DropIndicator.Visibility = Visibility.Visible;
-            }
-
-            if (_isDragging)
-            {
-               UpdateDropIndicator(sender as ListBox, e.GetPosition(sender as ListBox));
             }
          }
       }
 
-      private void TokensList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+      private void GlobalTokensList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+      {
+         HandleListBoxMouseUp(sender as ListBox, e, Settings.Instance.GlobalCommentTokens, GlobalTokensList);
+      }
+
+      private void SolutionTokensList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+      {
+         HandleListBoxMouseUp(sender as ListBox, e, Settings.Instance.SolutionCommentTokens, SolutionTokensList);
+      }
+
+      private void HandleListBoxMouseUp(ListBox listBox, MouseButtonEventArgs e, ObservableCollection<CommentToken> tokens, ListBox targetListBox)
       {
          if (_isDragging && _draggedIndex >= 0)
          {
-            var targetListBox = sender as ListBox;
             var settings = DataContext as Settings;
+            var targetTokens = listBox == GlobalTokensList ? settings.GlobalCommentTokens : settings.SolutionCommentTokens;
 
             if (targetListBox != null && settings != null)
             {
                var targetItem = GetListBoxItemAtPosition(targetListBox, e.GetPosition(targetListBox));
                var targetToken = targetItem?.DataContext as CommentToken;
 
-               int newIndex = targetToken != null ? settings.CommentTokens.IndexOf(targetToken) : settings.CommentTokens.Count - 1;
+               int newIndex = targetToken != null ? targetTokens.IndexOf(targetToken) : targetTokens.Count - 1;
 
                if (_draggedIndex >= 0 && newIndex >= 0 && _draggedIndex != newIndex)
                {
-                  settings.CommentTokens.Move(_draggedIndex, newIndex);
-                  TokensList.SelectedItem = _draggedItem;
+                  targetTokens.Move(_draggedIndex, newIndex);
+                  targetListBox.SelectedItem = _draggedItem;
                }
             }
 
@@ -166,37 +207,13 @@ namespace BetterCommentsPlus.Options
          {
             _dragSourceItem.Opacity = _originalOpacity;
          }
-         DropIndicator.Visibility = Visibility.Collapsed;
 
          _draggedItem = null;
          _draggedIndex = -1;
          _isDragging = false;
          _dragSourceItem = null;
-         (sender as ListBox)?.ReleaseMouseCapture();
-      }
-
-      private void UpdateDropIndicator(ListBox listBox, Point position)
-      {
-         var targetItem = GetListBoxItemAtPosition(listBox, position);
-         
-         if (targetItem != null)
-         {
-            var transform = targetItem.TransformToVisual(this);
-            var itemPosition = transform.Transform(new Point(0, 0));
-            
-            DropIndicator.Margin = new Thickness(0, itemPosition.Y - 1, 0, 0);
-         }
-         else if (Settings.Instance.CommentTokens.Count > 0)
-         {
-            var lastItem = TokensList.ItemContainerGenerator.ContainerFromIndex(Settings.Instance.CommentTokens.Count - 1) as ListBoxItem;
-            if (lastItem != null)
-            {
-               var transform = lastItem.TransformToVisual(this);
-               var itemPosition = transform.Transform(new Point(0, lastItem.ActualHeight));
-               
-               DropIndicator.Margin = new Thickness(0, itemPosition.Y - 1, 0, 0);
-            }
-         }
+         _currentDraggingListBox?.ReleaseMouseCapture();
+         _currentDraggingListBox = null;
       }
 
       private ListBoxItem GetListBoxItemAtPosition(ListBox listBox, Point position)
@@ -213,7 +230,16 @@ namespace BetterCommentsPlus.Options
          return obj as ListBoxItem;
       }
 
-      private void AddButton_Click(object sender, RoutedEventArgs e)
+      #endregion
+
+      #region 添加按钮
+
+      private void AddGlobalButton_Click(object sender, RoutedEventArgs e)
+      {
+         AddToken(Settings.Instance.GlobalCommentTokens, GlobalTokensList);
+      }
+
+      private void AddToken(ObservableCollection<CommentToken> tokens, ListBox listBox)
       {
          var settings = DataContext as Settings;
          if (settings == null)
@@ -225,7 +251,8 @@ namespace BetterCommentsPlus.Options
          {
             newCriteria = $"#NEW{counter}";
             counter++;
-         } while (settings.CommentTokens.Any(t => t.CurrentValue == newCriteria));
+         } while (settings.GlobalCommentTokens.Any(t => t.CurrentValue == newCriteria) ||
+                  settings.SolutionCommentTokens.Any(t => t.CurrentValue == newCriteria));
 
          var newToken = new CommentToken(
              type: CommentType.Important,
@@ -236,9 +263,13 @@ namespace BetterCommentsPlus.Options
          newToken.RuleId = Guid.NewGuid().ToString();
          newToken.IsDynamic = true;
 
-         settings.CommentTokens.Add(newToken);
-         TokensList.SelectedItem = newToken;
+         tokens.Add(newToken);
+         listBox.SelectedItem = newToken;
       }
+
+      #endregion
+
+      #region 删除按钮
 
       private void DeleteButton_Click(object sender, RoutedEventArgs e)
       {
@@ -252,43 +283,459 @@ namespace BetterCommentsPlus.Options
                var settings = DataContext as Settings;
                if (settings != null)
                {
-                  settings.CommentTokens.Remove(token);
+                  if (settings.GlobalCommentTokens.Contains(token))
+                     settings.GlobalCommentTokens.Remove(token);
+                  else if (settings.SolutionCommentTokens.Contains(token))
+                     settings.SolutionCommentTokens.Remove(token);
+                  
                   Settings.Instance.SyncCommentTokensToUnifiedConfig();
                }
             }
          }
       }
 
-      private void MoveUpButton_Click(object sender, RoutedEventArgs e)
+      #endregion
+
+      #region 上下移动按钮
+
+      private void MoveUpGlobalButton_Click(object sender, RoutedEventArgs e)
+      {
+         MoveUp(Settings.Instance.GlobalCommentTokens, GlobalTokensList);
+      }
+
+      private void MoveDownGlobalButton_Click(object sender, RoutedEventArgs e)
+      {
+         MoveDown(Settings.Instance.GlobalCommentTokens, GlobalTokensList);
+      }
+
+      private void MoveUpSolutionButton_Click(object sender, RoutedEventArgs e)
+      {
+         MoveUp(Settings.Instance.SolutionCommentTokens, SolutionTokensList);
+      }
+
+      private void MoveDownSolutionButton_Click(object sender, RoutedEventArgs e)
+      {
+         MoveDown(Settings.Instance.SolutionCommentTokens, SolutionTokensList);
+      }
+
+      private void MoveUp(ObservableCollection<CommentToken> tokens, ListBox listBox)
       {
          var settings = DataContext as Settings;
-         if (settings == null || TokensList.SelectedItem == null)
+         if (settings == null || listBox.SelectedItem == null)
             return;
 
-         int selectedIndex = TokensList.SelectedIndex;
+         int selectedIndex = listBox.SelectedIndex;
          if (selectedIndex > 0)
          {
-            settings.CommentTokens.Move(selectedIndex, selectedIndex - 1);
-            TokensList.SelectedIndex = selectedIndex - 1;
+            tokens.Move(selectedIndex, selectedIndex - 1);
+            listBox.SelectedIndex = selectedIndex - 1;
             Settings.Instance.SyncCommentTokensToUnifiedConfig();
             Settings.Instance.OnConfigurationChanged();
          }
       }
 
-      private void MoveDownButton_Click(object sender, RoutedEventArgs e)
+      private void MoveDown(ObservableCollection<CommentToken> tokens, ListBox listBox)
       {
          var settings = DataContext as Settings;
-         if (settings == null || TokensList.SelectedItem == null)
+         if (settings == null || listBox.SelectedItem == null)
             return;
 
-         int selectedIndex = TokensList.SelectedIndex;
-         if (selectedIndex >= 0 && selectedIndex < settings.CommentTokens.Count - 1)
+         int selectedIndex = listBox.SelectedIndex;
+         if (selectedIndex >= 0 && selectedIndex < tokens.Count - 1)
          {
-            settings.CommentTokens.Move(selectedIndex, selectedIndex + 1);
-            TokensList.SelectedIndex = selectedIndex + 1;
+            tokens.Move(selectedIndex, selectedIndex + 1);
+            listBox.SelectedIndex = selectedIndex + 1;
             Settings.Instance.SyncCommentTokensToUnifiedConfig();
             Settings.Instance.OnConfigurationChanged();
          }
+      }
+
+      #endregion
+
+      #region Solution 相关按钮
+
+      private void CopyAllFromGlobalButton_Click(object sender, RoutedEventArgs e)
+      {
+         var result = MessageBox.Show(
+             "这将复制所有 Global Rules 到 Solution Rules，是否继续？",
+             "确认复制",
+             MessageBoxButton.YesNo,
+             MessageBoxImage.Question);
+
+         if (result == MessageBoxResult.Yes)
+         {
+            Settings.Instance.CopyAllFromGlobalToSolution();
+         }
+      }
+
+      private void ImportFromGlobalButton_Click(object sender, RoutedEventArgs e)
+      {
+         if (Settings.Instance.GlobalCommentTokens.Count > 0)
+         {
+            var dialog = new Window
+            {
+               Title = "从 Global Rules 选择规则（按住 Ctrl 或 Shift 多选）",
+               Width = 400,
+               Height = 350,
+               WindowStartupLocation = WindowStartupLocation.CenterOwner,
+               Owner = Window.GetWindow(this)
+            };
+
+            var grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            var instructionText = new TextBlock
+            {
+               Text = "请选择要导入的规则（支持多选）：",
+               Margin = new Thickness(10)
+            };
+            Grid.SetRow(instructionText, 0);
+            grid.Children.Add(instructionText);
+
+            var listBox = new ListBox
+            {
+               ItemsSource = Settings.Instance.GlobalCommentTokens,
+               DisplayMemberPath = "CurrentValue",
+               SelectionMode = SelectionMode.Extended,
+               Margin = new Thickness(10)
+            };
+            Grid.SetRow(listBox, 1);
+            grid.Children.Add(listBox);
+
+            var buttonPanel = new StackPanel
+            {
+               Orientation = Orientation.Horizontal,
+               HorizontalAlignment = HorizontalAlignment.Right,
+               Margin = new Thickness(10)
+            };
+
+            var okButton = new Button
+            {
+               Content = "导入选中项",
+               Width = 100,
+               Margin = new Thickness(5)
+            };
+            okButton.Click += (s, args) =>
+            {
+               var selectedTags = listBox.SelectedItems.Cast<CommentToken>().ToList();
+               if (selectedTags.Count > 0)
+               {
+                  foreach (var selectedTag in selectedTags)
+                  {
+                     var newToken = new CommentToken(
+                         type: selectedTag.Type,
+                         defaultValue: selectedTag.DefaultValue,
+                         value: selectedTag.CurrentValue,
+                         colorHex: selectedTag.ColorHex)
+                     {
+                        IsBold = selectedTag.IsBold,
+                        IsItalic = selectedTag.IsItalic,
+                        HasUnderline = selectedTag.HasUnderline,
+                        HasStrikethrough = selectedTag.HasStrikethrough,
+                        IsForegroundActive = selectedTag.IsForegroundActive,
+                        IsDynamic = true,
+                        RuleId = Guid.NewGuid().ToString(),
+                        BackgroundStyle = new BackgroundStyle
+                        {
+                           IsActive = selectedTag.BackgroundStyle?.IsActive ?? false,
+                           ColorHex = selectedTag.BackgroundStyle?.ColorHex,
+                           Shape = selectedTag.BackgroundStyle?.Shape ?? "Tag",
+                           Blur = selectedTag.BackgroundStyle?.Blur ?? "None",
+                           Alpha = selectedTag.BackgroundStyle?.Alpha ?? "1/10",
+                           IsCaseSensitive = selectedTag.BackgroundStyle?.IsCaseSensitive ?? true,
+                           AllowPartialMatch = selectedTag.BackgroundStyle?.AllowPartialMatch ?? false
+                        }
+                     };
+                     Settings.Instance.SolutionCommentTokens.Add(newToken);
+                  }
+                  Settings.Instance.SyncCommentTokensToUnifiedConfig();
+                  Settings.Instance.OnConfigurationChanged();
+                  dialog.Close();
+               }
+               else
+               {
+                  MessageBox.Show("请至少选择一个规则", "提示",
+                      MessageBoxButton.OK, MessageBoxImage.Information);
+               }
+            };
+
+            var cancelButton = new Button
+            {
+               Content = "取消",
+               Width = 80,
+               Margin = new Thickness(5)
+            };
+            cancelButton.Click += (s, args) => dialog.Close();
+
+            buttonPanel.Children.Add(okButton);
+            buttonPanel.Children.Add(cancelButton);
+            Grid.SetRow(buttonPanel, 2);
+            grid.Children.Add(buttonPanel);
+
+            dialog.Content = grid;
+            dialog.ShowDialog();
+         }
+         else
+         {
+            MessageBox.Show("没有可用的 Global Rules", "提示",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+         }
+      }
+
+      private void ClearSolutionButton_Click(object sender, RoutedEventArgs e)
+      {
+         var result = MessageBox.Show(
+             "确定要清除所有 Solution Rules 吗？",
+             "确认清除",
+             MessageBoxButton.YesNo,
+             MessageBoxImage.Warning);
+
+         if (result == MessageBoxResult.Yes)
+         {
+            Settings.Instance.ClearSolutionTokens();
+         }
+      }
+
+      #endregion
+
+      #region 导入导出
+
+      private void ExportGlobalButton_Click(object sender, RoutedEventArgs e)
+      {
+         ExportRules(Settings.Instance.GlobalCommentTokens, "Global", "BetterCommentsPlus_GlobalRules.json");
+      }
+
+      private void ImportGlobalButton_Click(object sender, RoutedEventArgs e)
+      {
+         ImportRules(Settings.Instance.GlobalCommentTokens, "Global");
+      }
+
+      private void ExportSolutionButton_Click(object sender, RoutedEventArgs e)
+      {
+         ExportRules(Settings.Instance.SolutionCommentTokens, "Solution", "BetterCommentsPlus_SolutionRules.json");
+      }
+
+      private void ImportSolutionButton_Click(object sender, RoutedEventArgs e)
+      {
+         ImportRules(Settings.Instance.SolutionCommentTokens, "Solution");
+      }
+
+      private void ExportRules(ObservableCollection<CommentToken> tokens, string type, string defaultFileName)
+      {
+         if (tokens.Count == 0)
+         {
+            MessageBox.Show($"没有可用的 {type} Rules", "提示",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+         }
+
+         var saveDialog = new SaveFileDialog
+         {
+            Filter = "JSON 文件 (*.json)|*.json",
+            DefaultExt = ".json",
+            FileName = defaultFileName,
+            Title = $"导出 {type} Rules"
+         };
+
+         if (saveDialog.ShowDialog() == true)
+         {
+            try
+            {
+               var config = new CommentsPlusConfig
+               {
+                  ExportDate = DateTime.Now,
+                  Rules = tokens.Select(t => CommentTokenData.FromCommentToken(t)).ToList()
+               };
+
+               var json = JsonSerializer.Serialize(config, new JsonSerializerOptions
+               {
+                  WriteIndented = true,
+                  PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+               });
+
+               File.WriteAllText(saveDialog.FileName, json);
+               MessageBox.Show("导出成功！", "提示",
+                   MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+               MessageBox.Show($"导出失败：{ex.Message}", "错误",
+                   MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+         }
+      }
+
+      private void ImportRules(ObservableCollection<CommentToken> tokens, string type)
+      {
+         var openDialog = new OpenFileDialog
+         {
+            Filter = "JSON 文件 (*.json)|*.json",
+            Title = $"导入 {type} Rules"
+         };
+
+         if (openDialog.ShowDialog() == true)
+         {
+            try
+            {
+               var json = File.ReadAllText(openDialog.FileName);
+               var config = JsonSerializer.Deserialize<CommentsPlusConfig>(json, new JsonSerializerOptions
+               {
+                  PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                  PropertyNameCaseInsensitive = true
+               });
+
+               if (config?.Rules != null && config.Rules.Count > 0)
+               {
+                  var result = MessageBox.Show(
+                      "选择导入模式：\n\n是 - 覆盖现有规则\n否 - 合并现有规则",
+                      "导入模式",
+                      MessageBoxButton.YesNoCancel,
+                      MessageBoxImage.Question);
+
+                  if (result == MessageBoxResult.Cancel)
+                     return;
+
+                  if (result == MessageBoxResult.No)
+                  {
+                     foreach (var tokenData in config.Rules)
+                     {
+                        var newToken = tokenData.ToCommentToken();
+                        newToken.PropertyChanged += CommentToken_PropertyChanged;
+                        tokens.Add(newToken);
+                     }
+                  }
+                  else
+                  {
+                     tokens.Clear();
+                     foreach (var tokenData in config.Rules)
+                     {
+                        var newToken = tokenData.ToCommentToken();
+                        newToken.PropertyChanged += CommentToken_PropertyChanged;
+                        tokens.Add(newToken);
+                     }
+                  }
+
+                  Settings.Instance.SyncCommentTokensToUnifiedConfig();
+                  Settings.Instance.OnConfigurationChanged();
+                  MessageBox.Show("导入成功！", "提示",
+                      MessageBoxButton.OK, MessageBoxImage.Information);
+               }
+               else
+               {
+                  MessageBox.Show("文件中没有 Rules", "提示",
+                      MessageBoxButton.OK, MessageBoxImage.Information);
+               }
+            }
+            catch (Exception ex)
+            {
+               MessageBox.Show($"导入失败：{ex.Message}", "错误",
+                   MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+         }
+      }
+
+      #endregion
+
+      private void CommentToken_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+      {
+      }
+   }
+
+   public class CommentsPlusConfig
+   {
+      public string Version { get; set; } = "1.0";
+      public DateTime ExportDate { get; set; }
+      public System.Collections.Generic.List<CommentTokenData> Rules { get; set; } = new System.Collections.Generic.List<CommentTokenData>();
+   }
+
+   public class CommentTokenData
+   {
+      public string CurrentValue { get; set; }
+      public string DefaultValue { get; set; }
+      public string ColorHex { get; set; }
+      public bool IsBold { get; set; }
+      public bool IsItalic { get; set; }
+      public bool HasUnderline { get; set; }
+      public bool HasStrikethrough { get; set; }
+      public bool IsForegroundActive { get; set; }
+      public BackgroundStyleData BackgroundStyle { get; set; }
+
+      public static CommentTokenData FromCommentToken(CommentToken token)
+      {
+         return new CommentTokenData
+         {
+            CurrentValue = token.CurrentValue,
+            DefaultValue = token.DefaultValue,
+            ColorHex = token.ColorHex,
+            IsBold = token.IsBold,
+            IsItalic = token.IsItalic,
+            HasUnderline = token.HasUnderline,
+            HasStrikethrough = token.HasStrikethrough,
+            IsForegroundActive = token.IsForegroundActive,
+            BackgroundStyle = BackgroundStyleData.FromBackgroundStyle(token.BackgroundStyle)
+         };
+      }
+
+      public CommentToken ToCommentToken()
+      {
+         var token = new CommentToken(
+             type: CommentType.Important,
+             defaultValue: DefaultValue ?? CurrentValue,
+             value: CurrentValue,
+             colorHex: ColorHex ?? "#FFFF0000")
+         {
+            IsBold = IsBold,
+            IsItalic = IsItalic,
+            HasUnderline = HasUnderline,
+            HasStrikethrough = HasStrikethrough,
+            IsForegroundActive = IsForegroundActive,
+            IsDynamic = true,
+            RuleId = Guid.NewGuid().ToString(),
+            BackgroundStyle = BackgroundStyle?.ToBackgroundStyle() ?? new BackgroundStyle()
+         };
+         return token;
+      }
+   }
+
+   public class BackgroundStyleData
+   {
+      public bool IsActive { get; set; }
+      public string ColorHex { get; set; }
+      public string Shape { get; set; }
+      public string Blur { get; set; }
+      public string Alpha { get; set; }
+      public bool IsCaseSensitive { get; set; }
+      public bool AllowPartialMatch { get; set; }
+
+      public static BackgroundStyleData FromBackgroundStyle(BackgroundStyle style)
+      {
+         if (style == null) return null;
+         return new BackgroundStyleData
+         {
+            IsActive = style.IsActive,
+            ColorHex = style.ColorHex,
+            Shape = style.Shape,
+            Blur = style.Blur,
+            Alpha = style.Alpha,
+            IsCaseSensitive = style.IsCaseSensitive,
+            AllowPartialMatch = style.AllowPartialMatch
+         };
+      }
+
+      public BackgroundStyle ToBackgroundStyle()
+      {
+         return new BackgroundStyle
+         {
+            IsActive = IsActive,
+            ColorHex = ColorHex,
+            Shape = Shape ?? "Tag",
+            Blur = Blur ?? "None",
+            Alpha = Alpha ?? "1/10",
+            IsCaseSensitive = IsCaseSensitive,
+            AllowPartialMatch = AllowPartialMatch
+         };
       }
    }
 }

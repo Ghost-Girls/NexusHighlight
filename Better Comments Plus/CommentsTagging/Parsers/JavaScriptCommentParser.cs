@@ -1,4 +1,4 @@
-﻿using BetterCommentsPlus.Options;
+using BetterCommentsPlus.Options;
 using Microsoft.VisualStudio.Text;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace BetterCommentsPlus.CommentsTagging
       public override Comment Parse(SnapshotSpan span)
       {
          // Just get enough length for GetCommentType() to work.
-         var len = Settings.CommentTokens.Max(t => t.CurrentValue.Length) * 2;
+         var len = Settings.CommentTokens.Any() ? Settings.CommentTokens.Max(t => t.CurrentValue.Length) * 2 : 100;
 
          return base.Parse(new SnapshotSpan(span.Snapshot, span.Start, len));
       }
