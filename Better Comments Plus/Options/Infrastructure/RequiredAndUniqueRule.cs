@@ -7,15 +7,17 @@ namespace BetterCommentsPlus.Options
 {
    public class RequiredAndUniqueRule : ValidationRule
    {
+      public bool IsGlobalScope { get; set; } = false;
+      public bool IsSolutionScope { get; set; } = false;
+      
       public RequiredAndUniqueRule()
       {
       }
 
       public override ValidationResult Validate(object value, CultureInfo cultureInfo)
       {
-         var str = GetBoundValue(value) as string;
-
-         if (!(str is string))
+         var str = value as string;
+         if (str == null)
          {
             return new ValidationResult(false, "Value is not a string.");
          }
@@ -30,10 +32,35 @@ namespace BetterCommentsPlus.Options
             return new ValidationResult(false, "Value is required.");
          }
 
-         if (Settings.Instance.GlobalCommentTokens.Count(t => t.CurrentValue.Equals(str)) + 
-             Settings.Instance.SolutionCommentTokens.Count(t => t.CurrentValue.Equals(str)) > 1)
+         // 根据作用域检查唯一性
+         if (IsGlobalScope)
          {
-            return new ValidationResult(false, "Value must be unique.");
+            // 只检查 Global 集合内部是否唯一
+            var count = Settings.Instance.GlobalCommentTokens.Count(t => t.CurrentValue.Equals(str));
+            if (count > 1)
+            {
+               return new ValidationResult(false, "Value must be unique within Global Rules.");
+            }
+         }
+         else if (IsSolutionScope)
+         {
+            // 只检查 Solution 集合内部是否唯一
+            var count = Settings.Instance.SolutionCommentTokens.Count(t => t.CurrentValue.Equals(str));
+            if (count > 1)
+            {
+               return new ValidationResult(false, "Value must be unique within Solution Rules.");
+            }
+         }
+         else
+         {
+            // 默认行为：同时检查两个集合（用于 ValidateTokens 方法）
+            var globalCount = Settings.Instance.GlobalCommentTokens.Count(t => t.CurrentValue.Equals(str));
+            var solutionCount = Settings.Instance.SolutionCommentTokens.Count(t => t.CurrentValue.Equals(str));
+            
+            if (globalCount > 1 || solutionCount > 1)
+            {
+               return new ValidationResult(false, "Value must be unique within each scope.");
+            }
          }
 
          return ValidationResult.ValidResult;
@@ -43,7 +70,6 @@ namespace BetterCommentsPlus.Options
       {
          if (value is BindingExpression be)
          {
-            // ValidationStep = UpdatedValue or CommittedValue (Validate after setting)
             return be.DataItem
                      .GetType()
                      .GetProperty(be.ParentBinding.Path.Path)
@@ -51,7 +77,6 @@ namespace BetterCommentsPlus.Options
          }
          else
          {
-            // ValidationStep = RawProposedValue or ConvertedProposedValue
             return value;
          }
       }

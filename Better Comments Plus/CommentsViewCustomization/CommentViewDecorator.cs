@@ -94,9 +94,32 @@ namespace BetterCommentsPlus.CommentsViewCustomization
 
       private void DecorateDynamicRules()
       {
-         foreach (var token in settings.CommentTokens)
+         // 创建一个字典来跟踪已经应用过的 Criteria
+         // Solution Rules 优先级高于 Global Rules，所以先记录 Solution 的 Criteria
+         var appliedCriteria = new HashSet<string>();
+         
+         // 先应用 Solution Rules
+         foreach (var token in settings.SolutionCommentTokens)
          {
             if (!string.IsNullOrEmpty(token.RuleId))
+            {
+               appliedCriteria.Add(token.CurrentValue);
+               
+               var classificationType = regService.GetClassificationType(token.RuleId);
+               if (classificationType == null)
+               {
+                  classificationType = regService.CreateClassificationType(
+                      token.RuleId,
+                      new[] { regService.GetClassificationType("comment") });
+               }
+               SetProperties(classificationType);
+            }
+         }
+         
+         // 再应用 Global Rules，但跳过已经在 Solution 中应用过的 Criteria
+         foreach (var token in settings.GlobalCommentTokens)
+         {
+            if (!string.IsNullOrEmpty(token.RuleId) && !appliedCriteria.Contains(token.CurrentValue))
             {
                var classificationType = regService.GetClassificationType(token.RuleId);
                if (classificationType == null)
@@ -191,61 +214,46 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             bool? hasStrikethrough = null;
             bool? isForegroundActive = null;
 
-            if (settings.UnifiedConfig != null)
+            // 优先查找 Solution Rules 中是否有匹配的 Criteria
+            // Solution Rules 优先级高于 Global Rules
+            CommentToken matchingToken = null;
+            
+            // 先在 Solution Rules 中查找
+            if (!string.IsNullOrEmpty(criteria))
             {
-               var rule = settings.UnifiedConfig.Comments.FirstOrDefault(r => r.Id == ruleId);
-               if (rule != null && rule.Foreground != null)
-               {
-                  colorHex = rule.Foreground.ColorHex;
-                  isBold = rule.Foreground.IsBold;
-                  isItalic = rule.Foreground.IsItalic;
-                  hasUnderline = rule.Foreground.HasUnderline;
-                  hasStrikethrough = rule.Foreground.HasStrikethrough;
-                  isForegroundActive = rule.Foreground.IsActive;
-               }
-               else if (!string.IsNullOrEmpty(criteria))
-               {
-                  rule = settings.UnifiedConfig.Comments.FirstOrDefault(r => r.Criteria == criteria);
-                  if (rule != null && rule.Foreground != null)
-                  {
-                     colorHex = rule.Foreground.ColorHex;
-                     isBold = rule.Foreground.IsBold;
-                     isItalic = rule.Foreground.IsItalic;
-                     hasUnderline = rule.Foreground.HasUnderline;
-                     hasStrikethrough = rule.Foreground.HasStrikethrough;
-                     isForegroundActive = rule.Foreground.IsActive;
-                  }
-               }
+               matchingToken = settings.SolutionCommentTokens.FirstOrDefault(t => t.CurrentValue == criteria);
+            }
+            
+            // 如果 Solution Rules 中没有，再在 Global Rules 中查找
+            if (matchingToken == null && !string.IsNullOrEmpty(criteria))
+            {
+               matchingToken = settings.GlobalCommentTokens.FirstOrDefault(t => t.CurrentValue == criteria);
+            }
+            
+            // 如果还是没有找到，尝试通过 ruleId 查找（向后兼容）
+            if (matchingToken == null)
+            {
+               matchingToken = settings.CommentTokens.FirstOrDefault(t => t.RuleId == ruleId);
+            }
+            
+            // 如果还是没找到，尝试通过 commentType 查找预设规则
+            if (matchingToken == null && commentType.HasValue)
+            {
+               matchingToken = settings.GetToken(commentType.Value);
             }
 
-            var token = settings.CommentTokens.FirstOrDefault(t => t.RuleId == ruleId);
-            if (token != null)
+            // 应用找到的 Token 的样式
+            if (matchingToken != null)
             {
-               if (string.IsNullOrEmpty(colorHex) && !string.IsNullOrEmpty(token.ColorHex))
+               if (!string.IsNullOrEmpty(matchingToken.ColorHex))
                {
-                  colorHex = token.ColorHex;
+                  colorHex = matchingToken.ColorHex;
                }
-               isBold = token.IsBold;
-               isItalic = token.IsItalic;
-               hasUnderline = token.HasUnderline;
-               hasStrikethrough = token.HasStrikethrough;
-               isForegroundActive = token.IsForegroundActive;
-            }
-            else if (commentType.HasValue)
-            {
-               token = settings.GetToken(commentType.Value);
-               if (token != null)
-               {
-                  if (string.IsNullOrEmpty(colorHex) && !string.IsNullOrEmpty(token.ColorHex))
-                  {
-                     colorHex = token.ColorHex;
-                  }
-                  isBold = token.IsBold;
-                  isItalic = token.IsItalic;
-                  hasUnderline = token.HasUnderline;
-                  hasStrikethrough = token.HasStrikethrough;
-                  isForegroundActive = token.IsForegroundActive;
-               }
+               isBold = matchingToken.IsBold;
+               isItalic = matchingToken.IsItalic;
+               hasUnderline = matchingToken.HasUnderline;
+               hasStrikethrough = matchingToken.HasStrikethrough;
+               isForegroundActive = matchingToken.IsForegroundActive;
             }
 
             bool shouldApplyForeground = isForegroundActive.GetValueOrDefault(true);

@@ -430,11 +430,11 @@ public class UnifiedConfig
 
 ---
 
-### 3.6 阶段六：实现右键菜单创建/编辑规则功能 📋
+### 3.6 阶段六：实现右键菜单创建/编辑规则功能 ✅
 
 **目标**：移植 Highlighter 的右键菜单功能，支持快速创建/编辑规则
 
-**状态**：📋 **待执行**
+**状态**：✅ **已完成** (2026-03-18)
 
 **策略**：完整移植 Highlighter 的右键菜单实现，整合到 BCP 项目
 
@@ -446,51 +446,60 @@ public class UnifiedConfig
 - ✅ `Highlighter/VSCommandTable.cs` - 命令 ID 定义
 
 #### 任务清单：
-- [ ] 6.1 移植 EditColor 对话框 ✅
-  - [ ] 6.1.1 创建 `EditStyleRuleDialog.xaml`（基于 EditColor.xaml）
-  - [ ] 6.1.2 创建 `EditStyleRuleDialog.xaml.cs`（基于 EditColor.xaml.cs）
-  - [ ] 6.1.3 修改 UI 以同时支持 Foreground 和 Background 配置
-  - [ ] 6.1.4 实现预览功能（同时预览前景和背景效果）
-- [ ] 6.2 创建右键菜单命令 ✅
-  - [ ] 6.2.1 创建 `CreateEditStyleRule.cs`（基于 CreateHighlight.cs）
-  - [ ] 6.2.2 定义 VSCommandTable（两个菜单项：Create/Edit Foreground 和 Create/Edit Background）
-  - [ ] 6.2.3 实现命令处理逻辑
-  - [ ] 6.2.4 获取选中文本并自动填充到对话框
-- [ ] 6.3 实现配置层级（Global/Solution）✅
-  - [ ] 6.3.1 扩展 UnifiedConfig 支持 Solution 级别配置
-  - [ ] 6.3.2 实现配置保存/加载（Global 和 Solution 分离）
-  - [ ] 6.3.3 实现 Remember 类（记住用户最后使用的设置）
-- [ ] 6.4 集成到主项目 ✅
-  - [ ] 6.4.1 在 VSPackage.cs 中注册命令
-  - [ ] 6.4.2 确保命令只在有选中文本时可用
-  - [ ] 6.4.3 处理新建规则和编辑现有规则的逻辑分支
-- [ ] 6.5 优化用户体验 ✅
-  - [ ] 6.5.1 两个右键入口（Foreground 默认启用 / Background 默认启用）
-  - [ ] 6.5.2 智能默认值（根据选中位置判断是否在注释中）
-  - [ ] 6.5.3 实时预览效果
-  - [ ] 6.5.4 支持删除规则（编辑对话框中的 Delete 按钮）
+- [x] 6.1 移植 EditColor 对话框 ✅
+  - [x] 6.1.1 创建 `EditStyleRuleDialog.xaml`（基于 EditColor.xaml）
+  - [x] 6.1.2 创建 `EditStyleRuleDialog.xaml.cs`（基于 EditColor.xaml.cs）
+  - [x] 6.1.3 修改 UI 以同时支持 Foreground 和 Background 配置
+  - [x] 6.1.4 实现预览功能（同时预览前景和背景效果）
+- [x] 6.2 创建右键菜单命令 ✅
+  - [x] 6.2.1 创建 `CreateEditStyleRule.cs`（基于 CreateHighlight.cs）
+  - [x] 6.2.2 定义 VSCommandTable（两个菜单项：Create/Edit Foreground 和 Create/Edit Background）
+  - [x] 6.2.3 实现命令处理逻辑
+  - [x] 6.2.4 获取选中文本并自动填充到对话框
+- [x] 6.3 实现配置层级（Global/Solution）✅
+  - [x] 6.3.1 扩展 UnifiedConfig 支持 Solution 级别配置
+  - [x] 6.3.2 实现配置保存/加载（Global 和 Solution 分离）
+  - [x] 6.3.3 实现 Remember 类（记住用户最后使用的设置）
+- [x] 6.4 集成到主项目 ✅
+  - [x] 6.4.1 在 VSPackage.cs 中注册命令
+  - [x] 6.4.2 确保命令只在有选中文本时可用
+  - [x] 6.4.3 处理新建规则和编辑现有规则的逻辑分支
+- [x] 6.5 优化用户体验 ✅
+  - [x] 6.5.1 两个右键入口（Foreground 默认启用 / Background 默认启用）
+  - [x] 6.5.2 智能默认值（根据选中位置判断是否在注释中）
+  - [x] 6.5.3 实时预览效果
+  - [x] 6.5.4 支持删除规则（编辑对话框中的 Delete 按钮）
+- [x] 6.6 修复 Global 和 Solution 规则优先级问题 ✅
+  - [x] 6.6.1 修改 RequiredAndUniqueRule，允许 Global 和 Solution 有相同 Criteria ✅
+  - [x] 6.6.2 修改 ValidateTokens，分别验证 Global 和 Solution 集合 ✅
+  - [x] 6.6.3 确保 Solution Rules 优先级高于 Global Rules ✅
 
 **验证点**：
-- [ ] 选中任意文本时，右键菜单显示两个菜单项：「Create/Edit Foreground Styles Rule」和「Create/Edit Background Styles Rule」
-- [ ] 点击菜单项弹出编辑对话框
-- [ ] 对话框自动填充选中的文本
-- [ ] 可以配置 Foreground 样式（颜色、粗体、斜体等）
-- [ ] 可以配置 Background 样式（颜色、形状、模糊、透明度）
-- [ ] 可以选择 Global 或 Solution 级别
-- [ ] 新建规则立即生效
-- [ ] 编辑现有规则立即生效
-- [ ] 可以删除规则
-- [ ] 记住用户最后使用的设置（形状、模糊、透明度等）
+- [x] 选中任意文本时，右键菜单显示两个菜单项：「Create/Edit Foreground Styles Rule」和「Create/Edit Background Styles Rule」
+- [x] 点击菜单项弹出编辑对话框
+- [x] 对话框自动填充选中的文本
+- [x] 可以配置 Foreground 样式（颜色、粗体、斜体等）
+- [x] 可以配置 Background 样式（颜色、形状、模糊、透明度）
+- [x] 可以选择 Global 或 Solution 级别
+- [x] 新建规则立即生效
+- [x] 编辑现有规则立即生效
+- [x] 可以删除规则
+- [x] 记住用户最后使用的设置（形状、模糊、透明度等）
+- [x] Global 和 Solution 中允许有相同的 Criteria
+- [x] Solution Rules 优先级高于 Global Rules
+- [x] 验证逻辑正确：各自集合内部唯一，但两个集合之间允许重复
 
 **预计创建/修改的文件**：
-- Options/EditStyleRuleDialog.xaml（新建）
-- Options/EditStyleRuleDialog.xaml.cs（新建）
-- Commands/CreateEditStyleRule.cs（新建）
-- VSCommandTable.vsct（修改，添加两个菜单项）
-- VSCommandTable.cs（修改，添加命令 ID）
-- Options/UnifiedConfig.cs（扩展，添加 Solution 级别配置）
-- Options/Settings.cs（扩展，添加配置加载/保存）
-- VSPackage.cs（修改，注册命令）
+- Options/EditStyleRuleDialog.xaml（新建）✅
+- Options/EditStyleRuleDialog.xaml.cs（新建）✅
+- Commands/CreateEditStyleRule.cs（新建）✅
+- VSCommandTable.vsct（修改，添加两个菜单项）✅
+- VSCommandTable.cs（修改，添加命令 ID）✅
+- Options/UnifiedConfig.cs（扩展，添加 Solution 级别配置）✅
+- Options/Settings.cs（扩展，添加配置加载/保存）✅
+- VSPackage.cs（修改，注册命令）✅
+- Options/Infrastructure/RequiredAndUniqueRule.cs（修改，修复验证逻辑）✅
+- Options/OptionsPageBase.cs（修改，分别验证 Global 和 Solution）✅
 
 **交互设计要点**（来自 Merger_Interaction_Discussion.md）：
 
@@ -775,6 +784,6 @@ internal sealed class CreateEditStyleRule : BaseCommand<CreateEditStyleRule>
 
 ---
 
-*文档版本：3.1*
+*文档版本：3.2*
 *更新日期：2026-03-18*
-*上次更新：完成前景色启用/禁用功能，修复所有编译错误，实现完整的前景样式控制*
+*上次更新：完成前景色启用/禁用功能，修复所有编译错误，实现完整的前景样式控制；修复 Global 和 Solution 规则优先级问题*

@@ -52,11 +52,19 @@ namespace BetterCommentsPlus.Options
 
       protected bool ValidateTokens()
       {
-         var rule = new RequiredAndUniqueRule();
-
-         foreach (var tk in Settings.Instance.CommentTokens)
+         // 验证 Global 集合
+         var globalRule = new RequiredAndUniqueRule { IsGlobalScope = true };
+         foreach (var tk in Settings.Instance.GlobalCommentTokens)
          {
-            if (!rule.Validate(tk.CurrentValue, CultureInfo.InvariantCulture).IsValid)
+            if (!globalRule.Validate(tk.CurrentValue, CultureInfo.InvariantCulture).IsValid)
+               return false;
+         }
+
+         // 验证 Solution 集合
+         var solutionRule = new RequiredAndUniqueRule { IsSolutionScope = true };
+         foreach (var tk in Settings.Instance.SolutionCommentTokens)
+         {
+            if (!solutionRule.Validate(tk.CurrentValue, CultureInfo.InvariantCulture).IsValid)
                return false;
          }
 
