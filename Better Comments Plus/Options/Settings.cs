@@ -22,6 +22,20 @@ namespace BetterCommentsPlus.Options
         public bool IsDragging { get; set; }
         private bool _isSyncing;
 
+        // === 新的规则集合（使用 CommentRule）===
+        private readonly ObservableCollection<CommentRule> globalRules
+            = new ObservableCollection<CommentRule>
+            {
+                new CommentRule(CommentCategory.Important, "#IMPORTANT", "#FFFF0000"),
+                new CommentRule(CommentCategory.Remove, "#REMOVE", "#FF808080"),
+                new CommentRule(CommentCategory.Question, "#QUESTION", "#FFFFFF00"),
+                new CommentRule(CommentCategory.Task, "#TASK", "#FFEB690A"),
+            };
+
+        private readonly ObservableCollection<CommentRule> solutionRules
+            = new ObservableCollection<CommentRule>();
+
+        // === 旧的规则集合（保持向后兼容）===
         private readonly ObservableCollection<CommentToken> globalCommentTokens
             = new ObservableCollection<CommentToken>
             {
@@ -194,6 +208,23 @@ namespace BetterCommentsPlus.Options
             get { return solutionCommentTokens; }
         }
 
+        // === 新的规则集合属性 ===
+        public ObservableCollection<CommentRule> GlobalRules
+        {
+            get { return globalRules; }
+        }
+
+        public ObservableCollection<CommentRule> SolutionRules
+        {
+            get { return solutionRules; }
+        }
+
+        // === 合并所有规则（用于向后兼容）===
+        public System.Collections.Generic.IEnumerable<CommentRule> AllRules
+        {
+            get { return solutionRules.Concat(globalRules); }
+        }
+
         public ObservableCollection<StyleRule> StyleRules
         {
             get { return styleRules; }
@@ -218,6 +249,83 @@ namespace BetterCommentsPlus.Options
         #endregion ISettings Members
 
         #region Public Methods
+
+        // === 新的基于 CommentRule 的方法 ===
+        
+        public CommentRule GetRule(CommentCategory category)
+        {
+            return globalRules.FirstOrDefault(r => r.Category == category);
+        }
+
+        public string GetRulePattern(CommentCategory category)
+        {
+            var rule = GetRule(category);
+            return rule?.Criteria ?? "";
+        }
+
+        public void ClearSolutionRules()
+        {
+            _isSyncing = true;
+            try
+            {
+                solutionRules.Clear();
+                SyncCommentTokensToUnifiedConfig();
+                SyncCommentTokensToStyleRules();
+                OnConfigurationChanged();
+            }
+            finally
+            {
+                _isSyncing = false;
+            }
+        }
+
+        public void CopyAllFromGlobalToSolutionRules()
+        {
+            _isSyncing = true;
+            try
+            {
+                foreach (var globalRule in globalRules)
+                {
+                    var newRule = ConfigMigrator.MigrateFromCommentToken(
+                        new CommentToken(
+                            type: (CommentsTagging.CommentType)globalRule.Category.Value,
+                            defaultValue: globalRule.Criteria,
+                            value: globalRule.Criteria,
+                            colorHex: globalRule.ColorHex
+                        )
+                        {
+                            IsBold = globalRule.IsBold ?? false,
+                            IsItalic = globalRule.IsItalic ?? false,
+                            HasUnderline = globalRule.HasUnderline ?? false,
+                            HasStrikethrough = globalRule.HasStrikethrough ?? false,
+                            IsForegroundActive = globalRule.IsForegroundActive ?? true,
+                            IsDynamic = true,
+                            RuleId = Guid.NewGuid().ToString(),
+                            BackgroundStyle = new BackgroundStyle
+                            {
+                                IsActive = globalRule.IsBackgroundActive ?? false,
+                                ColorHex = globalRule.BackgroundColorHex,
+                                Shape = globalRule.Shape ?? "Tag",
+                                Blur = globalRule.Blur ?? "None",
+                                Alpha = globalRule.Alpha ?? "1/10",
+                                IsCaseSensitive = globalRule.IsCaseSensitive ?? true,
+                                AllowPartialMatch = globalRule.AllowPartialMatch ?? false
+                            }
+                        }
+                    );
+                    solutionRules.Add(newRule);
+                }
+                SyncCommentTokensToUnifiedConfig();
+                SyncCommentTokensToStyleRules();
+                OnConfigurationChanged();
+            }
+            finally
+            {
+                _isSyncing = false;
+            }
+        }
+
+        // === 旧的基于 CommentToken 的方法（保持向后兼容）===
 
         public CommentToken GetToken(CommentType type)
         {
