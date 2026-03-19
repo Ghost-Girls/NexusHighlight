@@ -11,19 +11,6 @@ using System.Linq;
 
 namespace BetterCommentsPlus.CommentsTagging
 {
-    /// <summary>
-    /// 评论类型枚举（向后兼容，保留用于 CommentToken）
-    /// 新代码请使用 CommentCategory
-    /// </summary>
-    public enum CommentType
-    {
-        Normal,
-        Important,
-        Question,
-        Remove,
-        Task
-    }
-
     internal class CommentTagger : ITagger<ClassificationTag>, IDisposable
     {
         private readonly Options.Settings settings = Options.Settings.Instance;

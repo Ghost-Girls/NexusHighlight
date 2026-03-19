@@ -22,7 +22,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
         private readonly Thickness tBlur = new(2, -3, 2, -3);
         private readonly Thickness tNone = new(0, 0, 0, 0);
         private char[] firstChars;
-        private List<CommentToken> tags;
+        private List<CommentRule> tags;
         private Performance performance = Performance.Normal;
 
         public BackgroundAdorner(IWpfTextView view)
@@ -97,19 +97,19 @@ namespace BetterCommentsPlus.CommentsViewCustomization
         {
             performance = Performance.Normal;
 
-            tags = Settings.Instance.CommentTokens
-                .Where(x => x.BackgroundStyle != null && x.BackgroundStyle.IsActive)
+            tags = Settings.Instance.AllRules
+                .Where(x => x.Background != null && x.Background.IsActive)
                 .ToList();
 
             List<char> chars = new List<char>();
             foreach (var tag in tags)
             {
-                if (!string.IsNullOrEmpty(tag.CurrentValue))
+                if (!string.IsNullOrEmpty(tag.Criteria))
                 {
-                    chars.Add(tag.CurrentValue[0]);
-                    if (!tag.BackgroundStyle.IsCaseSensitive)
+                    chars.Add(tag.Criteria[0]);
+                    if (!tag.Background.IsCaseSensitive)
                     {
-                        chars.Add(char.ToUpperInvariant(tag.CurrentValue[0]));
+                        chars.Add(char.ToUpperInvariant(tag.Criteria[0]));
                     }
                 }
             }
@@ -140,23 +140,23 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                 {
                     foreach (var tag in tags)
                     {
-                        if (string.IsNullOrEmpty(tag.CurrentValue))
+                        if (string.IsNullOrEmpty(tag.Criteria))
                             continue;
 
-                        string keyword = tag.CurrentValue.Trim();
+                        string keyword = tag.Criteria.Trim();
                         if (string.IsNullOrEmpty(keyword))
                             continue;
 
-                        if (FirstCharacterEquals(view.TextSnapshot[i], keyword[0], tag.BackgroundStyle.IsCaseSensitive) &&
+                        if (FirstCharacterEquals(view.TextSnapshot[i], keyword[0], tag.Background.IsCaseSensitive) &&
                             i <= end - keyword.Length &&
-                            CompareWords(view.TextSnapshot.GetText(i, keyword.Length), keyword, tag.BackgroundStyle.IsCaseSensitive) &&
-                            CheckWholeWordsMatch(view.TextSnapshot, i, keyword, tag.BackgroundStyle.AllowPartialMatch))
+                            CompareWords(view.TextSnapshot.GetText(i, keyword.Length), keyword, tag.Background.IsCaseSensitive) &&
+                            CheckWholeWordsMatch(view.TextSnapshot, i, keyword, tag.Background.AllowPartialMatch))
                         {
                             SnapshotSpan span;
                             TagShape shape;
                             try
                             {
-                                shape = (TagShape)Enum.Parse(typeof(TagShape), tag.BackgroundStyle.Shape ?? "Tag");
+                                shape = (TagShape)Enum.Parse(typeof(TagShape), tag.Background.Shape ?? "Tag");
                             }
                             catch
                             {
@@ -175,7 +175,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
                             BlurIntensity blur;
                             try
                             {
-                                blur = (BlurIntensity)Enum.Parse(typeof(BlurIntensity), tag.BackgroundStyle.Blur ?? "None");
+                                blur = (BlurIntensity)Enum.Parse(typeof(BlurIntensity), tag.Background.Blur ?? "None");
                             }
                             catch
                             {
@@ -236,7 +236,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             }
         }
 
-        private double CalculateDynamicWidth(Geometry markerGeometry, CommentToken tag)
+        private double CalculateDynamicWidth(Geometry markerGeometry, CommentRule rule)
         {
             double baseWidth = markerGeometry.Bounds.Width;
 
@@ -246,7 +246,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             TagShape shape;
             try
             {
-                shape = (TagShape)Enum.Parse(typeof(TagShape), tag.BackgroundStyle.Shape ?? "Tag");
+                shape = (TagShape)Enum.Parse(typeof(TagShape), rule.Background?.Shape ?? "Tag");
             }
             catch
             {
@@ -283,15 +283,15 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             return "Alpha_1_10";
         }
 
-        private void AddMarker(SnapshotSpan span, Geometry markerGeometry, CommentToken tag)
+        private void AddMarker(SnapshotSpan span, Geometry markerGeometry, CommentRule rule)
         {
-            double width = CalculateDynamicWidth(markerGeometry, tag);
+            double width = CalculateDynamicWidth(markerGeometry, rule);
             double height = markerGeometry.Bounds.Height;
 
             TagShape shape;
             try
             {
-                shape = (TagShape)Enum.Parse(typeof(TagShape), tag.BackgroundStyle.Shape ?? "Tag");
+                shape = (TagShape)Enum.Parse(typeof(TagShape), rule.Background?.Shape ?? "Tag");
             }
             catch
             {
@@ -301,7 +301,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             BlurIntensity blur;
             try
             {
-                blur = (BlurIntensity)Enum.Parse(typeof(BlurIntensity), tag.BackgroundStyle.Blur ?? "None");
+                blur = (BlurIntensity)Enum.Parse(typeof(BlurIntensity), rule.Background.Blur ?? "None");
             }
             catch
             {
@@ -311,7 +311,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             FillAlpha alpha;
             try
             {
-                string alphaEnumFormat = ConvertAlphaToEnumFormat(tag.BackgroundStyle.Alpha ?? "1/10");
+                string alphaEnumFormat = ConvertAlphaToEnumFormat(rule.Background.Alpha ?? "1/10");
                 alpha = (FillAlpha)Enum.Parse(typeof(FillAlpha), alphaEnumFormat);
             }
             catch
@@ -320,13 +320,13 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             }
 
             Color color;
-            if (!string.IsNullOrEmpty(tag.BackgroundStyle.ColorHex))
+            if (!string.IsNullOrEmpty(rule.Background.ColorHex))
             {
-                color = BackgroundHelper.HexToColor(tag.BackgroundStyle.ColorHex);
+                color = BackgroundHelper.HexToColor(rule.Background.ColorHex);
             }
-            else if (!string.IsNullOrEmpty(tag.ColorHex))
+            else if (!string.IsNullOrEmpty(rule.ColorHex))
             {
-                color = BackgroundHelper.HexToColor(tag.ColorHex);
+                color = BackgroundHelper.HexToColor(rule.ColorHex);
             }
             else
             {

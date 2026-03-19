@@ -18,35 +18,35 @@ namespace BetterCommentsPlus.CommentsTagging
         {
             var commentInfo = GetCommentInfo(span);
 
-            if (commentInfo.Token == null)
+            if (commentInfo.Rule == null)
                 return new Comment(new List<SnapshotSpan> { span }, CommentCategory.Normal);
 
-            if (commentInfo.Token.IsDynamic)
+            if (!commentInfo.Rule.IsPredefined)
             {
                 var commentSpans = new List<SnapshotSpan>();
                 var firstLineNumber = span.Snapshot.GetLineFromPosition(span.Start).LineNumber;
                 var lastLineNumber = span.Snapshot.GetLineFromPosition(span.End).LineNumber;
                 var spanText = span.GetText().ToLower();
-                var token = commentInfo.Token.CurrentValue;
-                var tokenLower = token.ToLower();
+                var criteria = commentInfo.Rule.Criteria;
+                var criteriaLower = criteria.ToLower();
 
                 if (firstLineNumber == lastLineNumber)
                 {
                     var startOffset = 0;
-                    if (spanText.StartsWith("//", OrdinalIgnoreCase))
+                    if (spanText.StartsWith("//", StringComparison.OrdinalIgnoreCase))
                     {
-                        startOffset = spanText.IndexOf(tokenLower, OrdinalIgnoreCase);
+                        startOffset = spanText.IndexOf(criteriaLower, StringComparison.OrdinalIgnoreCase);
                         if (startOffset < 0) startOffset = 2;
                     }
-                    else if (spanText.StartsWith("/*", OrdinalIgnoreCase))
+                    else if (spanText.StartsWith("/*", StringComparison.OrdinalIgnoreCase))
                     {
-                        startOffset = spanText.IndexOf(tokenLower, OrdinalIgnoreCase);
+                        startOffset = spanText.IndexOf(criteriaLower, StringComparison.OrdinalIgnoreCase);
                         if (startOffset < 0) startOffset = 2;
                     }
                     
                     int actualStartOffset = Settings.HighlightCriteriaItself 
                         ? startOffset 
-                        : spanText.IndexOfFirstChar(startOffset + token.Length);
+                        : spanText.IndexOfFirstChar(startOffset + criteria.Length);
                     
                     var spanLength = span.Length - actualStartOffset;
                     if (spanLength > 0)
@@ -61,12 +61,12 @@ namespace BetterCommentsPlus.CommentsTagging
 
                         if (curr == firstLineNumber)
                         {
-                            var startOffset = lineText.IndexOf(tokenLower, OrdinalIgnoreCase);
+                            var startOffset = lineText.IndexOf(criteriaLower, StringComparison.OrdinalIgnoreCase);
                             if (startOffset < 0) startOffset = lineText.IndexOfFirstChar();
                             
                             int actualStartOffset = Settings.HighlightCriteriaItself 
                                 ? startOffset 
-                                : lineText.IndexOfFirstChar(startOffset + token.Length);
+                                : lineText.IndexOfFirstChar(startOffset + criteria.Length);
                             
                             commentSpans.Add(new SnapshotSpan(span.Snapshot, line.Start + actualStartOffset, line.Length - actualStartOffset));
                         }
@@ -78,10 +78,10 @@ namespace BetterCommentsPlus.CommentsTagging
                                 commentSpans.Add(new SnapshotSpan(span.Snapshot, line.Start + startOffset, line.Length - startOffset));
                             }
                         }
-                        else if (lineText.Contains("*/") && !lineText.Trim().StartsWith("*/", OrdinalIgnoreCase))
+                        else if (lineText.Contains("*/") && !lineText.Trim().StartsWith("*/", StringComparison.OrdinalIgnoreCase))
                         {
                             var startOffset = lineText.IndexOfFirstChar();
-                            var closerIndex = lineText.IndexOf("*/", OrdinalIgnoreCase);
+                            var closerIndex = lineText.IndexOf("*/", StringComparison.OrdinalIgnoreCase);
                             var spanLength = lineText.IndexOfFirstCharReverse(closerIndex - 1) - startOffset + 1;
 
                             commentSpans.Add(new SnapshotSpan(span.Snapshot, line.Start + startOffset, spanLength));
@@ -89,17 +89,17 @@ namespace BetterCommentsPlus.CommentsTagging
                     }
                 }
 
-                return new Comment(commentSpans, commentInfo.Token.RuleId, commentInfo.Token.CurrentValue);
+                return new Comment(commentSpans, commentInfo.Rule.Id, commentInfo.Rule.Criteria);
             }
 
-            var commentCategory = (CommentCategory?)commentInfo.Token.Type;
+            var commentCategory = commentInfo.Rule.Category;
 
             // Color only the "Todo" keyword.
             if (Settings.HighlightTaskKeywordOnly && commentCategory == CommentCategory.Task)
             {
                 var spanText = span.GetText().ToLower();
                 var token = Settings.GetTokenValue(CommentCategory.Task);
-                var start = spanText.IndexOf(token, OrdinalIgnoreCase);
+                var start = spanText.IndexOf(token, StringComparison.OrdinalIgnoreCase);
 
                 return new Comment(
                     new List<SnapshotSpan> { new SnapshotSpan(span.Snapshot, span.Start + start, token.Length) },
@@ -115,7 +115,7 @@ namespace BetterCommentsPlus.CommentsTagging
 
         protected struct CommentInfo
         {
-            public CommentToken Token;
+            public CommentRule Rule;
             public int MatchStart;
             public int MatchLength;
         }
@@ -124,27 +124,28 @@ namespace BetterCommentsPlus.CommentsTagging
         {
             var commentText = SpanTextWithoutCommentStarter(span).ToLower().Trim();
             
-            foreach (var token in Settings.CommentTokens.OrderBy(t => t.IsDynamic ? 1 : 0))
+            // 优先查找 Solution Rules，然后是 Global Rules
+            foreach (var rule in Settings.SolutionRules.Concat(Settings.GlobalRules).OrderBy(r => r.IsPredefined ? 1 : 0))
             {
-                var criteria = token.CurrentValue.ToLower();
-                if (commentText.StartsWith(criteria, OrdinalIgnoreCase))
+                var criteria = rule.Criteria.ToLower();
+                if (commentText.StartsWith(criteria, StringComparison.OrdinalIgnoreCase))
                 {
                     return new CommentInfo
                     {
-                        Token = token,
+                        Rule = rule,
                         MatchStart = 0,
                         MatchLength = criteria.Length
                     };
                 }
             }
 
-            return new CommentInfo { Token = null };
+            return new CommentInfo { Rule = null };
         }
 
         protected virtual CommentCategory? GetCommentType(SnapshotSpan span)
         {
             var commentInfo = GetCommentInfo(span);
-            return (CommentCategory?)commentInfo.Token?.Type ?? CommentCategory.Normal;
+            return commentInfo.Rule?.Category ?? CommentCategory.Normal;
         }
 
         protected abstract Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory);

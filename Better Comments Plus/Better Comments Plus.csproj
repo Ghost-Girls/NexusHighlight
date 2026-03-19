@@ -95,18 +95,14 @@
     <Compile Include="CommentsViewCustomization\BackgroundHelper.cs" />
     <Compile Include="CommentsViewCustomization\CommentViewDecorator.cs" />
     <Compile Include="CommentsViewCustomization\CommentViewCreationListener.cs" />
-    <Compile Include="Options\Infrastructure\CommentToken.cs" />
     <Compile Include="Options\Infrastructure\EnumToStringConverter.cs" />
     <Compile Include="Options\Infrastructure\HexToColorConverter.cs" />
     <Compile Include="Options\Infrastructure\RelayCommand.cs" />
     <Compile Include="Options\Infrastructure\ForegroundStyle.cs" />
     <Compile Include="Options\Infrastructure\BackgroundStyle.cs" />
-    <Compile Include="Options\Infrastructure\StyleRule.cs" />
     <Compile Include="Options\Infrastructure\CommentRule.cs" />
     <Compile Include="Options\Infrastructure\CommentCategory.cs" />
     <Compile Include="Options\Infrastructure\RuleScope.cs" />
-    <Compile Include="Options\Infrastructure\ConfigMigrator.cs" />
-    <Compile Include="Options\Infrastructure\UnifiedConfig.cs" />
     <Compile Include="Options\OptionsPageBase.cs">
       <SubType>Component</SubType>
     </Compile>
