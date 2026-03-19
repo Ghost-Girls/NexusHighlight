@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using Microsoft.VisualStudio.Shell;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -54,17 +54,17 @@ namespace BetterCommentsPlus.Options
       {
          // 验证 Global 集合
          var globalRule = new RequiredAndUniqueRule { IsGlobalScope = true };
-         foreach (var tk in Settings.Instance.GlobalCommentTokens)
+         foreach (var rule in Settings.Instance.GlobalRules)
          {
-            if (!globalRule.Validate(tk.CurrentValue, CultureInfo.InvariantCulture).IsValid)
+            if (!globalRule.Validate(rule.Criteria, CultureInfo.InvariantCulture).IsValid)
                return false;
          }
 
          // 验证 Solution 集合
          var solutionRule = new RequiredAndUniqueRule { IsSolutionScope = true };
-         foreach (var tk in Settings.Instance.SolutionCommentTokens)
+         foreach (var rule in Settings.Instance.SolutionRules)
          {
-            if (!solutionRule.Validate(tk.CurrentValue, CultureInfo.InvariantCulture).IsValid)
+            if (!solutionRule.Validate(rule.Criteria, CultureInfo.InvariantCulture).IsValid)
                return false;
          }
 

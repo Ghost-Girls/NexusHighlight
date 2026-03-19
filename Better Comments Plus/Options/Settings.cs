@@ -332,10 +332,13 @@ namespace BetterCommentsPlus.Options
             return globalCommentTokens.FirstOrDefault(t => t.Type == type);
         }
 
-        public string GetTokenValue(CommentType type)
+        public string GetTokenValue(CommentCategory? category)
         {
-            var token = GetToken(type);
-            return token?.CurrentValue ?? "";
+            if (!category.HasValue)
+                return "";
+            
+            var rule = GetRule(category.Value);
+            return rule?.Criteria ?? "";
         }
 
         public void ClearSolutionTokens()

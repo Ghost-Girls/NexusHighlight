@@ -99,17 +99,17 @@ namespace BetterCommentsPlus.CommentsViewCustomization
          var appliedCriteria = new HashSet<string>();
          
          // 先应用 Solution Rules
-         foreach (var token in settings.SolutionCommentTokens)
+         foreach (var rule in settings.SolutionRules)
          {
-            if (!string.IsNullOrEmpty(token.RuleId))
+            if (!string.IsNullOrEmpty(rule.Id))
             {
-               appliedCriteria.Add(token.CurrentValue);
+               appliedCriteria.Add(rule.Criteria);
                
-               var classificationType = regService.GetClassificationType(token.RuleId);
+               var classificationType = regService.GetClassificationType(rule.Id);
                if (classificationType == null)
                {
                   classificationType = regService.CreateClassificationType(
-                      token.RuleId,
+                      rule.Id,
                       new[] { regService.GetClassificationType("comment") });
                }
                SetProperties(classificationType);
@@ -117,15 +117,15 @@ namespace BetterCommentsPlus.CommentsViewCustomization
          }
          
          // 再应用 Global Rules，但跳过已经在 Solution 中应用过的 Criteria
-         foreach (var token in settings.GlobalCommentTokens)
+         foreach (var rule in settings.GlobalRules)
          {
-            if (!string.IsNullOrEmpty(token.RuleId) && !appliedCriteria.Contains(token.CurrentValue))
+            if (!string.IsNullOrEmpty(rule.Id) && !appliedCriteria.Contains(rule.Criteria))
             {
-               var classificationType = regService.GetClassificationType(token.RuleId);
+               var classificationType = regService.GetClassificationType(rule.Id);
                if (classificationType == null)
                {
                   classificationType = regService.CreateClassificationType(
-                      token.RuleId,
+                      rule.Id,
                       new[] { regService.GetClassificationType("comment") });
                }
                SetProperties(classificationType);
@@ -182,28 +182,28 @@ namespace BetterCommentsPlus.CommentsViewCustomization
       {
          try
          {
-            CommentType? commentType = null;
+            CommentCategory? commentCategory = null;
             string criteria = null;
             string ruleId = classificationType.Classification;
 
             if (classificationType.IsOfType(CommentNames.IMPORTANT_COMMENT))
             {
-               commentType = CommentType.Important;
+               commentCategory = CommentCategory.Important;
                criteria = "#IMPORTANT";
             }
             else if (classificationType.IsOfType(CommentNames.QUESTION_COMMENT))
             {
-               commentType = CommentType.Question;
+               commentCategory = CommentCategory.Question;
                criteria = "#QUESTION";
             }
             else if (classificationType.IsOfType(CommentNames.REMOVE_COMMENT))
             {
-               commentType = CommentType.Remove;
+               commentCategory = CommentCategory.Remove;
                criteria = "#REMOVE";
             }
             else if (classificationType.IsOfType(CommentNames.TASK_COMMENT))
             {
-               commentType = CommentType.Task;
+               commentCategory = CommentCategory.Task;
                criteria = "#TASK";
             }
 
@@ -213,47 +213,49 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             bool? hasUnderline = null;
             bool? hasStrikethrough = null;
             bool? isForegroundActive = null;
+            BackgroundStyle background = null;
 
             // 优先查找 Solution Rules 中是否有匹配的 Criteria
             // Solution Rules 优先级高于 Global Rules
-            CommentToken matchingToken = null;
+            CommentRule matchingRule = null;
             
             // 先在 Solution Rules 中查找
             if (!string.IsNullOrEmpty(criteria))
             {
-               matchingToken = settings.SolutionCommentTokens.FirstOrDefault(t => t.CurrentValue == criteria);
+               matchingRule = settings.SolutionRules.FirstOrDefault(r => r.Criteria == criteria);
             }
             
             // 如果 Solution Rules 中没有，再在 Global Rules 中查找
-            if (matchingToken == null && !string.IsNullOrEmpty(criteria))
+            if (matchingRule == null && !string.IsNullOrEmpty(criteria))
             {
-               matchingToken = settings.GlobalCommentTokens.FirstOrDefault(t => t.CurrentValue == criteria);
+               matchingRule = settings.GlobalRules.FirstOrDefault(r => r.Criteria == criteria);
             }
             
             // 如果还是没有找到，尝试通过 ruleId 查找（向后兼容）
-            if (matchingToken == null)
+            if (matchingRule == null)
             {
-               matchingToken = settings.CommentTokens.FirstOrDefault(t => t.RuleId == ruleId);
+               matchingRule = settings.AllRules.FirstOrDefault(r => r.Id == ruleId);
             }
             
-            // 如果还是没找到，尝试通过 commentType 查找预设规则
-            if (matchingToken == null && commentType.HasValue)
+            // 如果还是没找到，尝试通过 commentCategory 查找预设规则
+            if (matchingRule == null && commentCategory.HasValue)
             {
-               matchingToken = settings.GetToken(commentType.Value);
+               matchingRule = settings.GetRule(commentCategory.Value);
             }
 
-            // 应用找到的 Token 的样式
-            if (matchingToken != null)
+            // 应用找到的 Rule 的样式
+            if (matchingRule != null)
             {
-               if (!string.IsNullOrEmpty(matchingToken.ColorHex))
+               if (!string.IsNullOrEmpty(matchingRule.ColorHex))
                {
-                  colorHex = matchingToken.ColorHex;
+                  colorHex = matchingRule.ColorHex;
                }
-               isBold = matchingToken.IsBold;
-               isItalic = matchingToken.IsItalic;
-               hasUnderline = matchingToken.HasUnderline;
-               hasStrikethrough = matchingToken.HasStrikethrough;
-               isForegroundActive = matchingToken.IsForegroundActive;
+               isBold = matchingRule.IsBold;
+               isItalic = matchingRule.IsItalic;
+               hasUnderline = matchingRule.HasUnderline;
+               hasStrikethrough = matchingRule.HasStrikethrough;
+               isForegroundActive = matchingRule.IsForegroundActive;
+               background = matchingRule.Background;
             }
 
             bool shouldApplyForeground = isForegroundActive.GetValueOrDefault(true);

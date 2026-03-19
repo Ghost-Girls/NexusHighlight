@@ -1,4 +1,4 @@
-﻿using BetterCommentsPlus.Options;
+using BetterCommentsPlus.Options;
 using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections.Generic;
@@ -14,13 +14,13 @@ namespace BetterCommentsPlus.CommentsTagging
             return txt.StartsWith("//", OrdinalIgnoreCase) || txt.StartsWith("/*", OrdinalIgnoreCase);
         }
 
-        protected override Comment SpecificParse(SnapshotSpan span, CommentType commentType)
+        protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
         {
             var spanText = span.GetText().ToLower();
 
             var commentSpans = new List<SnapshotSpan>();
 
-            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", commentType);
+            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", commentCategory);
 
             // single line comment
             if (spanText.StartsWith("//", OrdinalIgnoreCase))
@@ -33,7 +33,7 @@ namespace BetterCommentsPlus.CommentsTagging
                   && spanText.EndsWith("*/", OrdinalIgnoreCase)
                   && spanText.Length > 5)
             {
-                startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, commentType);
+                startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, commentCategory);
 
                 var indexOfStarter = spanText.IndexOf("*/", OrdinalIgnoreCase);
                 var spanLength = spanText.IndexOfFirstCharReverse(indexOfStarter - 1) - (startOffset - 1);
@@ -42,17 +42,17 @@ namespace BetterCommentsPlus.CommentsTagging
                     commentSpans.Add(new SnapshotSpan(span.Snapshot, span.Start + startOffset, spanLength));
             }
 
-            return new Comment(commentSpans, commentType);
+            return new Comment(commentSpans, commentCategory);
         }
 
-        protected override CommentType GetCommentType(SnapshotSpan span)
+        protected override CommentCategory? GetCommentType(SnapshotSpan span)
         {
 			// #HACK 
 			//if (Settings.StrikethroughDoubleComments && span.GetText().StartsWith("//x", OrdinalIgnoreCase))
-			//	return CommentType.x;
+			//	return CommentCategory.x;
 
 			if (Settings.StrikethroughDoubleComments && span.GetText().StartsWith("////", OrdinalIgnoreCase))
-                return CommentType.Remove;
+                return CommentCategory.Remove;
 
             return base.GetCommentType(span);
         }

@@ -16,7 +16,7 @@ namespace BetterCommentsPlus.Options
    public partial class OptionsTokensPageControl
    {
       private Point _dragStartPoint;
-      private CommentToken _draggedItem;
+      private CommentRule _draggedItem;
       private int _draggedIndex = -1;
       private bool _isDragging;
       private ListBoxItem _dragSourceItem;
@@ -35,14 +35,14 @@ namespace BetterCommentsPlus.Options
 
       private void ColorPreviewBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
       {
-         if (sender is Border border && border.DataContext is CommentToken token)
+         if (sender is Border border && border.DataContext is CommentRule rule)
          {
             Color? initialColor = null;
-            if (!string.IsNullOrEmpty(token.ColorHex))
+            if (!string.IsNullOrEmpty(rule.ColorHex))
             {
                try
                {
-                  initialColor = (Color)ColorConverter.ConvertFromString(token.ColorHex);
+                  initialColor = (Color)ColorConverter.ConvertFromString(rule.ColorHex);
                }
                catch { }
             }
@@ -54,22 +54,22 @@ namespace BetterCommentsPlus.Options
 
             if (dialog.ShowDialog() == true && dialog.SelectedColor.HasValue)
             {
-               token.ColorHex = $"#{dialog.SelectedColor.Value.A:X2}{dialog.SelectedColor.Value.R:X2}{dialog.SelectedColor.Value.G:X2}{dialog.SelectedColor.Value.B:X2}";
-               Settings.Instance.SyncCommentTokensToUnifiedConfig();
+               rule.ColorHex = $"#{dialog.SelectedColor.Value.A:X2}{dialog.SelectedColor.Value.R:X2}{dialog.SelectedColor.Value.G:X2}{dialog.SelectedColor.Value.B:X2}";
+               Settings.Instance.OnConfigurationChanged();
             }
          }
       }
 
       private void BackgroundColorPreviewBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
       {
-         if (sender is Border border && border.DataContext is CommentToken token && token.BackgroundStyle != null)
+         if (sender is Border border && border.DataContext is CommentRule rule && rule.Background != null)
          {
             Color? initialColor = null;
-            if (!string.IsNullOrEmpty(token.BackgroundStyle.ColorHex))
+            if (!string.IsNullOrEmpty(rule.Background.ColorHex))
             {
                try
                {
-                  initialColor = (Color)ColorConverter.ConvertFromString(token.BackgroundStyle.ColorHex);
+                  initialColor = (Color)ColorConverter.ConvertFromString(rule.Background.ColorHex);
                }
                catch { }
             }
@@ -81,8 +81,7 @@ namespace BetterCommentsPlus.Options
 
             if (dialog.ShowDialog() == true && dialog.SelectedColor.HasValue)
             {
-               token.BackgroundStyle.ColorHex = $"#{dialog.SelectedColor.Value.A:X2}{dialog.SelectedColor.Value.R:X2}{dialog.SelectedColor.Value.G:X2}{dialog.SelectedColor.Value.B:X2}";
-               Settings.Instance.SyncCommentTokensToUnifiedConfig();
+               rule.Background.ColorHex = $"#{dialog.SelectedColor.Value.A:X2}{dialog.SelectedColor.Value.R:X2}{dialog.SelectedColor.Value.G:X2}{dialog.SelectedColor.Value.B:X2}";
                Settings.Instance.OnConfigurationChanged();
             }
          }
@@ -96,15 +95,15 @@ namespace BetterCommentsPlus.Options
       {
          _dragStartPoint = e.GetPosition(null);
          
-         if (sender is Border grip && grip.DataContext is CommentToken token)
+         if (sender is Border grip && grip.DataContext is CommentRule rule)
          {
-            _draggedItem = token;
+            _draggedItem = rule;
             _currentDraggingListBox = FindParentListBox(grip);
             
-            if (_currentDraggingListBox == GlobalTokensList)
-                _draggedIndex = Settings.Instance.GlobalCommentTokens.IndexOf(token);
-            else if (_currentDraggingListBox == SolutionTokensList)
-                _draggedIndex = Settings.Instance.SolutionCommentTokens.IndexOf(token);
+            if (_currentDraggingListBox == GlobalRulesList)
+                _draggedIndex = Settings.Instance.GlobalRules.IndexOf(rule);
+            else if (_currentDraggingListBox == SolutionRulesList)
+                _draggedIndex = Settings.Instance.SolutionRules.IndexOf(rule);
             
             var listBoxItem = GetListBoxItemAncestor(grip);
             if (listBoxItem != null)
@@ -140,17 +139,17 @@ namespace BetterCommentsPlus.Options
          return obj as ListBoxItem;
       }
 
-      private void GlobalTokensList_MouseMove(object sender, MouseEventArgs e)
+      private void GlobalRulesList_MouseMove(object sender, MouseEventArgs e)
       {
-         HandleListBoxMouseMove(sender as ListBox, e, Settings.Instance.GlobalCommentTokens);
+         HandleListBoxMouseMove(sender as ListBox, e, Settings.Instance.GlobalRules);
       }
 
-      private void SolutionTokensList_MouseMove(object sender, MouseEventArgs e)
+      private void SolutionRulesList_MouseMove(object sender, MouseEventArgs e)
       {
-         HandleListBoxMouseMove(sender as ListBox, e, Settings.Instance.SolutionCommentTokens);
+         HandleListBoxMouseMove(sender as ListBox, e, Settings.Instance.SolutionRules);
       }
 
-      private void HandleListBoxMouseMove(ListBox listBox, MouseEventArgs e, ObservableCollection<CommentToken> tokens)
+      private void HandleListBoxMouseMove(ListBox listBox, MouseEventArgs e, ObservableCollection<CommentRule> rules)
       {
          if (e.LeftButton == MouseButtonState.Pressed && _draggedItem != null && _draggedIndex >= 0)
          {
@@ -205,22 +204,22 @@ namespace BetterCommentsPlus.Options
          return listBox.Items.Count;
       }
 
-      private void GlobalTokensList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+      private void GlobalRulesList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
       {
-         HandleListBoxMouseUp(sender as ListBox, e, Settings.Instance.GlobalCommentTokens, GlobalTokensList);
+         HandleListBoxMouseUp(sender as ListBox, e, Settings.Instance.GlobalRules, GlobalRulesList);
       }
 
-      private void SolutionTokensList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+      private void SolutionRulesList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
       {
-         HandleListBoxMouseUp(sender as ListBox, e, Settings.Instance.SolutionCommentTokens, SolutionTokensList);
+         HandleListBoxMouseUp(sender as ListBox, e, Settings.Instance.SolutionRules, SolutionRulesList);
       }
 
-      private void HandleListBoxMouseUp(ListBox listBox, MouseButtonEventArgs e, ObservableCollection<CommentToken> tokens, ListBox targetListBox)
+      private void HandleListBoxMouseUp(ListBox listBox, MouseButtonEventArgs e, ObservableCollection<CommentRule> rules, ListBox targetListBox)
       {
          if (_isDragging && _draggedIndex >= 0)
          {
             var settings = DataContext as Settings;
-            var targetTokens = listBox == GlobalTokensList ? settings.GlobalCommentTokens : settings.SolutionCommentTokens;
+            var targetRules = listBox == GlobalRulesList ? settings.GlobalRules : settings.SolutionRules;
 
             if (targetListBox != null && settings != null)
             {
@@ -234,13 +233,12 @@ namespace BetterCommentsPlus.Options
                
                if (_draggedIndex >= 0 && newIndex >= 0 && _draggedIndex != newIndex)
                {
-                  targetTokens.Move(_draggedIndex, newIndex);
+                  targetRules.Move(_draggedIndex, newIndex);
                   targetListBox.SelectedItem = _draggedItem;
                }
             }
 
             Settings.Instance.IsDragging = false;
-            Settings.Instance.SyncCommentTokensToUnifiedConfig();
             Settings.Instance.OnConfigurationChanged();
          }
 
@@ -280,10 +278,10 @@ namespace BetterCommentsPlus.Options
 
       private void AddGlobalButton_Click(object sender, RoutedEventArgs e)
       {
-         AddToken(Settings.Instance.GlobalCommentTokens, GlobalTokensList);
+         AddRule(Settings.Instance.GlobalRules, GlobalRulesList);
       }
 
-      private void AddToken(ObservableCollection<CommentToken> tokens, ListBox listBox)
+      private void AddRule(ObservableCollection<CommentRule> rules, ListBox listBox)
       {
          var settings = DataContext as Settings;
          if (settings == null)
@@ -295,20 +293,20 @@ namespace BetterCommentsPlus.Options
          {
             newCriteria = $"#NEW{counter}";
             counter++;
-         } while (settings.GlobalCommentTokens.Any(t => t.CurrentValue == newCriteria) ||
-                  settings.SolutionCommentTokens.Any(t => t.CurrentValue == newCriteria));
+         } while (settings.GlobalRules.Any(t => t.Criteria == newCriteria) ||
+                  settings.SolutionRules.Any(t => t.Criteria == newCriteria));
 
-         var newToken = new CommentToken(
-             type: CommentType.Important,
-             defaultValue: newCriteria,
-             value: newCriteria,
-             colorHex: "#FFFF0000");
+         var newRule = new CommentRule
+         {
+            Id = Guid.NewGuid().ToString(),
+            Criteria = newCriteria,
+            Category = CommentCategory.Important,
+            ColorHex = "#FFFF0000",
+            IsPredefined = false
+         };
 
-         newToken.RuleId = Guid.NewGuid().ToString();
-         newToken.IsDynamic = true;
-
-         tokens.Add(newToken);
-         listBox.SelectedItem = newToken;
+         rules.Add(newRule);
+         listBox.SelectedItem = newRule;
       }
 
       #endregion
@@ -317,17 +315,15 @@ namespace BetterCommentsPlus.Options
 
       private void DeleteButton_Click(object sender, RoutedEventArgs e)
       {
-         if (sender is Button button && button.Tag is CommentToken token)
+         if (sender is Button button && button.Tag is CommentRule rule)
          {
             var settings = DataContext as Settings;
             if (settings != null)
             {
-               if (settings.GlobalCommentTokens.Contains(token))
-                  settings.GlobalCommentTokens.Remove(token);
-               else if (settings.SolutionCommentTokens.Contains(token))
-                  settings.SolutionCommentTokens.Remove(token);
-               
-               Settings.Instance.SyncCommentTokensToUnifiedConfig();
+               if (settings.GlobalRules.Contains(rule))
+                  settings.GlobalRules.Remove(rule);
+               else if (settings.SolutionRules.Contains(rule))
+                  settings.SolutionRules.Remove(rule);
             }
          }
       }
@@ -338,25 +334,25 @@ namespace BetterCommentsPlus.Options
 
       private void MoveUpGlobalButton_Click(object sender, RoutedEventArgs e)
       {
-         MoveUp(Settings.Instance.GlobalCommentTokens, GlobalTokensList);
+         MoveUp(Settings.Instance.GlobalRules, GlobalRulesList);
       }
 
       private void MoveDownGlobalButton_Click(object sender, RoutedEventArgs e)
       {
-         MoveDown(Settings.Instance.GlobalCommentTokens, GlobalTokensList);
+         MoveDown(Settings.Instance.GlobalRules, GlobalRulesList);
       }
 
       private void MoveUpSolutionButton_Click(object sender, RoutedEventArgs e)
       {
-         MoveUp(Settings.Instance.SolutionCommentTokens, SolutionTokensList);
+         MoveUp(Settings.Instance.SolutionRules, SolutionRulesList);
       }
 
       private void MoveDownSolutionButton_Click(object sender, RoutedEventArgs e)
       {
-         MoveDown(Settings.Instance.SolutionCommentTokens, SolutionTokensList);
+         MoveDown(Settings.Instance.SolutionRules, SolutionRulesList);
       }
 
-      private void MoveUp(ObservableCollection<CommentToken> tokens, ListBox listBox)
+      private void MoveUp(ObservableCollection<CommentRule> rules, ListBox listBox)
       {
          var settings = DataContext as Settings;
          if (settings == null || listBox.SelectedItem == null)
@@ -365,25 +361,23 @@ namespace BetterCommentsPlus.Options
          int selectedIndex = listBox.SelectedIndex;
          if (selectedIndex > 0)
          {
-            tokens.Move(selectedIndex, selectedIndex - 1);
+            rules.Move(selectedIndex, selectedIndex - 1);
             listBox.SelectedIndex = selectedIndex - 1;
-            Settings.Instance.SyncCommentTokensToUnifiedConfig();
             Settings.Instance.OnConfigurationChanged();
          }
       }
 
-      private void MoveDown(ObservableCollection<CommentToken> tokens, ListBox listBox)
+      private void MoveDown(ObservableCollection<CommentRule> rules, ListBox listBox)
       {
          var settings = DataContext as Settings;
          if (settings == null || listBox.SelectedItem == null)
             return;
 
          int selectedIndex = listBox.SelectedIndex;
-         if (selectedIndex >= 0 && selectedIndex < tokens.Count - 1)
+         if (selectedIndex >= 0 && selectedIndex < rules.Count - 1)
          {
-            tokens.Move(selectedIndex, selectedIndex + 1);
+            rules.Move(selectedIndex, selectedIndex + 1);
             listBox.SelectedIndex = selectedIndex + 1;
-            Settings.Instance.SyncCommentTokensToUnifiedConfig();
             Settings.Instance.OnConfigurationChanged();
          }
       }
@@ -402,13 +396,13 @@ namespace BetterCommentsPlus.Options
 
          if (result == MessageBoxResult.Yes)
          {
-            Settings.Instance.CopyAllFromGlobalToSolution();
+            Settings.Instance.CopyAllFromGlobalToSolutionRules();
          }
       }
 
       private void ImportFromGlobalButton_Click(object sender, RoutedEventArgs e)
       {
-         if (Settings.Instance.GlobalCommentTokens.Count > 0)
+         if (Settings.Instance.GlobalRules.Count > 0)
          {
             var dialog = new Window
             {
@@ -434,8 +428,8 @@ namespace BetterCommentsPlus.Options
 
             var listBox = new ListBox
             {
-               ItemsSource = Settings.Instance.GlobalCommentTokens,
-               DisplayMemberPath = "CurrentValue",
+               ItemsSource = Settings.Instance.GlobalRules,
+               DisplayMemberPath = "Criteria",
                SelectionMode = SelectionMode.Extended,
                Margin = new Thickness(10)
             };
@@ -457,38 +451,36 @@ namespace BetterCommentsPlus.Options
             };
             okButton.Click += (s, args) =>
             {
-               var selectedTags = listBox.SelectedItems.Cast<CommentToken>().ToList();
-               if (selectedTags.Count > 0)
+               var selectedRules = listBox.SelectedItems.Cast<CommentRule>().ToList();
+               if (selectedRules.Count > 0)
                {
-                  foreach (var selectedTag in selectedTags)
+                  foreach (var selectedRule in selectedRules)
                   {
-                     var newToken = new CommentToken(
-                         type: selectedTag.Type,
-                         defaultValue: selectedTag.DefaultValue,
-                         value: selectedTag.CurrentValue,
-                         colorHex: selectedTag.ColorHex)
+                     var newRule = new CommentRule
                      {
-                        IsBold = selectedTag.IsBold,
-                        IsItalic = selectedTag.IsItalic,
-                        HasUnderline = selectedTag.HasUnderline,
-                        HasStrikethrough = selectedTag.HasStrikethrough,
-                        IsForegroundActive = selectedTag.IsForegroundActive,
-                        IsDynamic = true,
-                        RuleId = Guid.NewGuid().ToString(),
-                        BackgroundStyle = new BackgroundStyle
+                        Id = Guid.NewGuid().ToString(),
+                        Criteria = selectedRule.Criteria,
+                        Category = selectedRule.Category,
+                        ColorHex = selectedRule.ColorHex,
+                        IsBold = selectedRule.IsBold,
+                        IsItalic = selectedRule.IsItalic,
+                        HasUnderline = selectedRule.HasUnderline,
+                        HasStrikethrough = selectedRule.HasStrikethrough,
+                        IsForegroundActive = selectedRule.IsForegroundActive,
+                        IsPredefined = false,
+                        Background = new BackgroundStyle
                         {
-                           IsActive = selectedTag.BackgroundStyle?.IsActive ?? false,
-                           ColorHex = selectedTag.BackgroundStyle?.ColorHex,
-                           Shape = selectedTag.BackgroundStyle?.Shape ?? "Tag",
-                           Blur = selectedTag.BackgroundStyle?.Blur ?? "None",
-                           Alpha = selectedTag.BackgroundStyle?.Alpha ?? "1/10",
-                           IsCaseSensitive = selectedTag.BackgroundStyle?.IsCaseSensitive ?? true,
-                           AllowPartialMatch = selectedTag.BackgroundStyle?.AllowPartialMatch ?? false
+                           IsActive = selectedRule.Background?.IsActive ?? false,
+                           ColorHex = selectedRule.Background?.ColorHex,
+                           Shape = selectedRule.Background?.Shape ?? "Tag",
+                           Blur = selectedRule.Background?.Blur ?? "None",
+                           Alpha = selectedRule.Background?.Alpha ?? "1/10",
+                           IsCaseSensitive = selectedRule.Background?.IsCaseSensitive ?? true,
+                           AllowPartialMatch = selectedRule.Background?.AllowPartialMatch ?? false
                         }
                      };
-                     Settings.Instance.SolutionCommentTokens.Add(newToken);
+                     Settings.Instance.SolutionRules.Add(newRule);
                   }
-                  Settings.Instance.SyncCommentTokensToUnifiedConfig();
                   Settings.Instance.OnConfigurationChanged();
                   dialog.Close();
                }
@@ -532,7 +524,7 @@ namespace BetterCommentsPlus.Options
 
          if (result == MessageBoxResult.Yes)
          {
-            Settings.Instance.ClearSolutionTokens();
+            Settings.Instance.ClearSolutionRules();
          }
       }
 
@@ -542,27 +534,27 @@ namespace BetterCommentsPlus.Options
 
       private void ExportGlobalButton_Click(object sender, RoutedEventArgs e)
       {
-         ExportRules(Settings.Instance.GlobalCommentTokens, "Global", "BetterCommentsPlus_GlobalRules.json");
+         ExportRules(Settings.Instance.GlobalRules, "Global", "BetterCommentsPlus_GlobalRules.json");
       }
 
       private void ImportGlobalButton_Click(object sender, RoutedEventArgs e)
       {
-         ImportRules(Settings.Instance.GlobalCommentTokens, "Global");
+         ImportRules(Settings.Instance.GlobalRules, "Global");
       }
 
       private void ExportSolutionButton_Click(object sender, RoutedEventArgs e)
       {
-         ExportRules(Settings.Instance.SolutionCommentTokens, "Solution", "BetterCommentsPlus_SolutionRules.json");
+         ExportRules(Settings.Instance.SolutionRules, "Solution", "BetterCommentsPlus_SolutionRules.json");
       }
 
       private void ImportSolutionButton_Click(object sender, RoutedEventArgs e)
       {
-         ImportRules(Settings.Instance.SolutionCommentTokens, "Solution");
+         ImportRules(Settings.Instance.SolutionRules, "Solution");
       }
 
-      private void ExportRules(ObservableCollection<CommentToken> tokens, string type, string defaultFileName)
+      private void ExportRules(ObservableCollection<CommentRule> rules, string type, string defaultFileName)
       {
-         if (tokens.Count == 0)
+         if (rules.Count == 0)
          {
             MessageBox.Show($"没有可用的 {type} Rules", "提示",
                 MessageBoxButton.OK, MessageBoxImage.Information);
@@ -584,7 +576,7 @@ namespace BetterCommentsPlus.Options
                var config = new CommentsPlusConfig
                {
                   ExportDate = DateTime.Now,
-                  Rules = tokens.Select(t => CommentTokenData.FromCommentToken(t)).ToList()
+                  Rules = rules.Select(r => CommentRuleData.FromCommentRule(r)).ToList()
                };
 
                var json = JsonSerializer.Serialize(config, new JsonSerializerOptions
@@ -605,7 +597,7 @@ namespace BetterCommentsPlus.Options
          }
       }
 
-      private void ImportRules(ObservableCollection<CommentToken> tokens, string type)
+      private void ImportRules(ObservableCollection<CommentRule> rules, string type)
       {
          var openDialog = new OpenFileDialog
          {
@@ -637,25 +629,22 @@ namespace BetterCommentsPlus.Options
 
                   if (result == MessageBoxResult.No)
                   {
-                     foreach (var tokenData in config.Rules)
+                     foreach (var ruleData in config.Rules)
                      {
-                        var newToken = tokenData.ToCommentToken();
-                        newToken.PropertyChanged += CommentToken_PropertyChanged;
-                        tokens.Add(newToken);
+                        var newRule = ruleData.ToCommentRule();
+                        rules.Add(newRule);
                      }
                   }
                   else
                   {
-                     tokens.Clear();
-                     foreach (var tokenData in config.Rules)
+                     rules.Clear();
+                     foreach (var ruleData in config.Rules)
                      {
-                        var newToken = tokenData.ToCommentToken();
-                        newToken.PropertyChanged += CommentToken_PropertyChanged;
-                        tokens.Add(newToken);
+                        var newRule = ruleData.ToCommentRule();
+                        rules.Add(newRule);
                      }
                   }
 
-                  Settings.Instance.SyncCommentTokensToUnifiedConfig();
                   Settings.Instance.OnConfigurationChanged();
                   MessageBox.Show("导入成功！", "提示",
                       MessageBoxButton.OK, MessageBoxImage.Information);
@@ -676,10 +665,6 @@ namespace BetterCommentsPlus.Options
 
       #endregion
 
-      private void CommentToken_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-      {
-      }
-      
       #region 插入指示器 Adorner
 
       private void ShowInsertionAdorner(ListBox listBox, int index)
@@ -771,55 +756,54 @@ namespace BetterCommentsPlus.Options
    {
       public string Version { get; set; } = "1.0";
       public DateTime ExportDate { get; set; }
-      public System.Collections.Generic.List<CommentTokenData> Rules { get; set; } = new System.Collections.Generic.List<CommentTokenData>();
+      public System.Collections.Generic.List<CommentRuleData> Rules { get; set; } = new System.Collections.Generic.List<CommentRuleData>();
    }
 
-   public class CommentTokenData
+   public class CommentRuleData
    {
-      public string CurrentValue { get; set; }
-      public string DefaultValue { get; set; }
+      public string Criteria { get; set; }
+      public CommentCategory? Category { get; set; }
       public string ColorHex { get; set; }
-      public bool IsBold { get; set; }
-      public bool IsItalic { get; set; }
-      public bool HasUnderline { get; set; }
-      public bool HasStrikethrough { get; set; }
-      public bool IsForegroundActive { get; set; }
-      public BackgroundStyleData BackgroundStyle { get; set; }
+      public bool? IsBold { get; set; }
+      public bool? IsItalic { get; set; }
+      public bool? HasUnderline { get; set; }
+      public bool? HasStrikethrough { get; set; }
+      public bool? IsForegroundActive { get; set; }
+      public BackgroundStyleData Background { get; set; }
 
-      public static CommentTokenData FromCommentToken(CommentToken token)
+      public static CommentRuleData FromCommentRule(CommentRule rule)
       {
-         return new CommentTokenData
+         return new CommentRuleData
          {
-            CurrentValue = token.CurrentValue,
-            DefaultValue = token.DefaultValue,
-            ColorHex = token.ColorHex,
-            IsBold = token.IsBold,
-            IsItalic = token.IsItalic,
-            HasUnderline = token.HasUnderline,
-            HasStrikethrough = token.HasStrikethrough,
-            IsForegroundActive = token.IsForegroundActive,
-            BackgroundStyle = BackgroundStyleData.FromBackgroundStyle(token.BackgroundStyle)
+            Criteria = rule.Criteria,
+            Category = rule.Category,
+            ColorHex = rule.ColorHex,
+            IsBold = rule.IsBold,
+            IsItalic = rule.IsItalic,
+            HasUnderline = rule.HasUnderline,
+            HasStrikethrough = rule.HasStrikethrough,
+            IsForegroundActive = rule.IsForegroundActive,
+            Background = BackgroundStyleData.FromBackgroundStyle(rule.Background)
          };
       }
 
-      public CommentToken ToCommentToken()
+      public CommentRule ToCommentRule()
       {
-         var token = new CommentToken(
-             type: CommentType.Important,
-             defaultValue: DefaultValue ?? CurrentValue,
-             value: CurrentValue,
-             colorHex: ColorHex ?? "#FFFF0000")
+         var rule = new CommentRule
          {
+            Id = Guid.NewGuid().ToString(),
+            Criteria = Criteria ?? string.Empty,
+            Category = Category,
+            ColorHex = ColorHex ?? "#FFFF0000",
             IsBold = IsBold,
             IsItalic = IsItalic,
             HasUnderline = HasUnderline,
             HasStrikethrough = HasStrikethrough,
             IsForegroundActive = IsForegroundActive,
-            IsDynamic = true,
-            RuleId = Guid.NewGuid().ToString(),
-            BackgroundStyle = BackgroundStyle?.ToBackgroundStyle() ?? new BackgroundStyle()
+            IsPredefined = false,
+            Background = Background?.ToBackgroundStyle() ?? new BackgroundStyle()
          };
-         return token;
+         return rule;
       }
    }
 
@@ -830,19 +814,26 @@ namespace BetterCommentsPlus.Options
       public string Shape { get; set; }
       public string Blur { get; set; }
       public string Alpha { get; set; }
-      public bool IsCaseSensitive { get; set; }
+      public bool IsCaseSensitive { get; set; } = true;
       public bool AllowPartialMatch { get; set; }
+
+      public BackgroundStyleData()
+      {
+         Shape = "Tag";
+         Blur = "None";
+         Alpha = "1/10";
+      }
 
       public static BackgroundStyleData FromBackgroundStyle(BackgroundStyle style)
       {
-         if (style == null) return null;
+         if (style == null) return new BackgroundStyleData();
          return new BackgroundStyleData
          {
             IsActive = style.IsActive,
             ColorHex = style.ColorHex,
-            Shape = style.Shape,
-            Blur = style.Blur,
-            Alpha = style.Alpha,
+            Shape = style.Shape ?? "Tag",
+            Blur = style.Blur ?? "None",
+            Alpha = style.Alpha ?? "1/10",
             IsCaseSensitive = style.IsCaseSensitive,
             AllowPartialMatch = style.AllowPartialMatch
          };

@@ -10,9 +10,9 @@ namespace BetterCommentsPlus.CommentsTagging
       private static Options.Settings settings = Options.Settings.Instance;
 
 
-      public static int SingleLineCommentStartIndex(string comment, string doubleCommentStarter, CommentType type)
+      public static int SingleLineCommentStartIndex(string comment, string doubleCommentStarter, CommentCategory? category)
       {
-         var token = settings.GetTokenValue(type);
+         var token = settings.GetTokenValue(category ?? CommentCategory.Normal);
 
          var isDoubleComment = comment.StartsWith(doubleCommentStarter, StringComparison.OrdinalIgnoreCase);
 
@@ -31,9 +31,9 @@ namespace BetterCommentsPlus.CommentsTagging
          return comment.IndexOfFirstChar(start + token.Length);
       }
 
-      public static int DelimitedCommentStartIndex(string comment, CommentType type)
+      public static int DelimitedCommentStartIndex(string comment, CommentCategory? category)
       {
-         var token = settings.GetTokenValue(type);
+         var token = settings.GetTokenValue(category ?? CommentCategory.Normal);
          var start = comment.IndexOf(token, StringComparison.OrdinalIgnoreCase);
          
          if (settings.HighlightCriteriaItself)

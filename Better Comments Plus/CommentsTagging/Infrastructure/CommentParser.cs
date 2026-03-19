@@ -19,7 +19,7 @@ namespace BetterCommentsPlus.CommentsTagging
             var commentInfo = GetCommentInfo(span);
 
             if (commentInfo.Token == null)
-                return new Comment(new List<SnapshotSpan> { span }, CommentType.Normal);
+                return new Comment(new List<SnapshotSpan> { span }, CommentCategory.Normal);
 
             if (commentInfo.Token.IsDynamic)
             {
@@ -92,21 +92,21 @@ namespace BetterCommentsPlus.CommentsTagging
                 return new Comment(commentSpans, commentInfo.Token.RuleId, commentInfo.Token.CurrentValue);
             }
 
-            var commentType = commentInfo.Token.Type;
+            var commentCategory = (CommentCategory?)commentInfo.Token.Type;
 
             // Color only the "Todo" keyword.
-            if (Settings.HighlightTaskKeywordOnly && commentType == CommentType.Task)
+            if (Settings.HighlightTaskKeywordOnly && commentCategory == CommentCategory.Task)
             {
                 var spanText = span.GetText().ToLower();
-                var token = Settings.GetTokenValue(CommentType.Task);
+                var token = Settings.GetTokenValue(CommentCategory.Task);
                 var start = spanText.IndexOf(token, OrdinalIgnoreCase);
 
                 return new Comment(
-                    new SnapshotSpan(span.Snapshot, span.Start + start, token.Length),
-                    CommentType.Task);
+                    new List<SnapshotSpan> { new SnapshotSpan(span.Snapshot, span.Start + start, token.Length) },
+                    CommentCategory.Task);
             }
 
-            return SpecificParse(span, commentType);
+            return SpecificParse(span, commentCategory);
         }
 
         public abstract bool IsValidComment(SnapshotSpan span);
@@ -141,13 +141,13 @@ namespace BetterCommentsPlus.CommentsTagging
             return new CommentInfo { Token = null };
         }
 
-        protected virtual CommentType GetCommentType(SnapshotSpan span)
+        protected virtual CommentCategory? GetCommentType(SnapshotSpan span)
         {
             var commentInfo = GetCommentInfo(span);
-            return commentInfo.Token?.Type ?? CommentType.Normal;
+            return (CommentCategory?)commentInfo.Token?.Type ?? CommentCategory.Normal;
         }
 
-        protected abstract Comment SpecificParse(SnapshotSpan span, CommentType commentType);
+        protected abstract Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory);
 
         protected abstract string SpanTextWithoutCommentStarter(SnapshotSpan span);
     }

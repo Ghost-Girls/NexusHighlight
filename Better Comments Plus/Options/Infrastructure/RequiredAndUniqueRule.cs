@@ -36,7 +36,7 @@ namespace BetterCommentsPlus.Options
          if (IsGlobalScope)
          {
             // 只检查 Global 集合内部是否唯一
-            var count = Settings.Instance.GlobalCommentTokens.Count(t => t.CurrentValue.Equals(str));
+            var count = Settings.Instance.GlobalRules.Count(t => t.Criteria.Equals(str));
             if (count > 1)
             {
                return new ValidationResult(false, "Value must be unique within Global Rules.");
@@ -45,7 +45,7 @@ namespace BetterCommentsPlus.Options
          else if (IsSolutionScope)
          {
             // 只检查 Solution 集合内部是否唯一
-            var count = Settings.Instance.SolutionCommentTokens.Count(t => t.CurrentValue.Equals(str));
+            var count = Settings.Instance.SolutionRules.Count(t => t.Criteria.Equals(str));
             if (count > 1)
             {
                return new ValidationResult(false, "Value must be unique within Solution Rules.");
@@ -54,8 +54,8 @@ namespace BetterCommentsPlus.Options
          else
          {
             // 默认行为：同时检查两个集合（用于 ValidateTokens 方法）
-            var globalCount = Settings.Instance.GlobalCommentTokens.Count(t => t.CurrentValue.Equals(str));
-            var solutionCount = Settings.Instance.SolutionCommentTokens.Count(t => t.CurrentValue.Equals(str));
+            var globalCount = Settings.Instance.GlobalRules.Count(t => t.Criteria.Equals(str));
+            var solutionCount = Settings.Instance.SolutionRules.Count(t => t.Criteria.Equals(str));
             
             if (globalCount > 1 || solutionCount > 1)
             {

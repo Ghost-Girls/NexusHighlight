@@ -31,7 +31,7 @@ namespace BetterCommentsPlus.Options
 
         private bool loading;
         internal bool delete;
-        public StyleRule RuleToEdit { get; set; }
+        public CommentRule RuleToEdit { get; set; }
         
         public bool SaveToGlobal => chkSaveToGlobal.IsChecked == true;
         public bool SaveToSolution => chkSaveToSolution.IsChecked == true;
@@ -45,20 +45,20 @@ namespace BetterCommentsPlus.Options
             InitializeColorLists();
 
             txtCriteria.Text = RuleToEdit.Criteria;
-            chkFgActive.IsChecked = RuleToEdit.Foreground.IsActive;
-            chkFgBold.IsChecked = RuleToEdit.Foreground.IsBold;
-            chkFgItalic.IsChecked = RuleToEdit.Foreground.IsItalic;
-            chkFgUnderline.IsChecked = RuleToEdit.Foreground.HasUnderline;
-            chkFgStrikethrough.IsChecked = RuleToEdit.Foreground.HasStrikethrough;
+            chkFgActive.IsChecked = RuleToEdit.IsForegroundActive;
+            chkFgBold.IsChecked = RuleToEdit.IsBold;
+            chkFgItalic.IsChecked = RuleToEdit.IsItalic;
+            chkFgUnderline.IsChecked = RuleToEdit.HasUnderline;
+            chkFgStrikethrough.IsChecked = RuleToEdit.HasStrikethrough;
 
-            chkBgActive.IsChecked = RuleToEdit.Background.IsActive;
-            chkCaseSensitive.IsChecked = RuleToEdit.Background.IsCaseSensitive;
-            chkPartialMatch.IsChecked = RuleToEdit.Background.AllowPartialMatch;
+            chkBgActive.IsChecked = RuleToEdit.Background?.IsActive ?? false;
+            chkCaseSensitive.IsChecked = RuleToEdit.Background?.IsCaseSensitive ?? true;
+            chkPartialMatch.IsChecked = RuleToEdit.Background?.AllowPartialMatch ?? false;
 
             loading = true;
-            cboShape.SelectedIndex = GetShapeIndex(RuleToEdit.Background.Shape);
-            cboBlur.SelectedIndex = GetBlurIndex(RuleToEdit.Background.Blur);
-            cboAlpha.SelectedIndex = GetAlphaIndex(RuleToEdit.Background.Alpha);
+            cboShape.SelectedIndex = GetShapeIndex(RuleToEdit.Background?.Shape ?? "Tag");
+            cboBlur.SelectedIndex = GetBlurIndex(RuleToEdit.Background?.Blur ?? "None");
+            cboAlpha.SelectedIndex = GetAlphaIndex(RuleToEdit.Background?.Alpha ?? "1/10");
 
             // 添加所有控件事件监听，包括 Active 复选框
             txtCriteria.TextChanged += (_, _) => CreatePreview();
@@ -91,18 +91,21 @@ namespace BetterCommentsPlus.Options
         {
             RuleToEdit.Criteria = txtCriteria.Text;
 
-            RuleToEdit.Foreground.IsActive = chkFgActive.IsChecked == true;
-            RuleToEdit.Foreground.IsBold = chkFgBold.IsChecked == true;
-            RuleToEdit.Foreground.IsItalic = chkFgItalic.IsChecked == true;
-            RuleToEdit.Foreground.HasUnderline = chkFgUnderline.IsChecked == true;
-            RuleToEdit.Foreground.HasStrikethrough = chkFgStrikethrough.IsChecked == true;
+            RuleToEdit.IsForegroundActive = chkFgActive.IsChecked == true;
+            RuleToEdit.IsBold = chkFgBold.IsChecked == true;
+            RuleToEdit.IsItalic = chkFgItalic.IsChecked == true;
+            RuleToEdit.HasUnderline = chkFgUnderline.IsChecked == true;
+            RuleToEdit.HasStrikethrough = chkFgStrikethrough.IsChecked == true;
 
             var fgColor = GetSelectedFgColor();
             if (fgColor.HasValue)
             {
-                RuleToEdit.Foreground.SetColor(fgColor.Value);
+                RuleToEdit.ColorHex = $"#{fgColor.Value.A:X2}{fgColor.Value.R:X2}{fgColor.Value.G:X2}{fgColor.Value.B:X2}";
             }
 
+            if (RuleToEdit.Background == null)
+                RuleToEdit.Background = new BackgroundStyle();
+                
             RuleToEdit.Background.IsActive = chkBgActive.IsChecked == true;
             RuleToEdit.Background.IsCaseSensitive = chkCaseSensitive.IsChecked == true;
             RuleToEdit.Background.AllowPartialMatch = chkPartialMatch.IsChecked == true;
@@ -110,7 +113,7 @@ namespace BetterCommentsPlus.Options
             var bgColor = GetSelectedBgColor();
             if (bgColor.HasValue)
             {
-                RuleToEdit.Background.SetColor(bgColor.Value);
+                RuleToEdit.Background.ColorHex = $"#{bgColor.Value.A:X2}{bgColor.Value.R:X2}{bgColor.Value.G:X2}{bgColor.Value.B:X2}";
             }
 
             RuleToEdit.Background.Shape = GetShapeString(cboShape.SelectedIndex);
@@ -123,8 +126,8 @@ namespace BetterCommentsPlus.Options
 
         private void InitializeColorLists()
         {
-            string fgHexMatch = RuleToEdit.Foreground.GetColor()?.ToString() ?? "#57a64a";
-            string bgHexMatch = RuleToEdit.Background.GetColor()?.ToString() ?? "#FF0000";
+            string fgHexMatch = RuleToEdit.ColorHex ?? "#57a64a";
+            string bgHexMatch = RuleToEdit.Background?.ColorHex ?? "#FF0000";
             
             // 使用 ColorPickerDialog 的颜色矩阵
             var colors = new[]

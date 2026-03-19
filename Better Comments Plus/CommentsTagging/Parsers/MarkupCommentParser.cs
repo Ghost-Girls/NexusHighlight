@@ -1,4 +1,4 @@
-﻿using BetterCommentsPlus.Options;
+using BetterCommentsPlus.Options;
 using Microsoft.VisualStudio.Text;
 
 namespace BetterCommentsPlus.CommentsTagging
@@ -14,13 +14,13 @@ namespace BetterCommentsPlus.CommentsTagging
          return !txt.Contains("\r\n") && txt.Contains("<!--") && txt.Contains("-->");
       }
 
-      protected override Comment SpecificParse(SnapshotSpan span, CommentType commentType)
+      protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
       {
          var spanText = span.GetText().ToLower();
 
-         var token = Settings.Instance.GetTokenValue(commentType);
+         var token = Settings.Instance.GetTokenValue(commentCategory ?? CommentCategory.Normal);
 
-         var startOffset = commentType == CommentType.Task
+         var startOffset = (commentCategory == CommentCategory.Task)
                          ? spanText.IndexOf(token, 3, OrdinalIgnoreCase)
                          : spanText.IndexOfFirstChar(spanText.IndexOf(token, 3, OrdinalIgnoreCase) + token.Length);
 
@@ -28,11 +28,11 @@ namespace BetterCommentsPlus.CommentsTagging
          var spanLength = spanText.IndexOfFirstCharReverse(closerIndex - 1) - (startOffset - 1);
 
          return new Comment(
-             new SnapshotSpan(span.Snapshot, span.Start + startOffset, spanLength),
-             commentType);
+             new[] { new SnapshotSpan(span.Snapshot, span.Start + startOffset, spanLength) },
+             commentCategory);
       }
 
-      protected override CommentType GetCommentType(SnapshotSpan span)
+      protected override CommentCategory? GetCommentType(SnapshotSpan span)
       {
          return base.GetCommentType(span);
       }

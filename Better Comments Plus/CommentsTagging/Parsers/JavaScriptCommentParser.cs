@@ -22,7 +22,7 @@ namespace BetterCommentsPlus.CommentsTagging
          return base.Parse(new SnapshotSpan(span.Snapshot, span.Start, len));
       }
 
-      protected override Comment SpecificParse(SnapshotSpan span, CommentType commentType)
+      protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
       {
          var spanText = span.GetText().ToLower();
 
@@ -32,14 +32,14 @@ namespace BetterCommentsPlus.CommentsTagging
 
             spanText = fullSpan.GetText().ToLower();
 
-            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", commentType);
+            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", commentCategory);
             var spanLength = spanText.Length - startOffset;
 
             if (spanLength > 0)
             {
                return new Comment(
-                   new SnapshotSpan(fullSpan.Snapshot, fullSpan.Start + startOffset, spanLength),
-                   commentType);
+                   new[] { new SnapshotSpan(fullSpan.Snapshot, fullSpan.Start + startOffset, spanLength) },
+                   commentCategory);
             }
          }
          else if (spanText.Contains("/*"))
@@ -49,30 +49,30 @@ namespace BetterCommentsPlus.CommentsTagging
             if (fullSpans.Count == 1)
             {
                spanText = fullSpans[0].GetText().ToLower();
-               var startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, commentType);
+               var startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, commentCategory);
                var closerIndex = spanText.IndexOf("*/", OrdinalIgnoreCase);
                var spanLength = spanText.IndexOfFirstCharReverse(closerIndex - 1) - (startOffset - 1);
 
                if (spanLength > 0)
                {
                   return new Comment(
-                      new SnapshotSpan(fullSpans[0].Snapshot, fullSpans[0].Start + startOffset, spanLength),
-                      commentType);
+                      new[] { new SnapshotSpan(fullSpans[0].Snapshot, fullSpans[0].Start + startOffset, spanLength) },
+                      commentCategory);
                }
             }
          }
 
-         return new Comment(new List<SnapshotSpan>(), commentType);
+         return new Comment(new List<SnapshotSpan>(), commentCategory);
       }
 
-      protected override CommentType GetCommentType(SnapshotSpan span)
+      protected override CommentCategory? GetCommentType(SnapshotSpan span)
       {
          var fullSpan = span.GetText().Contains("//")
                       ? ParseHelper.CompleteSingleLineCommentSpan(span, "//")
                       : ParseHelper.CompleteDelimitedCommentSpan(span, "/*", "*/").First();
 
          if (Settings.StrikethroughDoubleComments && fullSpan.GetText().StartsWith("////", OrdinalIgnoreCase))
-            return CommentType.Remove;
+            return CommentCategory.Remove;
 
          return base.GetCommentType(fullSpan);
       }

@@ -11,6 +11,10 @@ using System.Linq;
 
 namespace BetterCommentsPlus.CommentsTagging
 {
+    /// <summary>
+    /// 评论类型枚举（向后兼容，保留用于 CommentToken）
+    /// 新代码请使用 CommentCategory
+    /// </summary>
     public enum CommentType
     {
         Normal,
@@ -90,23 +94,23 @@ namespace BetterCommentsPlus.CommentsTagging
                 return new ClassificationTag(classificationType);
             }
 
-            return CreateTag(comment.Type);
+            return CreateTag(comment.Category);
         }
 
-        private ClassificationTag CreateTag(CommentType type)
+        private ClassificationTag CreateTag(CommentCategory? category)
         {
-            switch (type)
+            switch (category)
             {
-                case CommentType.Important:
+                case CommentCategory.Important:
                     return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.IMPORTANT_COMMENT));
 
-                case CommentType.Remove:
+                case CommentCategory.Remove:
                     return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.REMOVE_COMMENT));
 
-                case CommentType.Question:
+                case CommentCategory.Question:
                     return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.QUESTION_COMMENT));
 
-                case CommentType.Task:
+                case CommentCategory.Task:
                     return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.TASK_COMMENT));
 
                 default:

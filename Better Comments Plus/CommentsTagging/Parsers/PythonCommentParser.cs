@@ -1,4 +1,4 @@
-﻿using BetterCommentsPlus.Options;
+using BetterCommentsPlus.Options;
 using Microsoft.VisualStudio.Text;
 
 namespace BetterCommentsPlus.CommentsTagging
@@ -10,20 +10,20 @@ namespace BetterCommentsPlus.CommentsTagging
          return span.GetText().Trim().StartsWith("#", OrdinalIgnoreCase);
       }
 
-      protected override Comment SpecificParse(SnapshotSpan span, CommentType commentType)
+      protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
       {
          var spanText = span.GetText().ToLower();
-         var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "##", commentType);
+         var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "##", commentCategory);
 
          return new Comment(
-             new SnapshotSpan(span.Snapshot, span.Start + startOffset, span.Length - startOffset),
-             commentType);
+             new[] { new SnapshotSpan(span.Snapshot, span.Start + startOffset, span.Length - startOffset) },
+             commentCategory);
       }
 
-      protected override CommentType GetCommentType(SnapshotSpan span)
+      protected override CommentCategory? GetCommentType(SnapshotSpan span)
       {
          if (Settings.StrikethroughDoubleComments && span.GetText().StartsWith("##", OrdinalIgnoreCase))
-            return CommentType.Remove;
+            return CommentCategory.Remove;
 
          return base.GetCommentType(span);
       }

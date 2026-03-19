@@ -1,4 +1,4 @@
-﻿using BetterCommentsPlus.Options;
+using BetterCommentsPlus.Options;
 using Microsoft.VisualStudio.Text;
 using System.Collections.Generic;
 
@@ -12,11 +12,11 @@ namespace BetterCommentsPlus.CommentsTagging
             return temp.StartsWith("//", OrdinalIgnoreCase) || temp.StartsWith("(*", OrdinalIgnoreCase);
         }
 
-        protected override Comment SpecificParse(SnapshotSpan span, CommentType commentType)
+        protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
         {
             var spanText = span.GetText().ToLower();
             var commentSpans = new List<SnapshotSpan>();
-            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", commentType);
+            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", commentCategory);
 
             if (spanText.StartsWith("//", OrdinalIgnoreCase) && startOffset > 0)
             {
@@ -24,7 +24,7 @@ namespace BetterCommentsPlus.CommentsTagging
             }
             else if (spanText.Contains("(*") && spanText.Contains("*)"))
             {
-                startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, commentType);
+                startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, commentCategory);
 
                 var closerIndex = spanText.IndexOf("*)", OrdinalIgnoreCase);
                 var spanLength = spanText.IndexOfFirstCharReverse(closerIndex - 1) - (startOffset - 1);
@@ -32,13 +32,13 @@ namespace BetterCommentsPlus.CommentsTagging
                 commentSpans.Add(new SnapshotSpan(span.Snapshot, span.Start + startOffset, spanLength));
             }
 
-            return new Comment(commentSpans, commentType);
+            return new Comment(commentSpans, commentCategory);
         }
 
-        protected override CommentType GetCommentType(SnapshotSpan span)
+        protected override CommentCategory? GetCommentType(SnapshotSpan span)
         {
             if (Settings.StrikethroughDoubleComments && span.GetText().StartsWith("////", OrdinalIgnoreCase))
-                return CommentType.Remove;
+                return CommentCategory.Remove;
 
             return base.GetCommentType(span);
         }

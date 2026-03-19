@@ -1,4 +1,5 @@
 using BetterCommentsPlus.CommentsTagging;
+using System.ComponentModel;
 using System.Windows.Media;
 
 namespace BetterCommentsPlus.Options

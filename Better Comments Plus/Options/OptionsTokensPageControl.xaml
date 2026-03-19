@@ -100,7 +100,7 @@
                             <TextBox.Text>
                                 <Binding
                                     Mode="TwoWay"
-                                    Path="CurrentValue"
+                                    Path="Criteria"
                                     UpdateSourceTrigger="LostFocus">
                                     <Binding.ValidationRules>
                                         <local:RequiredAndUniqueRule ValidationStep="CommittedValue" />
@@ -387,12 +387,12 @@
 
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ListBox
-                                x:Name="GlobalTokensList"
+                                x:Name="GlobalRulesList"
                                 BorderThickness="0"
                                 ItemTemplate="{StaticResource TokensListDataTemplate}"
-                                ItemsSource="{Binding GlobalCommentTokens, Mode=OneWay}"
-                                MouseMove="GlobalTokensList_MouseMove"
-                                PreviewMouseLeftButtonUp="GlobalTokensList_PreviewMouseLeftButtonUp" />
+                                ItemsSource="{Binding GlobalRules, Mode=OneWay}"
+                                MouseMove="GlobalRulesList_MouseMove"
+                                PreviewMouseLeftButtonUp="GlobalRulesList_PreviewMouseLeftButtonUp" />
                         </ScrollViewer>
                     </Grid>
 
@@ -503,12 +503,12 @@
 
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ListBox
-                                x:Name="SolutionTokensList"
+                                x:Name="SolutionRulesList"
                                 BorderThickness="0"
                                 ItemTemplate="{StaticResource TokensListDataTemplate}"
-                                ItemsSource="{Binding SolutionCommentTokens, Mode=OneWay}"
-                                MouseMove="SolutionTokensList_MouseMove"
-                                PreviewMouseLeftButtonUp="SolutionTokensList_PreviewMouseLeftButtonUp" />
+                                ItemsSource="{Binding SolutionRules, Mode=OneWay}"
+                                MouseMove="SolutionRulesList_MouseMove"
+                                PreviewMouseLeftButtonUp="SolutionRulesList_PreviewMouseLeftButtonUp" />
                         </ScrollViewer>
                     </Grid>
                     <StackPanel
