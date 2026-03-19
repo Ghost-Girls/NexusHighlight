@@ -1,7 +1,8 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using Microsoft.VisualStudio.Shell;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Media;
 using System.Windows;
 
@@ -52,19 +53,36 @@ namespace BetterCommentsPlus.Options
 
       protected bool ValidateRules()
       {
-         // 验证 Global 集合
-         var globalRule = new RequiredAndUniqueRule { IsGlobalScope = true };
+         // 验证 Global 集合 - 确保没有重复
+         var globalHasDuplicates = Settings.Instance.GlobalRules
+             .GroupBy(r => r.Criteria)
+             .Any(g => g.Count() > 1);
+         
+         if (globalHasDuplicates)
+            return false;
+
+         // 验证 Solution 集合 - 确保没有重复
+         var solutionHasDuplicates = Settings.Instance.SolutionRules
+             .GroupBy(r => r.Criteria)
+             .Any(g => g.Count() > 1);
+         
+         if (solutionHasDuplicates)
+            return false;
+
+         // 验证所有规则的格式
          foreach (var rule in Settings.Instance.GlobalRules)
          {
-            if (!globalRule.Validate(rule.Criteria, CultureInfo.InvariantCulture).IsValid)
+            if (string.IsNullOrWhiteSpace(rule.Criteria))
+               return false;
+            if (rule.Criteria.IndexOfAny(new[] { '|', ',', '/' }) > -1)
                return false;
          }
 
-         // 验证 Solution 集合
-         var solutionRule = new RequiredAndUniqueRule { IsSolutionScope = true };
          foreach (var rule in Settings.Instance.SolutionRules)
          {
-            if (!solutionRule.Validate(rule.Criteria, CultureInfo.InvariantCulture).IsValid)
+            if (string.IsNullOrWhiteSpace(rule.Criteria))
+               return false;
+            if (rule.Criteria.IndexOfAny(new[] { '|', ',', '/' }) > -1)
                return false;
          }
 

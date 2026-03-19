@@ -21,16 +21,11 @@ namespace BetterCommentsPlus.Options
 
         public bool IsDragging { get; set; }
         private bool _isSyncing;
+        private string _currentSolutionPath;
 
         // === 规则集合（使用 CommentRule）===
         private readonly ObservableCollection<CommentRule> globalRules
-            = new ObservableCollection<CommentRule>
-            {
-                new CommentRule("#IMPORTANT", "#FFFF0000"),
-                new CommentRule("#REMOVE", "#FF808080"),
-                new CommentRule("#QUESTION", "#FFFFFF00"),
-                new CommentRule("#TASK", "#FFEB690A"),
-            };
+            = new ObservableCollection<CommentRule>();
 
         private readonly ObservableCollection<CommentRule> solutionRules
             = new ObservableCollection<CommentRule>();
@@ -72,6 +67,14 @@ namespace BetterCommentsPlus.Options
             ResetSolutionRules = new RelayCommand(ClearSolutionRules);
             SettingsStore.LoadSettings(this);
 
+            // 从 SettingsManager 加载全局规则
+            var loadedGlobalRules = BetterCommentsPlus.SettingsManager.LoadGlobalRules();
+            foreach (var rule in loadedGlobalRules)
+            {
+                globalRules.Add(rule);
+            }
+
+            // 初始化解决方案规则（暂时为空，后续需要根据当前解决方案路径加载）
             InitializeRuleCollection(globalRules);
             InitializeRuleCollection(solutionRules);
 
@@ -274,25 +277,18 @@ namespace BetterCommentsPlus.Options
             {
                 globalRules.Clear();
 
-                var defaultRules = new[]
+                // 直接创建默认规则，而不是从文件加载
+                var defaultRules = new ObservableCollection<CommentRule>
                 {
-                    new { Criteria = "#IMPORTANT", ColorHex = "#FFFF0000", IsBold = true, IsItalic = false, HasUnderline = false, HasStrikethrough = false },
-                    new { Criteria = "#REMOVE", ColorHex = "#FF808080", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = true },
-                    new { Criteria = "#QUESTION", ColorHex = "#FFFFFF00", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = false },
-                    new { Criteria = "#TASK", ColorHex = "#FFEB690A", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = false }
-                };
-
-                foreach (var ruleInfo in defaultRules)
-                {
-                    var newRule = new CommentRule
+                    new CommentRule
                     {
                         Id = Guid.NewGuid().ToString(),
-                        Criteria = ruleInfo.Criteria,
-                        ColorHex = ruleInfo.ColorHex,
-                        IsBold = ruleInfo.IsBold,
-                        IsItalic = ruleInfo.IsItalic,
-                        HasUnderline = ruleInfo.HasUnderline,
-                        HasStrikethrough = ruleInfo.HasStrikethrough,
+                        Criteria = "#IMPORTANT",
+                        ColorHex = "#FFFF0000",
+                        IsBold = true,
+                        IsItalic = false,
+                        HasUnderline = false,
+                        HasStrikethrough = false,
                         IsForegroundActive = true,
                         IsPredefined = false,
                         Background = new Background
@@ -305,9 +301,78 @@ namespace BetterCommentsPlus.Options
                             IsCaseSensitive = true,
                             AllowPartialMatch = false
                         }
-                    };
+                    },
+                    new CommentRule
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Criteria = "#REMOVE",
+                        ColorHex = "#FF808080",
+                        IsBold = false,
+                        IsItalic = false,
+                        HasUnderline = false,
+                        HasStrikethrough = true,
+                        IsForegroundActive = true,
+                        IsPredefined = false,
+                        Background = new Background
+                        {
+                            IsActive = false,
+                            ColorHex = null,
+                            Shape = "Tag",
+                            Blur = "None",
+                            Alpha = "1/10",
+                            IsCaseSensitive = true,
+                            AllowPartialMatch = false
+                        }
+                    },
+                    new CommentRule
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Criteria = "#QUESTION",
+                        ColorHex = "#FFFFFF00",
+                        IsBold = false,
+                        IsItalic = false,
+                        HasUnderline = false,
+                        HasStrikethrough = false,
+                        IsForegroundActive = true,
+                        IsPredefined = false,
+                        Background = new Background
+                        {
+                            IsActive = false,
+                            ColorHex = null,
+                            Shape = "Tag",
+                            Blur = "None",
+                            Alpha = "1/10",
+                            IsCaseSensitive = true,
+                            AllowPartialMatch = false
+                        }
+                    },
+                    new CommentRule
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Criteria = "#TASK",
+                        ColorHex = "#FFEB690A",
+                        IsBold = false,
+                        IsItalic = false,
+                        HasUnderline = false,
+                        HasStrikethrough = false,
+                        IsForegroundActive = true,
+                        IsPredefined = false,
+                        Background = new Background
+                        {
+                            IsActive = false,
+                            ColorHex = null,
+                            Shape = "Tag",
+                            Blur = "None",
+                            Alpha = "1/10",
+                            IsCaseSensitive = true,
+                            AllowPartialMatch = false
+                        }
+                    }
+                };
 
-                    globalRules.Add(newRule);
+                foreach (var rule in defaultRules)
+                {
+                    globalRules.Add(rule);
                 }
 
                 OnConfigurationChanged();
@@ -326,7 +391,71 @@ namespace BetterCommentsPlus.Options
             _isSyncing = true;
             try
             {
+                // 保存规则到 SettingsManager
+                if (sender == globalRules)
+                {
+                    BetterCommentsPlus.SettingsManager.SaveGlobalRules(globalRules);
+                }
+                else if (sender == solutionRules)
+                {
+                    // 保存解决方案规则
+                    if (!string.IsNullOrEmpty(_currentSolutionPath))
+                    {
+                        BetterCommentsPlus.SettingsManager.SaveSolutionRules(_currentSolutionPath, solutionRules);
+                    }
+                }
+                
                 OnConfigurationChanged();
+            }
+            finally
+            {
+                _isSyncing = false;
+            }
+        }
+
+        // === 解决方案相关方法 ===
+        public void SetCurrentSolutionPath(string solutionPath)
+        {
+            if (_currentSolutionPath == solutionPath)
+                return;
+
+            _isSyncing = true;
+            try
+            {
+                // 保存旧解决方案的规则
+                if (!string.IsNullOrEmpty(_currentSolutionPath))
+                {
+                    BetterCommentsPlus.SettingsManager.SaveSolutionRules(_currentSolutionPath, solutionRules);
+                }
+
+                // 更新当前解决方案路径
+                _currentSolutionPath = solutionPath;
+
+                // 清空当前解决方案规则
+                solutionRules.Clear();
+
+                // 加载新解决方案的规则
+                if (!string.IsNullOrEmpty(solutionPath))
+                {
+                    var loadedSolutionRules = BetterCommentsPlus.SettingsManager.LoadSolutionRules(solutionPath);
+                    foreach (var rule in loadedSolutionRules)
+                    {
+                        // 确保规则有完整的默认属性
+                        if (rule.Background == null)
+                        {
+                            rule.Background = new Background();
+                        }
+
+                        if (string.IsNullOrEmpty(rule.Background.Shape))
+                            rule.Background.Shape = "Tag";
+                        if (string.IsNullOrEmpty(rule.Background.Blur))
+                            rule.Background.Blur = "None";
+                        if (string.IsNullOrEmpty(rule.Background.Alpha))
+                            rule.Background.Alpha = "1/10";
+                        
+                        solutionRules.Add(rule);
+                    }
+                }
             }
             finally
             {

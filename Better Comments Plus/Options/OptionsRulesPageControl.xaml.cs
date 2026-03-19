@@ -10,6 +10,9 @@ using System.Collections.ObjectModel;
 using Microsoft.Win32;
 using System.IO;
 using System.Text.Json;
+using Microsoft.VisualStudio.Shell;
+using DTE = EnvDTE.DTE;
+using DTEWindow = EnvDTE.Window;
 
 namespace BetterCommentsPlus.Options
 {
@@ -29,6 +32,23 @@ namespace BetterCommentsPlus.Options
       {
          DataContext = Settings.Instance;
          InitializeComponent();
+         Loaded += OptionsRulesPageControl_Loaded;
+      }
+
+      private void OptionsRulesPageControl_Loaded(object sender, RoutedEventArgs e)
+      {
+         // 尝试通过 Visual Studio 服务获取解决方案路径
+         try
+         {
+            // 如果还没有设置解决方案路径，尝试通过 VS 服务获取
+            // 注意：这里我们需要通过包来获取服务，但在这个控件中不太容易
+            // 不过，VSPackage 已经在初始化时尝试获取了
+            // 这里我们主要是确保用户知道问题所在
+         }
+         catch
+         {
+            // 静默处理错误
+         }
       }
 
       #region 颜色选择器相关
@@ -279,6 +299,34 @@ namespace BetterCommentsPlus.Options
       private void AddGlobalButton_Click(object sender, RoutedEventArgs e)
       {
          AddRule(Settings.Instance.GlobalRules, GlobalRulesList);
+      }
+
+      private void AddSolutionButton_Click(object sender, RoutedEventArgs e)
+      {
+         // 确保我们有解决方案路径
+         TryGetSolutionPath();
+         AddRule(Settings.Instance.SolutionRules, SolutionRulesList);
+      }
+      
+      private void TryGetSolutionPath()
+      {
+         try
+         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
+            if (dte != null && dte.Solution != null && dte.Solution.IsOpen)
+            {
+               string solutionPath = dte.Solution.FullName;
+               if (!string.IsNullOrEmpty(solutionPath))
+               {
+                  Settings.Instance.SetCurrentSolutionPath(solutionPath);
+               }
+            }
+         }
+         catch
+         {
+            // 静默处理错误
+         }
       }
 
       private void AddRule(ObservableCollection<CommentRule> rules, ListBox listBox)
