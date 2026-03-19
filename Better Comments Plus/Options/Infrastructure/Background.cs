@@ -2,7 +2,7 @@ using System.Windows.Media;
 
 namespace BetterCommentsPlus.Options
 {
-    public class BackgroundStyle : PropertyChangeNotifier
+    public class Background : PropertyChangeNotifier
     {
         private bool isActive;
         private string colorHex;
@@ -54,7 +54,7 @@ namespace BetterCommentsPlus.Options
             set { SetField(ref allowPartialMatch, value); }
         }
 
-        public BackgroundStyle()
+        public Background()
         {
             isActive = false;
             colorHex = null;

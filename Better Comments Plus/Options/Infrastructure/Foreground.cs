@@ -2,7 +2,7 @@ using System.Windows.Media;
 
 namespace BetterCommentsPlus.Options
 {
-    public class ForegroundStyle : PropertyChangeNotifier
+    public class Foreground : PropertyChangeNotifier
     {
         private bool isActive;
         private string colorHex;
@@ -47,7 +47,7 @@ namespace BetterCommentsPlus.Options
             set { SetField(ref hasStrikethrough, value); }
         }
 
-        public ForegroundStyle()
+        public Foreground()
         {
             isActive = true;
             colorHex = "#000000";

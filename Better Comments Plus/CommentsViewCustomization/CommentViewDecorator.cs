@@ -191,7 +191,7 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             bool? hasUnderline = null;
             bool? hasStrikethrough = null;
             bool? isForegroundActive = null;
-            BackgroundStyle background = null;
+            Background background = null;
 
             // 优先查找 Solution Rules 中是否有匹配的 Criteria
             // Solution Rules 优先级高于 Global Rules

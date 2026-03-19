@@ -8,7 +8,7 @@ using BetterCommentsPlus.Options;
 namespace BetterCommentsPlus
 {
    [ProvideOptionPage(typeof(OptionsGeneralPage), "Better Comments Plus", "General", 0, 0, true)]
-   [ProvideOptionPage(typeof(OptionsTokensPage), "Better Comments Plus", "Tokens", 0, 0, true)]
+   [ProvideOptionPage(typeof(OptionsRulesPage), "Better Comments Plus", "Rules", 0, 0, true)]
    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading =true)]
    [InstalledProductRegistration("#110", "#112", Vsix.Id, IconResourceID = 400)]
    [ProvideMenuResource("Menus.ctmenu", 1)]
@@ -26,7 +26,7 @@ namespace BetterCommentsPlus
          var commandService = await GetServiceAsync(typeof(IMenuCommandService)) as IMenuCommandService;
          if (commandService != null)
          {
-             Commands.CreateEditStyleRule.Initialize(this, commandService);
+             Commands.CreateEditRule.Initialize(this, commandService);
          }
       }
    }

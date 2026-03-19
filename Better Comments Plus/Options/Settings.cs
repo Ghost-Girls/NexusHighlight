@@ -68,8 +68,8 @@ namespace BetterCommentsPlus.Options
 
         private Settings()
         {
-            ResetTokens = new RelayCommand(SetTokensToDefault);
-            ResetSolutionTokens = new RelayCommand(ClearSolutionRules);
+            ResetRules = new RelayCommand(SetRulesToDefault);
+            ResetSolutionRules = new RelayCommand(ClearSolutionRules);
             SettingsStore.LoadSettings(this);
 
             InitializeRuleCollection(globalRules);
@@ -85,7 +85,7 @@ namespace BetterCommentsPlus.Options
             {
                 if (rule.Background == null)
                 {
-                    rule.Background = new BackgroundStyle();
+                    rule.Background = new Background();
                 }
 
                 if (string.IsNullOrEmpty(rule.Background.Shape))
@@ -161,8 +161,8 @@ namespace BetterCommentsPlus.Options
 
         #region Non-Settings Properties & Commands
 
-        public RelayCommand ResetTokens { get; }
-        public RelayCommand ResetSolutionTokens { get; }
+        public RelayCommand ResetRules { get; }
+        public RelayCommand ResetSolutionRules { get; }
 
         // === 规则集合属性 ===
         public ObservableCollection<CommentRule> GlobalRules
@@ -204,7 +204,7 @@ namespace BetterCommentsPlus.Options
             return rule?.Criteria ?? "";
         }
 
-        public string GetTokenValue(string criteria)
+        public string GetRuleValue(string criteria)
         {
             var rule = GetRule(criteria);
             return rule?.Criteria ?? "";
@@ -242,7 +242,7 @@ namespace BetterCommentsPlus.Options
                         HasStrikethrough = globalRule.HasStrikethrough,
                         IsForegroundActive = globalRule.IsForegroundActive,
                         IsPredefined = false,
-                        Background = new BackgroundStyle
+                        Background = new Background
                         {
                             IsActive = globalRule.Background?.IsActive ?? false,
                             ColorHex = globalRule.Background?.ColorHex,
@@ -267,7 +267,7 @@ namespace BetterCommentsPlus.Options
 
         #region Private Helpers
 
-        private void SetTokensToDefault()
+        private void SetRulesToDefault()
         {
             _isSyncing = true;
             try
@@ -295,7 +295,7 @@ namespace BetterCommentsPlus.Options
                         HasStrikethrough = ruleInfo.HasStrikethrough,
                         IsForegroundActive = true,
                         IsPredefined = false,
-                        Background = new BackgroundStyle
+                        Background = new Background
                         {
                             IsActive = false,
                             ColorHex = null,

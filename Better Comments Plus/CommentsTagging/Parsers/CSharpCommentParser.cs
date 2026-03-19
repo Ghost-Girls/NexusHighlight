@@ -43,24 +43,24 @@ namespace BetterCommentsPlus.CommentsTagging
             else //! The comment spans multiple lines
             {
                 var startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, criteria);
-                var token = Settings.Instance.GetTokenValue(criteria);
+                var rule = Settings.Instance.GetRuleValue(criteria);
 
                 for (var curr = firstLineNumber; curr <= lastLineNumber; curr++)
                 {
                     var line = span.Snapshot.GetLineFromLineNumber(curr);
                     var lineText = line.GetText().ToLower();
 
-                    if (curr == firstLineNumber && lineText.Length > token.Length + 2) //! First line.
+                    if (curr == firstLineNumber && lineText.Length > rule.Length + 2) //! First line.
                     {
                         var index = lineText.IndexOf("/*", OrdinalIgnoreCase);
                         if (criteria.ToUpper() == "#TASK")
                         {
-                            startOffset = lineText.IndexOf(token, OrdinalIgnoreCase);
+                            startOffset = lineText.IndexOf(rule, OrdinalIgnoreCase);
                         }
                         else
                         {
-                            var indexOfToken = lineText.IndexOf(token, OrdinalIgnoreCase);
-                            startOffset = lineText.IndexOfFirstChar(indexOfToken + token.Length);
+                            var indexOfRule = lineText.IndexOf(rule, OrdinalIgnoreCase);
+                            startOffset = lineText.IndexOfFirstChar(indexOfRule + rule.Length);
                         }
 
                         commentSpans.Add(new SnapshotSpan(span.Snapshot, line.Start + startOffset, line.Length - startOffset));

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using Microsoft.VisualStudio.Shell;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -9,28 +9,28 @@ namespace BetterCommentsPlus.Options
 {
    public abstract class OptionsPageBase : UIElementDialogPage
    {
-      protected bool TokensValidated { get; private set; }
+      protected bool RulesValidated { get; private set; }
 
       protected override UIElement Child { get; }
 
       protected override void OnActivate(CancelEventArgs e)
       {
-         TokensValidated = false;
+         RulesValidated = false;
          base.OnActivate(e);
       }
 
       protected override void OnApply(PageApplyEventArgs e)
       {
-         TokensValidated = ValidateTokens();
+         RulesValidated = ValidateRules();
 
-         if (TokensValidated)
+         if (RulesValidated)
          {
             e.ApplyBehavior = ApplyKind.Apply;
          }
          else
          {
             e.ApplyBehavior = ApplyKind.CancelNoNavigate;
-            ShowInvalidTokenMessage();
+            ShowInvalidRulesMessage();
          }
 
          base.OnApply(e);
@@ -38,7 +38,7 @@ namespace BetterCommentsPlus.Options
 
       protected override void OnClosed(EventArgs e)
       {
-         if (TokensValidated)
+         if (RulesValidated)
          {
             SettingsStore.SaveSettings(Settings.Instance);
          }
@@ -50,7 +50,7 @@ namespace BetterCommentsPlus.Options
          base.OnClosed(e);
       }
 
-      protected bool ValidateTokens()
+      protected bool ValidateRules()
       {
          // 验证 Global 集合
          var globalRule = new RequiredAndUniqueRule { IsGlobalScope = true };
@@ -71,10 +71,10 @@ namespace BetterCommentsPlus.Options
          return true;
       }
 
-      protected void ShowInvalidTokenMessage()
+      protected void ShowInvalidRulesMessage()
       {
          SystemSounds.Exclamation.Play();
-         MessageBox.Show("Invalid token!", "Better Comments Plus", MessageBoxButton.OK, MessageBoxImage.Error);
+         MessageBox.Show("Invalid rule!", "Better Comments Plus", MessageBoxButton.OK, MessageBoxImage.Error);
       }
    }
 }

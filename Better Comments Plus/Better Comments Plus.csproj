@@ -96,20 +96,20 @@
     <Compile Include="Options\Infrastructure\EnumToStringConverter.cs" />
     <Compile Include="Options\Infrastructure\HexToColorConverter.cs" />
     <Compile Include="Options\Infrastructure\RelayCommand.cs" />
-    <Compile Include="Options\Infrastructure\ForegroundStyle.cs" />
-    <Compile Include="Options\Infrastructure\BackgroundStyle.cs" />
+    <Compile Include="Options\Infrastructure\Foreground.cs" />
+    <Compile Include="Options\Infrastructure\Background.cs" />
     <Compile Include="Options\Infrastructure\CommentRule.cs" />
     <Compile Include="Options\Infrastructure\RuleScope.cs" />
     <Compile Include="Options\OptionsPageBase.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Options\OptionsTokensPageControl.xaml.cs">
-      <DependentUpon>OptionsTokensPageControl.xaml</DependentUpon>
+    <Compile Include="Options\OptionsRulesPageControl.xaml.cs">
+      <DependentUpon>OptionsRulesPageControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Options\ColorPickerDialog.xaml.cs">
       <DependentUpon>ColorPickerDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Options\OptionsTokensPage.cs">
+    <Compile Include="Options\OptionsRulesPage.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Options\Infrastructure\PropertyChangeNotifier.cs" />
@@ -137,12 +137,12 @@
     </Compile>
     <Compile Include="Options\Infrastructure\SettingsStore.cs" />
     <Compile Include="Options\Helper.cs" />
-    <Compile Include="Options\EditStyleRuleDialog.xaml.cs">
-      <DependentUpon>EditStyleRuleDialog.xaml</DependentUpon>
+    <Compile Include="Options\EditRuleDialog.xaml.cs">
+      <DependentUpon>EditRuleDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Commands\CreateEditStyleRule.cs" />
+    <Compile Include="Commands\CreateEditRule.cs" />
     <Compile Include="VSCommandTable.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -197,7 +197,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Options\OptionsTokensPageControl.xaml">
+    <Page Include="Options\OptionsRulesPageControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -209,7 +209,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Options\EditStyleRuleDialog.xaml">
+    <Page Include="Options\EditRuleDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

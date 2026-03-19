@@ -12,17 +12,17 @@
     </Groups>
 
     <Buttons>
-      <Button guid="guidBetterCommentsPlusPackageCmdSet" id="CreateEditForegroundStyleRule" priority="0x0100" type="Button">
+      <Button guid="guidBetterCommentsPlusPackageCmdSet" id="CreateEditForegroundRule" priority="0x0100" type="Button">
         <Parent guid="guidBetterCommentsPlusPackageCmdSet" id="ContextMenuGroup" />
         <Strings>
-          <ButtonText>Create/Edit Foreground Styles Rule</ButtonText>
+          <ButtonText>Create/Edit Foreground Rule</ButtonText>
         </Strings>
       </Button>
 
-      <Button guid="guidBetterCommentsPlusPackageCmdSet" id="CreateEditBackgroundStyleRule" priority="0x0101" type="Button">
+      <Button guid="guidBetterCommentsPlusPackageCmdSet" id="CreateEditBackgroundRule" priority="0x0101" type="Button">
         <Parent guid="guidBetterCommentsPlusPackageCmdSet" id="ContextMenuGroup" />
         <Strings>
-          <ButtonText>Create/Edit Background Styles Rule</ButtonText>
+          <ButtonText>Create/Edit Background Rule</ButtonText>
         </Strings>
       </Button>
     </Buttons>
@@ -32,8 +32,8 @@
     <GuidSymbol name="guidBetterCommentsPlusPackage" value="{09e59564-c21a-44f8-ae2b-c2bc17facd07}" />
     <GuidSymbol name="guidBetterCommentsPlusPackageCmdSet" value="{09e59564-c21a-44f8-ae2b-c2bc17facd08}">
       <IDSymbol name="ContextMenuGroup" value="0x0001" />
-      <IDSymbol name="CreateEditForegroundStyleRule" value="0x0100" />
-      <IDSymbol name="CreateEditBackgroundStyleRule" value="0x0101" />
+      <IDSymbol name="CreateEditForegroundRule" value="0x0100" />
+      <IDSymbol name="CreateEditBackgroundRule" value="0x0101" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

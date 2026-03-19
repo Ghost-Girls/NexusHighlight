@@ -11,7 +11,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace BetterCommentsPlus.Commands
 {
-    internal static class CreateEditStyleRule
+    internal static class CreateEditRule
     {
         private static VsPackage package;
         private static IMenuCommandService commandService;
@@ -23,29 +23,29 @@ namespace BetterCommentsPlus.Commands
 
             if (commandService != null)
             {
-                var foregroundCommandId = new CommandID(PackageGuids.guidBetterCommentsPlusPackageCmdSet, PackageIds.CreateEditForegroundStyleRule);
-                var foregroundMenuItem = new MenuCommand(OnCreateEditForegroundStyleRule, foregroundCommandId);
+                var foregroundCommandId = new CommandID(PackageGuids.guidBetterCommentsPlusPackageCmdSet, PackageIds.CreateEditForegroundRule);
+                var foregroundMenuItem = new MenuCommand(OnCreateEditForegroundRule, foregroundCommandId);
                 commandService.AddCommand(foregroundMenuItem);
 
-                var backgroundCommandId = new CommandID(PackageGuids.guidBetterCommentsPlusPackageCmdSet, PackageIds.CreateEditBackgroundStyleRule);
-                var backgroundMenuItem = new MenuCommand(OnCreateEditBackgroundStyleRule, backgroundCommandId);
+                var backgroundCommandId = new CommandID(PackageGuids.guidBetterCommentsPlusPackageCmdSet, PackageIds.CreateEditBackgroundRule);
+                var backgroundMenuItem = new MenuCommand(OnCreateEditBackgroundRule, backgroundCommandId);
                 commandService.AddCommand(backgroundMenuItem);
             }
         }
 
-        private static void OnCreateEditForegroundStyleRule(object sender, EventArgs e)
+        private static void OnCreateEditForegroundRule(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            ExecuteStyleRuleCommand(enableForeground: true);
+            ExecuteRuleCommand(enableForeground: true);
         }
 
-        private static void OnCreateEditBackgroundStyleRule(object sender, EventArgs e)
+        private static void OnCreateEditBackgroundRule(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            ExecuteStyleRuleCommand(enableForeground: false);
+            ExecuteRuleCommand(enableForeground: false);
         }
 
-        private static void ExecuteStyleRuleCommand(bool enableForeground)
+        private static void ExecuteRuleCommand(bool enableForeground)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -84,7 +84,7 @@ namespace BetterCommentsPlus.Commands
                         HasUnderline = false,
                         HasStrikethrough = false,
                         IsForegroundActive = enableForeground,
-                        Background = new BackgroundStyle
+                        Background = new Background
                         {
                             IsActive = !enableForeground,
                             ColorHex = !enableForeground ? "#FF0000" : null,
@@ -97,10 +97,10 @@ namespace BetterCommentsPlus.Commands
                     };
                 }
 
-                var editor = new EditStyleRuleDialog
+                var editor = new EditRuleDialog
                 {
                     RuleToEdit = found,
-                    Title = isNew ? "Create Style Rule" : "Modify Style Rule"
+                    Title = isNew ? "Create Rule" : "Modify Rule"
                 };
 
                 editor.ModifyButton.Content = isNew ? "Create" : "Modify";

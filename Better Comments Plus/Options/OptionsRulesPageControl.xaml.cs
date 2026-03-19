@@ -13,7 +13,7 @@ using System.Text.Json;
 
 namespace BetterCommentsPlus.Options
 {
-   public partial class OptionsTokensPageControl
+   public partial class OptionsRulesPageControl
    {
       private Point _dragStartPoint;
       private CommentRule _draggedItem;
@@ -25,7 +25,7 @@ namespace BetterCommentsPlus.Options
       private AdornerLayer _adornerLayer;
       private InsertionAdorner _insertionAdorner;
 
-      public OptionsTokensPageControl()
+      public OptionsRulesPageControl()
       {
          DataContext = Settings.Instance;
          InitializeComponent();
@@ -466,7 +466,7 @@ namespace BetterCommentsPlus.Options
                         HasStrikethrough = selectedRule.HasStrikethrough,
                         IsForegroundActive = selectedRule.IsForegroundActive,
                         IsPredefined = false,
-                        Background = new BackgroundStyle
+                        Background = new Background
                         {
                            IsActive = selectedRule.Background?.IsActive ?? false,
                            ColorHex = selectedRule.Background?.ColorHex,
@@ -766,7 +766,7 @@ namespace BetterCommentsPlus.Options
       public bool? HasUnderline { get; set; }
       public bool? HasStrikethrough { get; set; }
       public bool? IsForegroundActive { get; set; }
-      public BackgroundStyleData Background { get; set; }
+      public BackgroundData Background { get; set; }
 
       public static CommentRuleData FromCommentRule(CommentRule rule)
       {
@@ -779,7 +779,7 @@ namespace BetterCommentsPlus.Options
             HasUnderline = rule.HasUnderline,
             HasStrikethrough = rule.HasStrikethrough,
             IsForegroundActive = rule.IsForegroundActive,
-            Background = BackgroundStyleData.FromBackgroundStyle(rule.Background)
+            Background = BackgroundData.FromBackground(rule.Background)
          };
       }
 
@@ -796,13 +796,13 @@ namespace BetterCommentsPlus.Options
             HasStrikethrough = HasStrikethrough,
             IsForegroundActive = IsForegroundActive,
             IsPredefined = false,
-            Background = Background?.ToBackgroundStyle() ?? new BackgroundStyle()
+            Background = Background?.ToBackground() ?? new Background()
          };
          return rule;
       }
    }
 
-   public class BackgroundStyleData
+   public class BackgroundData
    {
       public bool IsActive { get; set; }
       public string ColorHex { get; set; }
@@ -812,17 +812,17 @@ namespace BetterCommentsPlus.Options
       public bool IsCaseSensitive { get; set; } = true;
       public bool AllowPartialMatch { get; set; }
 
-      public BackgroundStyleData()
+      public BackgroundData()
       {
          Shape = "Tag";
          Blur = "None";
          Alpha = "1/10";
       }
 
-      public static BackgroundStyleData FromBackgroundStyle(BackgroundStyle style)
+      public static BackgroundData FromBackground(Background style)
       {
-         if (style == null) return new BackgroundStyleData();
-         return new BackgroundStyleData
+         if (style == null) return new BackgroundData();
+         return new BackgroundData
          {
             IsActive = style.IsActive,
             ColorHex = style.ColorHex,
@@ -834,9 +834,9 @@ namespace BetterCommentsPlus.Options
          };
       }
 
-      public BackgroundStyle ToBackgroundStyle()
+      public Background ToBackground()
       {
-         return new BackgroundStyle
+         return new Background
          {
             IsActive = IsActive,
             ColorHex = ColorHex,

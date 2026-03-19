@@ -96,11 +96,11 @@ namespace BetterCommentsPlus.CommentsTagging
             if (Settings.HighlightTaskKeywordOnly && commentInfo.Rule.Criteria.ToUpper() == "#TASK")
             {
                 var spanText = span.GetText().ToLower();
-                var token = Settings.GetTokenValue("#TASK");
-                var start = spanText.IndexOf(token, StringComparison.OrdinalIgnoreCase);
+                var rule = Settings.GetRuleValue("#TASK");
+                var start = spanText.IndexOf(rule, StringComparison.OrdinalIgnoreCase);
 
                 return new Comment(
-                    new List<SnapshotSpan> { new SnapshotSpan(span.Snapshot, span.Start + start, token.Length) },
+                    new List<SnapshotSpan> { new SnapshotSpan(span.Snapshot, span.Start + start, rule.Length) },
                     commentInfo.Rule.Criteria);
             }
 

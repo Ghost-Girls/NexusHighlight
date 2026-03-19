@@ -24,7 +24,7 @@ namespace BetterCommentsPlus.Options
 
          if (str.IndexOfAny(new[] { '|', ',', '/' }) > -1)
          {
-            return new ValidationResult(false, "Tokens can't contain any of the following characters | , /");
+            return new ValidationResult(false, "Rules can't contain any of the following characters | , /");
          }
 
          if (string.IsNullOrWhiteSpace(str))
@@ -52,8 +52,8 @@ namespace BetterCommentsPlus.Options
             }
          }
          else
-         {
-            // 默认行为：同时检查两个集合（用于 ValidateTokens 方法）
+        {
+            // 默认行为：同时检查两个集合（用于 ValidateRules 方法）
             var globalCount = Settings.Instance.GlobalRules.Count(t => t.Criteria.Equals(str));
             var solutionCount = Settings.Instance.SolutionRules.Count(t => t.Criteria.Equals(str));
             

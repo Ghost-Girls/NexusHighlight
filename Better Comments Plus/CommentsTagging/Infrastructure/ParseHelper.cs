@@ -12,7 +12,7 @@ namespace BetterCommentsPlus.CommentsTagging
 
       public static int SingleLineCommentStartIndex(string comment, string doubleCommentStarter, string criteria)
       {
-         var token = settings.GetTokenValue(criteria);
+         var rule = settings.GetRuleValue(criteria);
 
          var isDoubleComment = comment.StartsWith(doubleCommentStarter, StringComparison.OrdinalIgnoreCase);
 
@@ -21,27 +21,27 @@ namespace BetterCommentsPlus.CommentsTagging
             return comment.IndexOfFirstChar(doubleCommentStarter.Length);
          }
 
-         var start = comment.IndexOf(token, StringComparison.OrdinalIgnoreCase);
+         var start = comment.IndexOf(rule, StringComparison.OrdinalIgnoreCase);
          
          if (settings.HighlightCriteriaItself)
          {
             return start;
          }
 
-         return comment.IndexOfFirstChar(start + token.Length);
+         return comment.IndexOfFirstChar(start + rule.Length);
       }
 
       public static int DelimitedCommentStartIndex(string comment, string criteria)
       {
-         var token = settings.GetTokenValue(criteria);
-         var start = comment.IndexOf(token, StringComparison.OrdinalIgnoreCase);
+         var rule = settings.GetRuleValue(criteria);
+         var start = comment.IndexOf(rule, StringComparison.OrdinalIgnoreCase);
          
          if (settings.HighlightCriteriaItself)
          {
             return start;
          }
 
-         return comment.IndexOfFirstChar(start + token.Length);
+         return comment.IndexOfFirstChar(start + rule.Length);
       }
 
       public static SnapshotSpan CompleteSingleLineCommentSpan(SnapshotSpan source, string startString)

@@ -18,11 +18,11 @@ namespace BetterCommentsPlus.CommentsTagging
       {
          var spanText = span.GetText().ToLower();
 
-         var token = Settings.Instance.GetTokenValue(criteria);
+         var rule = Settings.Instance.GetRuleValue(criteria);
 
          var startOffset = (criteria.ToUpper() == "#TASK")
-                         ? spanText.IndexOf(token, 3, OrdinalIgnoreCase)
-                         : spanText.IndexOfFirstChar(spanText.IndexOf(token, 3, OrdinalIgnoreCase) + token.Length);
+                         ? spanText.IndexOf(rule, 3, OrdinalIgnoreCase)
+                         : spanText.IndexOfFirstChar(spanText.IndexOf(rule, 3, OrdinalIgnoreCase) + rule.Length);
 
          var closerIndex = spanText.IndexOf("-->", OrdinalIgnoreCase);
          var spanLength = spanText.IndexOfFirstCharReverse(closerIndex - 1) - (startOffset - 1);

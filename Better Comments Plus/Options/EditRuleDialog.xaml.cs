@@ -7,13 +7,13 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace BetterCommentsPlus.Options
 {
-    public partial class EditStyleRuleDialog
+    public partial class EditRuleDialog
     {
-        public EditStyleRuleDialog()
+        public EditRuleDialog()
         {
             InitializeComponent();
 
-            Loaded += EditStyleRuleDialog_Loaded;
+            Loaded += EditRuleDialog_Loaded;
 
             btnModify.Click += BtnModify_Click;
             btnCancel.Click += BtnCancel_Click;
@@ -39,7 +39,7 @@ namespace BetterCommentsPlus.Options
         public Button ModifyButton => btnModify;
         public Button DeleteButton => btnDelete;
 
-        private void EditStyleRuleDialog_Loaded(object sender, RoutedEventArgs e)
+        private void EditRuleDialog_Loaded(object sender, RoutedEventArgs e)
         {
             BetterCommentsPlus.Options.Helper.InitDefaults();
             InitializeColorLists();
@@ -104,7 +104,7 @@ namespace BetterCommentsPlus.Options
             }
 
             if (RuleToEdit.Background == null)
-                RuleToEdit.Background = new BackgroundStyle();
+                RuleToEdit.Background = new Background();
                 
             RuleToEdit.Background.IsActive = chkBgActive.IsChecked == true;
             RuleToEdit.Background.IsCaseSensitive = chkCaseSensitive.IsChecked == true;

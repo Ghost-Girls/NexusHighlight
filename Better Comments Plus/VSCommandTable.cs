@@ -14,7 +14,7 @@ namespace BetterCommentsPlus
     internal static class PackageIds
     {
         public const int ContextMenuGroup = 0x0001;
-        public const int CreateEditForegroundStyleRule = 0x0100;
-        public const int CreateEditBackgroundStyleRule = 0x0101;
+        public const int CreateEditForegroundRule = 0x0100;
+        public const int CreateEditBackgroundRule = 0x0101;
     }
 }

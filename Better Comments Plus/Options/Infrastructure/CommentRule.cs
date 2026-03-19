@@ -6,7 +6,6 @@ namespace BetterCommentsPlus.Options
 {
     /// <summary>
     /// 评论规则 - 统一的规则定义
-    /// 合并了原来的 CommentToken 和 StyleRule
     /// </summary>
     public class CommentRule : INotifyPropertyChanged
     {
@@ -20,8 +19,8 @@ namespace BetterCommentsPlus.Options
         private string criteria;
 
         // === 样式 ===
-        private ForegroundStyle foreground;
-        private BackgroundStyle background;
+        private Foreground foreground;
+        private Background background;
 
         // === 作用域 ===
         private RuleScope scope;
@@ -35,8 +34,8 @@ namespace BetterCommentsPlus.Options
             isPredefined = false;
             isActive = true;
             order = 0;
-            foreground = new ForegroundStyle();
-            background = new BackgroundStyle();
+            foreground = new Foreground();
+            background = new Background();
             scope = RuleScope.Global;
         }
 
@@ -106,18 +105,18 @@ namespace BetterCommentsPlus.Options
         // === 样式 ===
 
         /// <summary>
-        /// 前景样式
+        /// 前景
         /// </summary>
-        public ForegroundStyle Foreground
+        public Foreground Foreground
         {
             get => foreground;
             set { foreground = value; OnPropertyChanged(); }
         }
 
         /// <summary>
-        /// 背景样式
+        /// 背景
         /// </summary>
-        public BackgroundStyle Background
+        public Background Background
         {
             get => background;
             set { background = value; OnPropertyChanged(); }
