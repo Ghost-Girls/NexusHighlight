@@ -81,19 +81,19 @@ namespace BetterCommentsPlus.CommentsTagging
                 return new ClassificationTag(classificationType);
             }
 
-            // 根据 Criteria 映射到预定义的分类类型
-            var criteria = comment.Criteria?.ToUpper();
-            if (criteria == "#IMPORTANT")
-                return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.IMPORTANT_COMMENT));
-            
-            if (criteria == "#REMOVE")
-                return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.REMOVE_COMMENT));
-            
-            if (criteria == "#QUESTION")
-                return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.QUESTION_COMMENT));
-            
-            if (criteria == "#TASK")
-                return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.TASK_COMMENT));
+            // 所有规则一视同仁，使用 Criteria 作为分类类型
+            var criteria = comment.Criteria;
+            if (!string.IsNullOrEmpty(criteria))
+            {
+                var criteriaType = classRegistry.GetClassificationType(criteria);
+                if (criteriaType == null)
+                {
+                    criteriaType = classRegistry.CreateClassificationType(
+                        criteria,
+                        new[] { classRegistry.GetClassificationType("comment") });
+                }
+                return new ClassificationTag(criteriaType);
+            }
 
             return new ClassificationTag(classRegistry.GetClassificationType("comment"));
         }

@@ -182,25 +182,8 @@ namespace BetterCommentsPlus.CommentsViewCustomization
       {
          try
          {
-            string criteria = null;
-            string ruleId = classificationType.Classification;
-
-            if (classificationType.IsOfType(CommentNames.IMPORTANT_COMMENT))
-            {
-               criteria = "#IMPORTANT";
-            }
-            else if (classificationType.IsOfType(CommentNames.QUESTION_COMMENT))
-            {
-               criteria = "#QUESTION";
-            }
-            else if (classificationType.IsOfType(CommentNames.REMOVE_COMMENT))
-            {
-               criteria = "#REMOVE";
-            }
-            else if (classificationType.IsOfType(CommentNames.TASK_COMMENT))
-            {
-               criteria = "#TASK";
-            }
+            string criteria = classificationType.Classification;
+            string ruleId = criteria;
 
             string colorHex = null;
             bool? isBold = null;

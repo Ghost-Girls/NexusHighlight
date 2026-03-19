@@ -80,8 +80,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CommentsClassification\CommentClassificationDefinitions.cs" />
-    <Compile Include="CommentsClassification\CommentClassificationFormatDefinitions.cs" />
     <Compile Include="CommentsClassification\Constants.cs" />
     <Compile Include="CommentsTagging\CommentTagger.cs" />
     <Compile Include="CommentsTagging\CommentTaggerProvider.cs" />
