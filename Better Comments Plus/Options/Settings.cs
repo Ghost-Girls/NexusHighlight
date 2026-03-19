@@ -413,7 +413,12 @@ namespace BetterCommentsPlus.Options
             }
         }
 
-        // === 解决方案相关方法 ===
+        // === 解决方案相关属性和方法 ===
+        public string CurrentSolutionPath
+        {
+            get { return _currentSolutionPath; }
+        }
+
         public void SetCurrentSolutionPath(string solutionPath)
         {
             if (_currentSolutionPath == solutionPath)

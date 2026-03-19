@@ -255,6 +255,23 @@ namespace BetterCommentsPlus.Options
                {
                   targetRules.Move(_draggedIndex, newIndex);
                   targetListBox.SelectedItem = _draggedItem;
+                  
+                  // 拖拽完成后，手动保存规则
+                  Settings.Instance.IsDragging = false;
+                  bool isGlobalRules = listBox == GlobalRulesList;
+                  if (isGlobalRules)
+                  {
+                     SettingsManager.SaveGlobalRules(settings.GlobalRules);
+                  }
+                  else
+                  {
+                     // 获取当前解决方案路径并保存
+                     var solutionPath = settings.CurrentSolutionPath;
+                     if (!string.IsNullOrEmpty(solutionPath))
+                     {
+                        SettingsManager.SaveSolutionRules(solutionPath, settings.SolutionRules);
+                     }
+                  }
                }
             }
 
@@ -303,30 +320,7 @@ namespace BetterCommentsPlus.Options
 
       private void AddSolutionButton_Click(object sender, RoutedEventArgs e)
       {
-         // 确保我们有解决方案路径
-         TryGetSolutionPath();
          AddRule(Settings.Instance.SolutionRules, SolutionRulesList);
-      }
-      
-      private void TryGetSolutionPath()
-      {
-         try
-         {
-            ThreadHelper.ThrowIfNotOnUIThread();
-            var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
-            if (dte != null && dte.Solution != null && dte.Solution.IsOpen)
-            {
-               string solutionPath = dte.Solution.FullName;
-               if (!string.IsNullOrEmpty(solutionPath))
-               {
-                  Settings.Instance.SetCurrentSolutionPath(solutionPath);
-               }
-            }
-         }
-         catch
-         {
-            // 静默处理错误
-         }
       }
 
       private void AddRule(ObservableCollection<CommentRule> rules, ListBox listBox)

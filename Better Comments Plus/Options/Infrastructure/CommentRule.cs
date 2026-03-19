@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace BetterCommentsPlus.Options
 {
@@ -13,7 +14,6 @@ namespace BetterCommentsPlus.Options
         private string id;
         private bool isPredefined;
         private bool isActive;
-        private int order;
 
         // === 匹配 ===
         private string criteria;
@@ -21,9 +21,6 @@ namespace BetterCommentsPlus.Options
         // === 样式 ===
         private Foreground foreground;
         private Background background;
-
-        // === 作用域 ===
-        private RuleScope scope;
 
         #region 构造函数
 
@@ -33,10 +30,8 @@ namespace BetterCommentsPlus.Options
             criteria = string.Empty;
             isPredefined = false;
             isActive = true;
-            order = 0;
             foreground = new Foreground();
             background = new Background();
-            scope = RuleScope.Global;
         }
 
         public CommentRule(string criteria, string colorHex) : this()
@@ -82,15 +77,6 @@ namespace BetterCommentsPlus.Options
             set { isActive = value; OnPropertyChanged(); }
         }
 
-        /// <summary>
-        /// 排序顺序
-        /// </summary>
-        public int Order
-        {
-            get => order;
-            set { order = value; OnPropertyChanged(); }
-        }
-
         // === 匹配 ===
 
         /// <summary>
@@ -122,51 +108,46 @@ namespace BetterCommentsPlus.Options
             set { background = value; OnPropertyChanged(); }
         }
 
-        // === 作用域 ===
-
-        /// <summary>
-        /// 规则作用域（全局或解决方案）
-        /// </summary>
-        public RuleScope Scope
-        {
-            get => scope;
-            set { scope = value; OnPropertyChanged(); }
-        }
-
         #endregion
 
         #region 便捷属性（前景样式）
 
+        [JsonIgnore]
         public string ColorHex
         {
             get => foreground?.ColorHex;
             set { if (foreground != null) { foreground.ColorHex = value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public bool? IsBold
         {
             get => foreground?.IsBold;
             set { if (foreground != null && value.HasValue) { foreground.IsBold = value.Value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public bool? IsItalic
         {
             get => foreground?.IsItalic;
             set { if (foreground != null && value.HasValue) { foreground.IsItalic = value.Value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public bool? HasUnderline
         {
             get => foreground?.HasUnderline;
             set { if (foreground != null && value.HasValue) { foreground.HasUnderline = value.Value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public bool? HasStrikethrough
         {
             get => foreground?.HasStrikethrough;
             set { if (foreground != null && value.HasValue) { foreground.HasStrikethrough = value.Value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public bool? IsForegroundActive
         {
             get => foreground?.IsActive;
@@ -177,42 +158,49 @@ namespace BetterCommentsPlus.Options
 
         #region 便捷属性（背景样式）
 
+        [JsonIgnore]
         public string BackgroundColorHex
         {
             get => background?.ColorHex;
             set { if (background != null) { background.ColorHex = value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public string Shape
         {
             get => background?.Shape;
             set { if (background != null) { background.Shape = value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public string Blur
         {
             get => background?.Blur;
             set { if (background != null) { background.Blur = value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public string Alpha
         {
             get => background?.Alpha;
             set { if (background != null) { background.Alpha = value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public bool? IsBackgroundActive
         {
             get => background?.IsActive;
             set { if (background != null && value.HasValue) { background.IsActive = value.Value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public bool? IsCaseSensitive
         {
             get => background?.IsCaseSensitive;
             set { if (background != null && value.HasValue) { background.IsCaseSensitive = value.Value; OnPropertyChanged(); } }
         }
 
+        [JsonIgnore]
         public bool? AllowPartialMatch
         {
             get => background?.AllowPartialMatch;

@@ -99,7 +99,6 @@
     <Compile Include="Options\Infrastructure\Foreground.cs" />
     <Compile Include="Options\Infrastructure\Background.cs" />
     <Compile Include="Options\Infrastructure\CommentRule.cs" />
-    <Compile Include="Options\Infrastructure\RuleScope.cs" />
     <Compile Include="Options\OptionsPageBase.cs">
       <SubType>Component</SubType>
     </Compile>
