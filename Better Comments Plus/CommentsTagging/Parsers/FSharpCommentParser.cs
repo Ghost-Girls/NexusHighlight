@@ -12,11 +12,11 @@ namespace BetterCommentsPlus.CommentsTagging
             return temp.StartsWith("//", OrdinalIgnoreCase) || temp.StartsWith("(*", OrdinalIgnoreCase);
         }
 
-        protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
+        protected override Comment SpecificParse(SnapshotSpan span, string criteria)
         {
             var spanText = span.GetText().ToLower();
             var commentSpans = new List<SnapshotSpan>();
-            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", commentCategory);
+            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", criteria);
 
             if (spanText.StartsWith("//", OrdinalIgnoreCase) && startOffset > 0)
             {
@@ -24,7 +24,7 @@ namespace BetterCommentsPlus.CommentsTagging
             }
             else if (spanText.Contains("(*") && spanText.Contains("*)"))
             {
-                startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, commentCategory);
+                startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, criteria);
 
                 var closerIndex = spanText.IndexOf("*)", OrdinalIgnoreCase);
                 var spanLength = spanText.IndexOfFirstCharReverse(closerIndex - 1) - (startOffset - 1);
@@ -32,15 +32,15 @@ namespace BetterCommentsPlus.CommentsTagging
                 commentSpans.Add(new SnapshotSpan(span.Snapshot, span.Start + startOffset, spanLength));
             }
 
-            return new Comment(commentSpans, commentCategory);
+            return new Comment(commentSpans, criteria);
         }
 
-        protected override CommentCategory? GetCommentType(SnapshotSpan span)
+        protected override string GetCommentCriteria(SnapshotSpan span)
         {
             if (Settings.StrikethroughDoubleComments && span.GetText().StartsWith("////", OrdinalIgnoreCase))
-                return CommentCategory.Remove;
+                return "#REMOVE";
 
-            return base.GetCommentType(span);
+            return base.GetCommentCriteria(span);
         }
 
         protected override string SpanTextWithoutCommentStarter(SnapshotSpan span)

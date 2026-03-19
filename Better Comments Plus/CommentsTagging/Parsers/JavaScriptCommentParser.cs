@@ -22,7 +22,7 @@ namespace BetterCommentsPlus.CommentsTagging
          return base.Parse(new SnapshotSpan(span.Snapshot, span.Start, len));
       }
 
-      protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
+      protected override Comment SpecificParse(SnapshotSpan span, string criteria)
       {
          var spanText = span.GetText().ToLower();
 
@@ -32,14 +32,14 @@ namespace BetterCommentsPlus.CommentsTagging
 
             spanText = fullSpan.GetText().ToLower();
 
-            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", commentCategory);
+            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", criteria);
             var spanLength = spanText.Length - startOffset;
 
             if (spanLength > 0)
             {
                return new Comment(
                    new[] { new SnapshotSpan(fullSpan.Snapshot, fullSpan.Start + startOffset, spanLength) },
-                   commentCategory);
+                   criteria);
             }
          }
          else if (spanText.Contains("/*"))
@@ -49,7 +49,7 @@ namespace BetterCommentsPlus.CommentsTagging
             if (fullSpans.Count == 1)
             {
                spanText = fullSpans[0].GetText().ToLower();
-               var startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, commentCategory);
+               var startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, criteria);
                var closerIndex = spanText.IndexOf("*/", OrdinalIgnoreCase);
                var spanLength = spanText.IndexOfFirstCharReverse(closerIndex - 1) - (startOffset - 1);
 
@@ -57,24 +57,24 @@ namespace BetterCommentsPlus.CommentsTagging
                {
                   return new Comment(
                       new[] { new SnapshotSpan(fullSpans[0].Snapshot, fullSpans[0].Start + startOffset, spanLength) },
-                      commentCategory);
+                      criteria);
                }
             }
          }
 
-         return new Comment(new List<SnapshotSpan>(), commentCategory);
+         return new Comment(new List<SnapshotSpan>(), criteria);
       }
 
-      protected override CommentCategory? GetCommentType(SnapshotSpan span)
+      protected override string GetCommentCriteria(SnapshotSpan span)
       {
          var fullSpan = span.GetText().Contains("//")
                       ? ParseHelper.CompleteSingleLineCommentSpan(span, "//")
                       : ParseHelper.CompleteDelimitedCommentSpan(span, "/*", "*/").First();
 
          if (Settings.StrikethroughDoubleComments && fullSpan.GetText().StartsWith("////", OrdinalIgnoreCase))
-            return CommentCategory.Remove;
+            return "#REMOVE";
 
-         return base.GetCommentType(fullSpan);
+         return base.GetCommentCriteria(fullSpan);
       }
 
       protected override string SpanTextWithoutCommentStarter(SnapshotSpan span)

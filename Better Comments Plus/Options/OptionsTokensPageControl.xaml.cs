@@ -300,7 +300,6 @@ namespace BetterCommentsPlus.Options
          {
             Id = Guid.NewGuid().ToString(),
             Criteria = newCriteria,
-            Category = CommentCategory.Important,
             ColorHex = "#FFFF0000",
             IsPredefined = false
          };
@@ -460,7 +459,6 @@ namespace BetterCommentsPlus.Options
                      {
                         Id = Guid.NewGuid().ToString(),
                         Criteria = selectedRule.Criteria,
-                        Category = selectedRule.Category,
                         ColorHex = selectedRule.ColorHex,
                         IsBold = selectedRule.IsBold,
                         IsItalic = selectedRule.IsItalic,
@@ -762,7 +760,6 @@ namespace BetterCommentsPlus.Options
    public class CommentRuleData
    {
       public string Criteria { get; set; }
-      public CommentCategory? Category { get; set; }
       public string ColorHex { get; set; }
       public bool? IsBold { get; set; }
       public bool? IsItalic { get; set; }
@@ -776,7 +773,6 @@ namespace BetterCommentsPlus.Options
          return new CommentRuleData
          {
             Criteria = rule.Criteria,
-            Category = rule.Category,
             ColorHex = rule.ColorHex,
             IsBold = rule.IsBold,
             IsItalic = rule.IsItalic,
@@ -793,7 +789,6 @@ namespace BetterCommentsPlus.Options
          {
             Id = Guid.NewGuid().ToString(),
             Criteria = Criteria ?? string.Empty,
-            Category = Category,
             ColorHex = ColorHex ?? "#FFFF0000",
             IsBold = IsBold,
             IsItalic = IsItalic,

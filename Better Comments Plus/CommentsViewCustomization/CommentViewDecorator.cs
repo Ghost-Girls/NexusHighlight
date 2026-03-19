@@ -182,28 +182,23 @@ namespace BetterCommentsPlus.CommentsViewCustomization
       {
          try
          {
-            CommentCategory? commentCategory = null;
             string criteria = null;
             string ruleId = classificationType.Classification;
 
             if (classificationType.IsOfType(CommentNames.IMPORTANT_COMMENT))
             {
-               commentCategory = CommentCategory.Important;
                criteria = "#IMPORTANT";
             }
             else if (classificationType.IsOfType(CommentNames.QUESTION_COMMENT))
             {
-               commentCategory = CommentCategory.Question;
                criteria = "#QUESTION";
             }
             else if (classificationType.IsOfType(CommentNames.REMOVE_COMMENT))
             {
-               commentCategory = CommentCategory.Remove;
                criteria = "#REMOVE";
             }
             else if (classificationType.IsOfType(CommentNames.TASK_COMMENT))
             {
-               commentCategory = CommentCategory.Task;
                criteria = "#TASK";
             }
 
@@ -235,12 +230,6 @@ namespace BetterCommentsPlus.CommentsViewCustomization
             if (matchingRule == null)
             {
                matchingRule = settings.AllRules.FirstOrDefault(r => r.Id == ruleId);
-            }
-            
-            // 如果还是没找到，尝试通过 commentCategory 查找预设规则
-            if (matchingRule == null && commentCategory.HasValue)
-            {
-               matchingRule = settings.GetRule(commentCategory.Value);
             }
 
             // 应用找到的 Rule 的样式

@@ -10,22 +10,22 @@ namespace BetterCommentsPlus.CommentsTagging
          return span.GetText().Trim().StartsWith("#", OrdinalIgnoreCase);
       }
 
-      protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
+      protected override Comment SpecificParse(SnapshotSpan span, string criteria)
       {
          var spanText = span.GetText().ToLower();
-         var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "##", commentCategory);
+         var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "##", criteria);
 
          return new Comment(
              new[] { new SnapshotSpan(span.Snapshot, span.Start + startOffset, span.Length - startOffset) },
-             commentCategory);
+             criteria);
       }
 
-      protected override CommentCategory? GetCommentType(SnapshotSpan span)
+      protected override string GetCommentCriteria(SnapshotSpan span)
       {
          if (Settings.StrikethroughDoubleComments && span.GetText().StartsWith("##", OrdinalIgnoreCase))
-            return CommentCategory.Remove;
+            return "#REMOVE";
 
-         return base.GetCommentType(span);
+         return base.GetCommentCriteria(span);
       }
 
       protected override string SpanTextWithoutCommentStarter(SnapshotSpan span)

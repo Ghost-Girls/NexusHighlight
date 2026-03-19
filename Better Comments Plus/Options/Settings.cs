@@ -26,10 +26,10 @@ namespace BetterCommentsPlus.Options
         private readonly ObservableCollection<CommentRule> globalRules
             = new ObservableCollection<CommentRule>
             {
-                new CommentRule(CommentCategory.Important, "#IMPORTANT", "#FFFF0000"),
-                new CommentRule(CommentCategory.Remove, "#REMOVE", "#FF808080"),
-                new CommentRule(CommentCategory.Question, "#QUESTION", "#FFFFFF00"),
-                new CommentRule(CommentCategory.Task, "#TASK", "#FFEB690A"),
+                new CommentRule("#IMPORTANT", "#FFFF0000"),
+                new CommentRule("#REMOVE", "#FF808080"),
+                new CommentRule("#QUESTION", "#FFFFFF00"),
+                new CommentRule("#TASK", "#FFEB690A"),
             };
 
         private readonly ObservableCollection<CommentRule> solutionRules
@@ -193,23 +193,20 @@ namespace BetterCommentsPlus.Options
 
         // === 基于 CommentRule 的方法 ===
         
-        public CommentRule GetRule(CommentCategory category)
+        public CommentRule GetRule(string criteria)
         {
-            return globalRules.FirstOrDefault(r => r.Category == category);
+            return globalRules.FirstOrDefault(r => r.Criteria == criteria);
         }
 
-        public string GetRulePattern(CommentCategory category)
+        public string GetRulePattern(string criteria)
         {
-            var rule = GetRule(category);
+            var rule = GetRule(criteria);
             return rule?.Criteria ?? "";
         }
 
-        public string GetTokenValue(CommentCategory? category)
+        public string GetTokenValue(string criteria)
         {
-            if (!category.HasValue)
-                return "";
-            
-            var rule = GetRule(category.Value);
+            var rule = GetRule(criteria);
             return rule?.Criteria ?? "";
         }
 
@@ -238,7 +235,6 @@ namespace BetterCommentsPlus.Options
                     {
                         Id = Guid.NewGuid().ToString(),
                         Criteria = globalRule.Criteria,
-                        Category = globalRule.Category,
                         ColorHex = globalRule.ColorHex,
                         IsBold = globalRule.IsBold,
                         IsItalic = globalRule.IsItalic,
@@ -280,10 +276,10 @@ namespace BetterCommentsPlus.Options
 
                 var defaultRules = new[]
                 {
-                    new { Category = CommentCategory.Important, Criteria = "#IMPORTANT", ColorHex = "#FFFF0000", IsBold = true, IsItalic = false, HasUnderline = false, HasStrikethrough = false },
-                    new { Category = CommentCategory.Remove, Criteria = "#REMOVE", ColorHex = "#FF808080", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = true },
-                    new { Category = CommentCategory.Question, Criteria = "#QUESTION", ColorHex = "#FFFFFF00", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = false },
-                    new { Category = CommentCategory.Task, Criteria = "#TASK", ColorHex = "#FFEB690A", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = false }
+                    new { Criteria = "#IMPORTANT", ColorHex = "#FFFF0000", IsBold = true, IsItalic = false, HasUnderline = false, HasStrikethrough = false },
+                    new { Criteria = "#REMOVE", ColorHex = "#FF808080", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = true },
+                    new { Criteria = "#QUESTION", ColorHex = "#FFFFFF00", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = false },
+                    new { Criteria = "#TASK", ColorHex = "#FFEB690A", IsBold = false, IsItalic = false, HasUnderline = false, HasStrikethrough = false }
                 };
 
                 foreach (var ruleInfo in defaultRules)
@@ -291,7 +287,6 @@ namespace BetterCommentsPlus.Options
                     var newRule = new CommentRule
                     {
                         Id = Guid.NewGuid().ToString(),
-                        Category = ruleInfo.Category,
                         Criteria = ruleInfo.Criteria,
                         ColorHex = ruleInfo.ColorHex,
                         IsBold = ruleInfo.IsBold,

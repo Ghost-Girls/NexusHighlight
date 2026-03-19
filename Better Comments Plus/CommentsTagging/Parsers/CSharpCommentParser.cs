@@ -14,7 +14,7 @@ namespace BetterCommentsPlus.CommentsTagging
                 || txt.StartsWith("/*", OrdinalIgnoreCase);
         }
 
-        protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
+        protected override Comment SpecificParse(SnapshotSpan span, string criteria)
         {
             var spanText = span.GetText().ToLower();
 
@@ -25,7 +25,7 @@ namespace BetterCommentsPlus.CommentsTagging
 
             if (firstLineNumber == lastLineNumber) //! The comment span consists of a single line.
             {
-                var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", commentCategory);
+                var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", criteria);
                 var spanLength = 0;
                 if (spanText.StartsWith("//", OrdinalIgnoreCase))
                 {
@@ -42,8 +42,8 @@ namespace BetterCommentsPlus.CommentsTagging
             }
             else //! The comment spans multiple lines
             {
-                var startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, commentCategory);
-                var token = Settings.Instance.GetTokenValue(commentCategory ?? CommentCategory.Normal);
+                var startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, criteria);
+                var token = Settings.Instance.GetTokenValue(criteria);
 
                 for (var curr = firstLineNumber; curr <= lastLineNumber; curr++)
                 {
@@ -53,7 +53,7 @@ namespace BetterCommentsPlus.CommentsTagging
                     if (curr == firstLineNumber && lineText.Length > token.Length + 2) //! First line.
                     {
                         var index = lineText.IndexOf("/*", OrdinalIgnoreCase);
-                        if (commentCategory == CommentCategory.Task)
+                        if (criteria.ToUpper() == "#TASK")
                         {
                             startOffset = lineText.IndexOf(token, OrdinalIgnoreCase);
                         }
@@ -85,15 +85,15 @@ namespace BetterCommentsPlus.CommentsTagging
                 }
             }
 
-            return new Comment(commentSpans, commentCategory);
+            return new Comment(commentSpans, null);
         }
 
-        protected override CommentCategory? GetCommentType(SnapshotSpan span)
+        protected override string GetCommentCriteria(SnapshotSpan span)
         {
             if (Settings.StrikethroughDoubleComments && span.GetText().StartsWith("////", OrdinalIgnoreCase))
-                return CommentCategory.Remove;
+                return "#REMOVE";
 
-            return base.GetCommentType(span);
+            return base.GetCommentCriteria(span);
         }
 
         protected override string SpanTextWithoutCommentStarter(SnapshotSpan span)

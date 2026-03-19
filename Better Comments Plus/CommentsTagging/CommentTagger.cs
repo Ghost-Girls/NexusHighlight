@@ -81,28 +81,21 @@ namespace BetterCommentsPlus.CommentsTagging
                 return new ClassificationTag(classificationType);
             }
 
-            return CreateTag(comment.Category);
-        }
+            // 根据 Criteria 映射到预定义的分类类型
+            var criteria = comment.Criteria?.ToUpper();
+            if (criteria == "#IMPORTANT")
+                return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.IMPORTANT_COMMENT));
+            
+            if (criteria == "#REMOVE")
+                return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.REMOVE_COMMENT));
+            
+            if (criteria == "#QUESTION")
+                return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.QUESTION_COMMENT));
+            
+            if (criteria == "#TASK")
+                return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.TASK_COMMENT));
 
-        private ClassificationTag CreateTag(CommentCategory? category)
-        {
-            switch (category)
-            {
-                case CommentCategory.Important:
-                    return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.IMPORTANT_COMMENT));
-
-                case CommentCategory.Remove:
-                    return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.REMOVE_COMMENT));
-
-                case CommentCategory.Question:
-                    return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.QUESTION_COMMENT));
-
-                case CommentCategory.Task:
-                    return new ClassificationTag(classRegistry.GetClassificationType(CommentNames.TASK_COMMENT));
-
-                default:
-                    return new ClassificationTag(classRegistry.GetClassificationType("comment"));
-            }
+            return new ClassificationTag(classRegistry.GetClassificationType("comment"));
         }
 
         private ICommentParser CreateCommentParser(IContentType contentType)

@@ -19,7 +19,7 @@ namespace BetterCommentsPlus.CommentsTagging
             var commentInfo = GetCommentInfo(span);
 
             if (commentInfo.Rule == null)
-                return new Comment(new List<SnapshotSpan> { span }, CommentCategory.Normal);
+                return new Comment(new List<SnapshotSpan> { span }, "");
 
             if (!commentInfo.Rule.IsPredefined)
             {
@@ -92,21 +92,19 @@ namespace BetterCommentsPlus.CommentsTagging
                 return new Comment(commentSpans, commentInfo.Rule.Id, commentInfo.Rule.Criteria);
             }
 
-            var commentCategory = commentInfo.Rule.Category;
-
             // Color only the "Todo" keyword.
-            if (Settings.HighlightTaskKeywordOnly && commentCategory == CommentCategory.Task)
+            if (Settings.HighlightTaskKeywordOnly && commentInfo.Rule.Criteria.ToUpper() == "#TASK")
             {
                 var spanText = span.GetText().ToLower();
-                var token = Settings.GetTokenValue(CommentCategory.Task);
+                var token = Settings.GetTokenValue("#TASK");
                 var start = spanText.IndexOf(token, StringComparison.OrdinalIgnoreCase);
 
                 return new Comment(
                     new List<SnapshotSpan> { new SnapshotSpan(span.Snapshot, span.Start + start, token.Length) },
-                    CommentCategory.Task);
+                    commentInfo.Rule.Criteria);
             }
 
-            return SpecificParse(span, commentCategory);
+            return SpecificParse(span, commentInfo.Rule.Criteria);
         }
 
         public abstract bool IsValidComment(SnapshotSpan span);
@@ -142,13 +140,13 @@ namespace BetterCommentsPlus.CommentsTagging
             return new CommentInfo { Rule = null };
         }
 
-        protected virtual CommentCategory? GetCommentType(SnapshotSpan span)
+        protected virtual string GetCommentCriteria(SnapshotSpan span)
         {
             var commentInfo = GetCommentInfo(span);
-            return commentInfo.Rule?.Category ?? CommentCategory.Normal;
+            return commentInfo.Rule?.Criteria ?? "";
         }
 
-        protected abstract Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory);
+        protected abstract Comment SpecificParse(SnapshotSpan span, string criteria);
 
         protected abstract string SpanTextWithoutCommentStarter(SnapshotSpan span);
     }

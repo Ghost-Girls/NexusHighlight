@@ -14,13 +14,13 @@ namespace BetterCommentsPlus.CommentsTagging
          return !txt.Contains("\r\n") && txt.Contains("<!--") && txt.Contains("-->");
       }
 
-      protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
+      protected override Comment SpecificParse(SnapshotSpan span, string criteria)
       {
          var spanText = span.GetText().ToLower();
 
-         var token = Settings.Instance.GetTokenValue(commentCategory ?? CommentCategory.Normal);
+         var token = Settings.Instance.GetTokenValue(criteria);
 
-         var startOffset = (commentCategory == CommentCategory.Task)
+         var startOffset = (criteria.ToUpper() == "#TASK")
                          ? spanText.IndexOf(token, 3, OrdinalIgnoreCase)
                          : spanText.IndexOfFirstChar(spanText.IndexOf(token, 3, OrdinalIgnoreCase) + token.Length);
 
@@ -29,12 +29,12 @@ namespace BetterCommentsPlus.CommentsTagging
 
          return new Comment(
              new[] { new SnapshotSpan(span.Snapshot, span.Start + startOffset, spanLength) },
-             commentCategory);
+             criteria);
       }
 
-      protected override CommentCategory? GetCommentType(SnapshotSpan span)
+      protected override string GetCommentCriteria(SnapshotSpan span)
       {
-         return base.GetCommentType(span);
+         return base.GetCommentCriteria(span);
       }
 
       protected override string SpanTextWithoutCommentStarter(SnapshotSpan span)

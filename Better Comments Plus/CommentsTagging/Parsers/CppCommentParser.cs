@@ -14,13 +14,13 @@ namespace BetterCommentsPlus.CommentsTagging
             return txt.StartsWith("//", OrdinalIgnoreCase) || txt.StartsWith("/*", OrdinalIgnoreCase);
         }
 
-        protected override Comment SpecificParse(SnapshotSpan span, CommentCategory? commentCategory)
+        protected override Comment SpecificParse(SnapshotSpan span, string criteria)
         {
             var spanText = span.GetText().ToLower();
 
             var commentSpans = new List<SnapshotSpan>();
 
-            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", commentCategory);
+            var startOffset = ParseHelper.SingleLineCommentStartIndex(spanText, "////", criteria);
 
             // single line comment
             if (spanText.StartsWith("//", OrdinalIgnoreCase))
@@ -33,7 +33,7 @@ namespace BetterCommentsPlus.CommentsTagging
                   && spanText.EndsWith("*/", OrdinalIgnoreCase)
                   && spanText.Length > 5)
             {
-                startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, commentCategory);
+                startOffset = ParseHelper.DelimitedCommentStartIndex(spanText, criteria);
 
                 var indexOfStarter = spanText.IndexOf("*/", OrdinalIgnoreCase);
                 var spanLength = spanText.IndexOfFirstCharReverse(indexOfStarter - 1) - (startOffset - 1);
@@ -42,19 +42,19 @@ namespace BetterCommentsPlus.CommentsTagging
                     commentSpans.Add(new SnapshotSpan(span.Snapshot, span.Start + startOffset, spanLength));
             }
 
-            return new Comment(commentSpans, commentCategory);
+            return new Comment(commentSpans, criteria);
         }
 
-        protected override CommentCategory? GetCommentType(SnapshotSpan span)
+        protected override string GetCommentCriteria(SnapshotSpan span)
         {
 			// #HACK 
 			//if (Settings.StrikethroughDoubleComments && span.GetText().StartsWith("//x", OrdinalIgnoreCase))
-			//	return CommentCategory.x;
+			//	return "#X";
 
 			if (Settings.StrikethroughDoubleComments && span.GetText().StartsWith("////", OrdinalIgnoreCase))
-                return CommentCategory.Remove;
+                return "#REMOVE";
 
-            return base.GetCommentType(span);
+            return base.GetCommentCriteria(span);
         }
 
         protected override string SpanTextWithoutCommentStarter(SnapshotSpan span)

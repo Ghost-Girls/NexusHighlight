@@ -12,7 +12,6 @@ namespace BetterCommentsPlus.Options
     {
         // === 标识 ===
         private string id;
-        private CommentCategory? category;
         private bool isPredefined;
         private bool isActive;
         private int order;
@@ -41,9 +40,8 @@ namespace BetterCommentsPlus.Options
             scope = RuleScope.Global;
         }
 
-        public CommentRule(CommentCategory category, string criteria, string colorHex) : this()
+        public CommentRule(string criteria, string colorHex) : this()
         {
-            this.category = category;
             this.criteria = criteria;
             this.isPredefined = true;
             if (foreground != null)
@@ -65,15 +63,6 @@ namespace BetterCommentsPlus.Options
         {
             get => id;
             set { id = value; OnPropertyChanged(); }
-        }
-
-        /// <summary>
-        /// 评论分类（仅预定义规则使用）
-        /// </summary>
-        public CommentCategory? Category
-        {
-            get => category;
-            set { category = value; OnPropertyChanged(); }
         }
 
         /// <summary>
@@ -248,7 +237,7 @@ namespace BetterCommentsPlus.Options
 
         public override string ToString()
         {
-            return $"{Criteria} ({(Category.HasValue ? Category.Value.ToString() : "Custom")})";
+            return $"{Criteria} ({(IsPredefined ? "Predefined" : "Custom")})";
         }
 
         #endregion
