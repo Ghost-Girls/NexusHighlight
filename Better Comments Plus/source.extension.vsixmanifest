@@ -1,15 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Better Comments Plus.Ghost-Girls.646f2284-7979-4af0-a676-4f2d7693df8e" Version="0.157" Language="en-US" Publisher="Ghost-Girls" />
+        <Identity Id="Better Comments Plus.Ghost-Girls.646f2284-7979-4af0-a676-4f2d7693df8e" Version="0.0.8" Language="en-US" Publisher="Ghost-Girls" />
         <DisplayName>Better Comments Plus</DisplayName>
-        <Description xml:space="preserve">Better Comments is a Visual Studio extension that gives you the ability to customize the font and opacity of your comments independently of the editor's font settings. It also adds four additional comment classifications, each classification with its own customizable foreground.
+        <Description xml:space="preserve">Better Comments Plus lets you customize comment font, opacity and size independently of the editor's font settings. It also adds customizable comment classifications, each with its own configurable foreground and background styles.
 
-This project was forked from omsharp/BetterComments.</Description>
+Key features:
+- Customize comment font, size, opacity, and style (bold, italic, underline, strikethrough)
+- Create unlimited custom comment rules with flexible matching criteria
+- Drag and drop to reorder rule priorities
+- Global and solution-specific rule sets
+- Rich foreground and background customization (colors, shapes, blur, transparency)
+- Case-sensitive and partial match options
+
+This project was forked from omsharp/BetterComments and Dax Pandhi/Highlighter.</Description>
         <License>Resources\LICENSE</License>
         <Icon>Resources\Icon.png</Icon>
         <PreviewImage>Resources\PreviewImage.png</PreviewImage>
-        <Tags>Better, Comments, Italic, Bold, Opacity, Font, Size, Categorize, Color, Colorize</Tags>
+        <Tags>Better, Comments, Italic, Bold, Opacity, Font, Size, Categorize, Color, Colorize, Rules, Customization, Background, DragDrop, Solution</Tags>
     </Metadata>
 
     <Installation>
