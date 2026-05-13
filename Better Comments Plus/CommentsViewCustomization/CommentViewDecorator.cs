@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using TextFormattingRunProperties = Microsoft.VisualStudio.Text.Formatting.TextFormattingRunProperties;
 
 namespace BetterCommentsPlus.CommentsViewCustomization
@@ -54,13 +55,24 @@ namespace BetterCommentsPlus.CommentsViewCustomization
       private void OnSettingsSaved()
       {
          if (!isDecorating)
-            Decorate();
+            DeferredDecorate();
       }
 
       private void OnConfigurationChanged(object sender, EventArgs e)
       {
          if (!isDecorating)
-            Decorate();
+            DeferredDecorate();
+      }
+
+      private void DeferredDecorate()
+      {
+         Dispatcher.CurrentDispatcher.BeginInvoke(
+             DispatcherPriority.Background,
+             new Action(() =>
+             {
+                if (!isDecorating)
+                   Decorate();
+             }));
       }
 
       private void TextView_GotAggregateFocus(object sender, EventArgs e)

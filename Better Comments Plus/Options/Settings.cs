@@ -1,8 +1,10 @@
 using BetterCommentsPlus.CommentsTagging;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace BetterCommentsPlus.Options
 {
@@ -391,17 +393,19 @@ namespace BetterCommentsPlus.Options
             _isSyncing = true;
             try
             {
-                // 保存规则到 SettingsManager
+                // 将规则复制到本地列表，避免在后台线程访问 ObservableCollection 时的线程安全问题
                 if (sender == globalRules)
                 {
-                    BetterCommentsPlus.SettingsManager.SaveGlobalRules(globalRules);
+                    var rulesCopy = new List<CommentRule>(globalRules);
+                    Task.Run(() => BetterCommentsPlus.SettingsManager.SaveGlobalRules(rulesCopy));
                 }
                 else if (sender == solutionRules)
                 {
-                    // 保存解决方案规则
                     if (!string.IsNullOrEmpty(_currentSolutionPath))
                     {
-                        BetterCommentsPlus.SettingsManager.SaveSolutionRules(_currentSolutionPath, solutionRules);
+                        var rulesCopy = new List<CommentRule>(solutionRules);
+                        var solutionPath = _currentSolutionPath;
+                        Task.Run(() => BetterCommentsPlus.SettingsManager.SaveSolutionRules(solutionPath, rulesCopy));
                     }
                 }
                 
@@ -427,10 +431,12 @@ namespace BetterCommentsPlus.Options
             _isSyncing = true;
             try
             {
-                // 保存旧解决方案的规则
+                // 保存旧解决方案的规则到后台线程
                 if (!string.IsNullOrEmpty(_currentSolutionPath))
                 {
-                    BetterCommentsPlus.SettingsManager.SaveSolutionRules(_currentSolutionPath, solutionRules);
+                    var oldSolutionPath = _currentSolutionPath;
+                    var rulesCopy = new List<CommentRule>(solutionRules);
+                    Task.Run(() => BetterCommentsPlus.SettingsManager.SaveSolutionRules(oldSolutionPath, rulesCopy));
                 }
 
                 // 更新当前解决方案路径

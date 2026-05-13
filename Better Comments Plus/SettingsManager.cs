@@ -71,11 +71,16 @@ namespace BetterCommentsPlus
         // 保存全局规则
         public static void SaveGlobalRules(ObservableCollection<CommentRule> rules)
         {
+            SaveGlobalRules(new List<CommentRule>(rules));
+        }
+
+        // 保存全局规则（线程安全版本，接受 List）
+        public static void SaveGlobalRules(List<CommentRule> rules)
+        {
             try
             {
                 var filePath = GetGlobalRulesFilePath();
-                var rulesList = new List<CommentRule>(rules);
-                var json = JsonSerializer.Serialize(rulesList, new JsonSerializerOptions { WriteIndented = true });
+                var json = JsonSerializer.Serialize(rules, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(filePath, json);
             }
             catch
@@ -108,14 +113,19 @@ namespace BetterCommentsPlus
         // 保存解决方案规则
         public static void SaveSolutionRules(string solutionPath, ObservableCollection<CommentRule> rules)
         {
+            SaveSolutionRules(solutionPath, new List<CommentRule>(rules));
+        }
+
+        // 保存解决方案规则（线程安全版本，接受 List）
+        public static void SaveSolutionRules(string solutionPath, List<CommentRule> rules)
+        {
             try
             {
                 var filePath = GetSolutionRulesFilePath(solutionPath);
                 if (filePath == null)
                     return;
 
-                var rulesList = new List<CommentRule>(rules);
-                var json = JsonSerializer.Serialize(rulesList, new JsonSerializerOptions { WriteIndented = true });
+                var json = JsonSerializer.Serialize(rules, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(filePath, json);
             }
             catch
