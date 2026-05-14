@@ -279,19 +279,23 @@
                         </ComboBox>
 
                         <CheckBox
-                            Width="70"
+                            Width="36"
                             Height="24"
                             Margin="0,0,5,0"
                             Padding="2"
-                            Content="区分大小写"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Content="Aa"
                             IsChecked="{Binding Background.IsCaseSensitive, UpdateSourceTrigger=PropertyChanged}" />
 
                         <CheckBox
-                            Width="70"
+                            Width="100"
                             Height="24"
                             Margin="0,0,5,0"
                             Padding="2"
-                            Content="部分匹配"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Content="Partial Match"
                             IsChecked="{Binding Background.AllowPartialMatch, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Button
@@ -311,15 +315,47 @@
     <Grid Margin="10,10,10,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel
+        <!--  ! Language  -->
+        <GroupBox
+            x:Name="grpLanguage"
             Grid.Row="0"
+            Margin="0,0,0,10"
+            Header="界面语言">
+            <Grid Margin="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Label
+                    x:Name="lblLanguage"
+                    Grid.Column="0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Content="语言 :" />
+                <ComboBox
+                    x:Name="cmbLanguage"
+                    Grid.Column="1"
+                    Width="300"
+                    Margin="0,5"
+                    HorizontalAlignment="Left"
+                    SelectionChanged="cmbLanguage_SelectionChanged">
+                    <ComboBoxItem Tag="Chinese" />
+                    <ComboBoxItem Tag="English" />
+                </ComboBox>
+            </Grid>
+        </GroupBox>
+
+        <StackPanel
+            Grid.Row="1"
             Margin="0,0,0,5"
             Orientation="Horizontal">
             <CheckBox
-                Width="120"
+                x:Name="chkHighlightCriteria"
+                Width="130"
                 Height="24"
                 Margin="0,0,0,0"
                 Padding="5,0"
@@ -329,8 +365,11 @@
                 ToolTip="启用后，匹配的 Criteria 文本本身也会应用样式（如 &quot;#IMPORTANT&quot;）" />
         </StackPanel>
 
-        <TabControl Grid.Row="1" Margin="0">
-            <TabItem Header="Global Rules">
+        <TabControl
+            x:Name="tabControl"
+            Grid.Row="2"
+            Margin="0">
+            <TabItem x:Name="tabGlobal" Header="Global Rules">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -370,6 +409,7 @@
                             Content="Import Global"
                             Style="{StaticResource ButtonStyle}" />
                         <TextBlock
+                            x:Name="txtNoteGlobal"
                             Margin="5"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
@@ -403,6 +443,7 @@
                         HorizontalAlignment="Right"
                         Orientation="Vertical">
                         <Button
+                            x:Name="btnMoveUpGlobal"
                             Width="94"
                             Height="24"
                             Margin="5"
@@ -411,6 +452,7 @@
                             Content="↑ 上移"
                             Style="{StaticResource ButtonStyle}" />
                         <Button
+                            x:Name="btnMoveDownGlobal"
                             Width="94"
                             Height="24"
                             Margin="5"
@@ -419,6 +461,7 @@
                             Content="↓ 下移"
                             Style="{StaticResource ButtonStyle}" />
                         <Button
+                            x:Name="btnResetGlobal"
                             Width="94"
                             Height="24"
                             Margin="5"
@@ -430,7 +473,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Solution Rules">
+            <TabItem x:Name="tabSolution" Header="Solution Rules">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -495,6 +538,7 @@
                             Content="Import"
                             Style="{StaticResource ButtonStyle}" />
                         <TextBlock
+                            x:Name="txtNoteSolution"
                             Margin="5"
                             VerticalAlignment="Center"
                             FontStyle="Italic"
@@ -526,6 +570,7 @@
                         HorizontalAlignment="Center"
                         Orientation="Vertical">
                         <Button
+                            x:Name="btnMoveUpSolution"
                             Width="94"
                             Height="24"
                             Margin="5"
@@ -534,6 +579,7 @@
                             Content="↑ 上移"
                             Style="{StaticResource ButtonStyle}" />
                         <Button
+                            x:Name="btnMoveDownSolution"
                             Width="94"
                             Height="24"
                             Margin="5"
@@ -542,6 +588,7 @@
                             Content="↓ 下移"
                             Style="{StaticResource ButtonStyle}" />
                         <Button
+                            x:Name="btnClearSolution"
                             Width="94"
                             Height="24"
                             Margin="5"

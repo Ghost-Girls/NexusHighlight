@@ -16,40 +16,114 @@ using DTEWindow = EnvDTE.Window;
 
 namespace BetterCommentsPlus.Options
 {
-   public partial class OptionsRulesPageControl
-   {
-      private Point _dragStartPoint;
-      private CommentRule _draggedItem;
-      private int _draggedIndex = -1;
-      private bool _isDragging;
-      private ListBoxItem _dragSourceItem;
-      private double _originalOpacity;
-      private ListBox _currentDraggingListBox;
-      private AdornerLayer _adornerLayer;
-      private InsertionAdorner _insertionAdorner;
+    public partial class OptionsRulesPageControl
+    {
+        private Point _dragStartPoint;
+        private CommentRule _draggedItem;
+        private int _draggedIndex = -1;
+        private bool _isDragging;
+        private ListBoxItem _dragSourceItem;
+        private double _originalOpacity;
+        private ListBox _currentDraggingListBox;
+        private AdornerLayer _adornerLayer;
+        private InsertionAdorner _insertionAdorner;
 
-      public OptionsRulesPageControl()
-      {
-         DataContext = Settings.Instance;
-         InitializeComponent();
-         Loaded += OptionsRulesPageControl_Loaded;
-      }
+        public OptionsRulesPageControl()
+        {
+            DataContext = Settings.Instance;
+            InitializeComponent();
+            Loaded += OptionsRulesPageControl_Loaded;
+            UIStrings.LanguageChanged += OnLanguageChanged;
+        }
 
-      private void OptionsRulesPageControl_Loaded(object sender, RoutedEventArgs e)
-      {
-         // 尝试通过 Visual Studio 服务获取解决方案路径
-         try
-         {
-            // 如果还没有设置解决方案路径，尝试通过 VS 服务获取
-            // 注意：这里我们需要通过包来获取服务，但在这个控件中不太容易
-            // 不过，VSPackage 已经在初始化时尝试获取了
-            // 这里我们主要是确保用户知道问题所在
-         }
-         catch
-         {
-            // 静默处理错误
-         }
-      }
+        private void OptionsRulesPageControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            UIStrings.CurrentLanguage = Settings.Instance.UILanguage;
+            ApplyUIStrings();
+            SelectLanguageItem(Settings.Instance.UILanguage);
+            // 尝试通过 Visual Studio 服务获取解决方案路径
+            try
+            {
+                // 如果还没有设置解决方案路径，尝试通过 VS 服务获取
+                // 注意：这里我们需要通过包来获取服务，但在这个控件中不太容易
+                // 不过，VSPackage 已经在初始化时尝试获取了
+                // 这里我们主要是确保用户知道问题所在
+            }
+            catch
+            {
+                // 静默处理错误
+            }
+        }
+
+        private void OnLanguageChanged(object sender, EventArgs e)
+        {
+            Dispatcher.Invoke(() => ApplyUIStrings());
+        }
+
+        private void ApplyUIStrings()
+        {
+            grpLanguage.Header = UIStrings.GroupLanguage;
+            lblLanguage.Content = UIStrings.LabelLanguage + " :";
+            SetComboItemText(cmbLanguage, "Chinese", UIStrings.LanguageChinese);
+            SetComboItemText(cmbLanguage, "English", UIStrings.LanguageEnglish);
+
+            chkHighlightCriteria.Content = UIStrings.LabelHighlightCriteria;
+            tabGlobal.Header = UIStrings.TabGlobalRules;
+            tabSolution.Header = UIStrings.TabSolutionRules;
+            AddGlobalButton.Content = UIStrings.ButtonAddGlobal;
+            ExportGlobalButton.Content = UIStrings.ButtonExportGlobal;
+            ImportGlobalButton.Content = UIStrings.ButtonImportGlobal;
+            txtNoteGlobal.Text = UIStrings.NoteGlobalRules;
+            btnMoveUpGlobal.Content = UIStrings.ButtonMoveUp;
+            btnMoveDownGlobal.Content = UIStrings.ButtonMoveDown;
+            btnResetGlobal.Content = UIStrings.ButtonReset;
+
+            AddSolutionButton.Content = UIStrings.ButtonAddSolution;
+            CopyAllFromGlobalButton.Content = UIStrings.ButtonCopyFromGlobal;
+            ImportFromGlobalButton.Content = UIStrings.ButtonImportFromGlobal;
+            ClearSolutionButton.Content = UIStrings.ButtonClearSolution;
+            ExportSolutionButton.Content = UIStrings.ButtonExportSolution;
+            ImportSolutionButton.Content = UIStrings.ButtonImportSolution;
+            txtNoteSolution.Text = UIStrings.NoteSolutionRules;
+            btnMoveUpSolution.Content = UIStrings.ButtonMoveUp;
+            btnMoveDownSolution.Content = UIStrings.ButtonMoveDown;
+            btnClearSolution.Content = UIStrings.ButtonReset;
+        }
+
+        private static void SetComboItemText(ComboBox combo, string tag, string text)
+        {
+            foreach (ComboBoxItem item in combo.Items)
+            {
+                if (item.Tag as string == tag)
+                {
+                    item.Content = text;
+                    return;
+                }
+            }
+        }
+
+        private void SelectLanguageItem(UILanguage language)
+        {
+            foreach (ComboBoxItem item in cmbLanguage.Items)
+            {
+                if (item.Tag as string == language.ToString())
+                {
+                    cmbLanguage.SelectedItem = item;
+                    break;
+                }
+            }
+        }
+
+        private void cmbLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!IsLoaded) return;
+            var selectedItem = cmbLanguage.SelectedItem as ComboBoxItem;
+            if (selectedItem != null && Enum.TryParse<UILanguage>(selectedItem.Tag as string, out var lang))
+            {
+                UIStrings.SwitchLanguage(lang);
+                Settings.Instance.UILanguage = lang;
+            }
+        }
 
       #region 颜色选择器相关
 

@@ -20,6 +20,7 @@ namespace BetterCommentsPlus.Options
         private bool underlineImportantComments = false;
         private bool strikethroughDoubleComments = false;
         private bool highlightCriteriaItself = false;
+        private UILanguage uiLanguage = UILanguage.Chinese;
 
         public bool IsDragging { get; set; }
         private bool _isSyncing;
@@ -160,6 +161,13 @@ namespace BetterCommentsPlus.Options
         {
             get { return highlightCriteriaItself; }
             set { SetField(ref highlightCriteriaItself, value); }
+        }
+
+        [Setting]
+        public UILanguage UILanguage
+        {
+            get { return uiLanguage; }
+            set { SetField(ref uiLanguage, value); }
         }
 
         #endregion Settings Properties

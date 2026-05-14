@@ -59,7 +59,8 @@ namespace BetterCommentsPlus.Options
 
          foreach (var prop in properties)
          {
-            switch (prop.GetValue(settings))
+            var value = prop.GetValue(settings);
+            switch (value)
             {
                case bool b:
                   store.SetBoolean(settings.Key, prop.Name, b);
@@ -80,6 +81,11 @@ namespace BetterCommentsPlus.Options
                   store.SetString(settings.Key, prop.Name, s);
                   saved = true;
                   break;
+
+               case Enum e:
+                  store.SetString(settings.Key, prop.Name, e.ToString());
+                  saved = true;
+                  break;
             }
          }
 
@@ -94,23 +100,40 @@ namespace BetterCommentsPlus.Options
          {
             if (store.PropertyExists(settings.Key, prop.Name))
             {
-               switch (prop.GetValue(settings))
+               var propType = prop.PropertyType;
+               if (propType.IsEnum)
                {
-                  case bool b:
-                     prop.SetValue(settings, store.GetBoolean(settings.Key, prop.Name));
-                     break;
+                  var enumString = store.GetString(settings.Key, prop.Name);
+                  try
+                  {
+                     var enumValue = Enum.Parse(propType, enumString);
+                     prop.SetValue(settings, enumValue);
+                  }
+                  catch
+                  {
+                     // 解析失败，保持默认值
+                  }
+               }
+               else
+               {
+                  switch (prop.GetValue(settings))
+                  {
+                     case bool b:
+                        prop.SetValue(settings, store.GetBoolean(settings.Key, prop.Name));
+                        break;
 
-                  case int i:
-                     prop.SetValue(settings, store.GetInt32(settings.Key, prop.Name));
-                     break;
+                     case int i:
+                        prop.SetValue(settings, store.GetInt32(settings.Key, prop.Name));
+                        break;
 
-                  case double d when double.TryParse(store.GetString(settings.Key, prop.Name), out double value):
-                     prop.SetValue(settings, value);
-                     break;
+                     case double d when double.TryParse(store.GetString(settings.Key, prop.Name), out double value):
+                        prop.SetValue(settings, value);
+                        break;
 
-                  case string s:
-                     prop.SetValue(settings, store.GetString(settings.Key, prop.Name));
-                     break;
+                     case string s:
+                        prop.SetValue(settings, store.GetString(settings.Key, prop.Name));
+                        break;
+                  }
                }
             }
          }
