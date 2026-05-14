@@ -124,6 +124,7 @@
     <Compile Include="Options\Infrastructure\ISettings.cs" />
     <Compile Include="Options\Infrastructure\SettingAttribute.cs" />
     <Compile Include="Options\Settings.cs" />
+    <Compile Include="Options\UIStrings.cs" />
     <Compile Include="Options\OptionsGeneralPageControl.xaml.cs">
       <DependentUpon>OptionsGeneralPageControl.xaml</DependentUpon>
     </Compile>

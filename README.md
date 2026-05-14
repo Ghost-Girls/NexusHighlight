@@ -2,18 +2,24 @@
 - **Branch vs17 :** VS2022 only.
 ---------------------------------------
 
+# Better Comments Plus
 
+**Better Comments Plus** is a Visual Studio extension that merges and extends two popular extensions — [Better Comments](https://github.com/omsharp/BetterComments) by Omar Rwemi and [Highlighter](https://github.com/daxpandhi/Highlighter) by Dax Pandhi — into a single, unified commenting solution.
 
-# Better Comments
-**Better Comments** is a Visual Studio extension that gives you the ability to customize the font and opacity of your comments independently of the editor's font settings. 
-It also adds four additional comment classifications, each classification with its own customizable foreground. 
+It lets you customize comment font, opacity and size independently of the editor's font settings, and adds customizable comment classifications, each with its own configurable foreground and background styles.
 
-
-
-<!-- Update the VS Gallery link after you upload the VSIX-->
 Download this extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=OmarRwemi.BetterCommentsVS2022).
 
 ---------------------------------------
+
+## Project Origins
+
+This project is a **merged fork** of:
+
+- **[Better Comments](https://github.com/omsharp/BetterComments)** — Customizable comment foreground colors, font settings, and comment classifications
+- **[Highlighter](https://github.com/daxpandhi/Highlighter)** — Text highlighting with configurable background colors, shapes, and blur effects
+
+Both projects are licensed under [Apache 2.0](LICENSE). Original copyright notices are preserved in the LICENSE file.
 
 ## Features
 
@@ -67,50 +73,27 @@ Single-line delimited comments (**Works in C#, F#, C/C++, and JavaScript**)
 
 <br>
 
-### Custom Foreground Color for each Classification 
+### Custom Foreground & Background Color for each Rule
 
-- You can set each comment classification foreground color to whatever you like.
+- You can set foreground and background colors for each rule independently.
+- You can enable/disable foreground and background styling per rule.
+- Background supports multiple shapes (Tag, Tag Under, Line, Line Under) with blur and transparency options.
 
-- You can also set a particular comment classification font weight to bold.
+   Go to Tools => Options => Better Comments Plus => Rules
 
-   Go to Tools => Options => Fonts and Colors
-
-
-![Sample1](screenshots/CommentsColors.png)
+![Options](screenshots/OptionsRules.png)
 
 <br>
 
-### Independent Font Settings
+### Independent Font Settings & More
 
 - You can change the comments font settings without affecting the editor's font settings.
+- You can add unlimited custom rules with custom matching criteria.
+- You can drag and drop to reorder rule priorities.
+- You can create Global rules (applied to all projects) or Solution rules (specific to the current solution).
+- You can import and export rule configurations.
 
-   Go to Tools -> Options -> Better Comments -> Font Options
-
-![Options](screenshots/Options.png)
-
-- You can use whatever font you like.
-
-![Options](screenshots/FontSample.png)
-
-- You can offset the comment font size relative to the font size of the editor. Make it larger or smaller.
-
-![Options](screenshots/SizeSample.png)
-
-- You can italicize comments.
-
-![Options](screenshots/ItalicSample.png)
-
-- You can control the comments opacity.
-
-![Options](screenshots/OpacitySample.png)
-
-- You can choose to color the "Todo" keyword only instead of the whole task comment.
-
-![Options](screenshots/HighlightOnlyKeywordSample.png)
-
-- You can choose to underline the important comments 
-
-![Options](screenshots/UnderlineSample.png)
+   Go to Tools => Options => Better Comments Plus => General / Rules
 
 
 <br>

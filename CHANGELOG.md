@@ -1,97 +1,46 @@
-## Things to look into
+# Changelog
+All notable changes to this project will be documented in this file.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-- [ ] Add a preview pane in the options page. That would be a nice touch to have.
-- [ ] Custom tokens
----
+## [1.0.0] - 2026-03-20 (Merged Release)
 
-## Changelog
+### This is a major merged release combining features from two projects:
+- [Better Comments](https://github.com/omsharp/BetterComments) by Omar Rwemi
+- [Highlighter](https://github.com/daxpandhi/Highlighter) by Dax Pandhi
 
-### 2.3
+### Added
+- Unified rule system supporting both foreground and background styling
+- Background highlighting support (Tag, Tag Under, Line, Line Under shapes)
+- Solution-specific rules in addition to global rules
+- Unlimited custom comment rules with flexible matching criteria
+- Drag and drop rule reordering with instant persistence
+- Rule import/export functionality
+- Case-sensitive and partial match options for background rules
+- Blur and transparency effects for background styles
+- Dual right-click menu entries (Foreground Styles Rule / Background Styles Rule)
+- Global and Solution rule tabs in Options page
+- Deferred UI rendering for improved performance
 
-**2019-02-08**
+### Changed
+- Rules now store both Foreground and Background configurations
+- Rule order determined by JSON array position (no separate Order field)
+- File I/O moved to background threads to prevent UI freeze
+- Configuration changes apply asynchronously
+- Updated plugin description in VSIX manifest
 
-- [x] Support VS2019
+### Fixed
+- 4-5 second UI freeze when creating new rules
+- Rule drag-and-drop ordering not persisting to disk
 
-### 2.2
+### Credits
+- Original Better Comments: Omar Rwemi
+- Original Highlighter: Dax Pandhi
+- Merged project: Ghost-Girls
 
-**2018-10-23**
+## [Unreleased] - Better Comments Original
 
-- [x] Fixed issue #23
-- [x] Code cleanup 
- 
-
-### 2.1
-
-**2017-10-4**
-
-- [x] The user can use custom comment tokens
-
-
-### 2.0
-
-**2017-06-12**
-
-- [x] Redesigned the whole tagging process
-   - Every content type (language) has its own comment parser
-- [x] Fixed the issue with Strikethrough and Underline decorations.
-- [x] Added an option to disable the strikethrough of double comments.
-
-
-### 1.6
-
-**2017-04-2**
-
-- [x] Bug fix. (Issue #11)
-
-
-### 1.5
-
-**2017-03-31**
-
-- [x] Support Visual Studio 2017
-
-
-### 1.4
-
-**2016-09-26**
-
-- [x] Bug fix (Issue #10).
-
-
-### 1.3
-
-**2016-09-25**
-
-- [x] Added an option to color only the "TODO" keyword instead of the whole task comment.
-- [x] Added an option to underline important comments.
-
-
-### 1.2
-
-**2016-09-24**
-
-- [x] Used slider controls for Size and Opacity instead of the ugly combobox.
-
-
-### 1.1
-
-**2016-05-28**
-
-- [x] Fixed the Italic option issue. It works properly now.
-
-
-### 1.0
-
-**2016-05-18**
-
-- [x] Add extra comment classifications
-  - Comment-Important
-  - Comment-Question
-  - Comment-Crossed
-  - Comment-Task
-- [x] Highlight each comment classification with customizable color
-- [x] Support C#, F#, VB.NET, C/C++, JavaScript, Python, HTML, and XAML
-  - Highlighting single-line comments works across all supported languages
-  - Highlighting multiline comments works only in C#
-- [x] Control comments font and opacity
-- [x] Add Options page for comments font and opacity settings
+### Features
+- Customize comment font, opacity, and size independently of editor settings
+- Four additional comment classifications (Important, Question, Remove, Task)
+- Per-classification customizable foreground colors
+- Bold, italic, underline, and strikethrough options
