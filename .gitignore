@@ -245,3 +245,4 @@ ModelManifest.xml
 .fake/
 /NexusHighlight/packages.config
 /Options
+/Highlighter
