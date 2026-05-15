@@ -1,110 +1,225 @@
-- **Branch vs16 :** VS2015, VS2017, and VS2019 on single vsix.
-- **Branch vs17 :** VS2022 only.
----------------------------------------
+# NexusHighlight
 
-# Better Comments Plus
+[![Visual Studio](https://img.shields.io/badge/Visual%20Studio-2022%2B-5C2D91.svg)](https://visualstudio.microsoft.com/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-**Better Comments Plus** is a Visual Studio extension that merges and extends two popular extensions — [Better Comments](https://github.com/omsharp/BetterComments) by Omar Rwemi and [Highlighter](https://github.com/daxpandhi/Highlighter) by Dax Pandhi — into a single, unified commenting solution.
+**English: [English](README.en.md)**
 
-It lets you customize comment font, opacity and size independently of the editor's font settings, and adds customizable comment classifications, each with its own configurable foreground and background styles.
+---
 
-Download this extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=OmarRwemi.BetterCommentsVS2022).
+**NexusHighlight** 是一款 Visual Studio 扩展插件，让你能够完全独立于编辑器默认设置，自由控制代码注释的显示样式。自定义字体、大小、透明度、前景色、背景样式——一切尽在掌握。
 
----------------------------------------
+---
 
-## Project Origins
+## 目录
 
-This project is a **merged fork** of:
+- [功能概览](#功能概览)
+- [快速开始](#快速开始)
+- [常规选项](#常规选项)
+- [自定义规则](#自定义规则)
+  - [前景样式](#前景样式)
+  - [背景样式](#背景样式)
+  - [匹配选项](#匹配选项)
+- [规则管理](#规则管理)
+  - [全局规则与解决方案规则](#全局规则与解决方案规则)
+  - [拖拽排序](#拖拽排序)
+  - [导入与导出](#导入与导出)
+- [支持的语言](#支持的语言)
+- [贡献指南](#贡献指南)
+- [许可证](#许可证)
 
-- **[Better Comments](https://github.com/omsharp/BetterComments)** — Customizable comment foreground colors, font settings, and comment classifications
-- **[Highlighter](https://github.com/daxpandhi/Highlighter)** — Text highlighting with configurable background colors, shapes, and blur effects
+---
 
-Both projects are licensed under [Apache 2.0](LICENSE). Original copyright notices are preserved in the LICENSE file.
+## 功能概览
 
-## Features
+NexusHighlight 可以将平淡的代码注释转化为视觉上有意义的标注。无论是高亮重要备注、标记任务、区分问题，还是让注释更易读，NexusHighlight 都能满足你的需求。
 
-- Additional comment classifications. Important, Question, Task, and Crossed. 
-- Customizable foreground for each comment classification.
-- Customize the font settings and opacity of your comments.
-- Works with C#, F#, VB.NET, C/C++, JavaScript, Python, HTML, and XAML.
+<!-- TODO: [配图] 编辑器中各种样式注释的效果总览 — 不同颜色、背景高亮、粗体/斜体文字 -->
+<!-- ![功能概览](screenshots/overview.png) -->
 
-<br>
+---
 
-### Comment Classifications
+## 快速开始
 
-- Use '!' for Important.
-- Use '?' for Question.
-- Use "Todo" (Case ignored) for Task.
-- Use 'x', 'X', or double comment for strikethrough (Crossed).
+1. 从 [Visual Studio Marketplace](https://marketplace.visualstudio.com/) 安装扩展
+2. 打开 **工具 → 选项 → NexusHighlight**
+3. 先在 **常规** 页面设置全局注释外观
+4. 再到 **规则** 页面创建自定义匹配规则
 
+---
 
-Or you can use your own custom tokens:
+## 常规选项
 
-![Sample1](screenshots/CustomTokensExample.png)
+常规页面提供影响所有注释的全局设置。
 
-![Sample1](screenshots/CustomTokensOptionsPage.png)
+<!-- TODO: [配图] 常规选项页全貌 -->
+<!-- ![常规选项页](screenshots/general-options.png) -->
 
+### 界面语言
 
+NexusHighlight 支持**中文**和**英文**界面，可在常规页面随时切换。
 
+### 字体与大小
 
-C#, F#, C/C++, and JavaScript 
+- **字体** — 选择系统中安装的任何字体。注释将使用该字体，不受编辑器字体设置影响。
+- **大小偏移** — 相对于编辑器默认字体大小调整注释字号。滑块范围 **-3**（更小）到 **+3**（更大），步进 0.5。
 
-![Sample1](screenshots/ClassificationC.png)
+### 透明度
 
-VB.NET 
+通过滑块控制注释透明度，从 **0%**（完全透明）到 **100%**（完全不透明）。适合在降低视觉干扰的同时保持注释可读性。
 
-![Sample1](screenshots/ClassificationVB.png)
+<!-- TODO: [配图] 透明度对比 — 同一段代码不同透明度效果 -->
+<!-- ![透明度对比](screenshots/opacity-comparison.png) -->
 
-Python 
+### 样式开关
 
-![Sample1](screenshots/ClassificationPython.png)
+- **斜体** — 全局切换所有注释的斜体样式
+- **仅高亮任务关键字** — 启用后，仅 "Todo" 关键字（不区分大小写）被着色，而非整行注释
+- **下划线重要注释** — 自动为以 `!` 开头的注释添加下划线
+- **删除线双注释** — 对双斜杠注释行应用删除线（如 C# 中的 `// // text`）
 
-HTML/XAML (**Works only with single-line comments**) 
+---
 
-![Sample1](screenshots/ClassificationMarkup.png)
+## 自定义规则
 
-Multiline delimited comments (**Works only in C#**).
+规则页面是 NexusHighlight 的核心功能。你可以创建无限数量的规则，每条规则拥有独立的匹配条件和视觉样式。
 
-![Sample1](screenshots/ClassificationMultilineCS.png)
+<!-- TODO: [配图] 规则页全貌，显示配置了多条规则的列表 -->
+<!-- ![规则页](screenshots/rules-page.png) -->
 
-Single-line delimited comments (**Works in C#, F#, C/C++, and JavaScript**)
+每条规则包含一个**匹配条件**（要匹配的文本模式）以及一组**前景**和**背景**样式选项。
 
-![Sample1](screenshots/ClassificationDelimited.png)
+### 前景样式
 
-<br>
+控制匹配文本的外观：
 
-### Custom Foreground & Background Color for each Rule
+| 选项 | 说明 |
+|------|------|
+| **颜色** | 从丰富的调色板中选择，或输入自定义十六进制值 |
+| **粗体** | 匹配文本加粗 |
+| **斜体** | 匹配文本倾斜 |
+| **下划线** | 为匹配文本添加下划线 |
+| **删除线** | 为匹配文本添加删除线 |
 
-- You can set foreground and background colors for each rule independently.
-- You can enable/disable foreground and background styling per rule.
-- Background supports multiple shapes (Tag, Tag Under, Line, Line Under) with blur and transparency options.
+每条规则都有**启用前景**开关，可独立控制前景样式的开启与关闭。
 
-   Go to Tools => Options => Better Comments Plus => Rules
+<!-- TODO: [配图] 前景样式示例 — 不同颜色和字体样式应用到注释的效果 -->
+<!-- ![前景样式示例](screenshots/foreground-examples.png) -->
 
-![Options](screenshots/OptionsRules.png)
+### 背景样式
 
-<br>
+添加背景高亮，让注释更加醒目。
 
-### Independent Font Settings & More
+#### 背景形状
 
-- You can change the comments font settings without affecting the editor's font settings.
-- You can add unlimited custom rules with custom matching criteria.
-- You can drag and drop to reorder rule priorities.
-- You can create Global rules (applied to all projects) or Solution rules (specific to the current solution).
-- You can import and export rule configurations.
+| 形状 | 视觉效果 |
+|------|---------|
+| **标签** | 匹配文本后的圆角矩形，类似标签 |
+| **标签下划线** | 与标签相同，但额外添加下划线 |
+| **行** | 高亮匹配文本所在的整行 |
+| **行下划线** | 与行相同，但额外添加下划线 |
 
-   Go to Tools => Options => Better Comments Plus => General / Rules
+<!-- TODO: [配图] 四种背景形状应用于同一文本的对比 -->
+<!-- ![背景形状](screenshots/background-shapes.png) -->
 
+#### 背景模糊
 
-<br>
+控制背景边缘的锐利或柔和程度：
 
-## Contribute
-- Check out the [contribution guidelines](CONTRIBUTING.md)
-if you want to contribute to this project.
+| 级别 | 效果 |
+|------|------|
+| 无 | 锐利、实心的背景 |
+| 低 | 边缘略微柔和 |
+| 中 | 明显的模糊效果 |
+| 高 | 强模糊效果 |
+| 极高 | 最大模糊，接近发光效果 |
 
-- See the [changelog](CHANGELOG.md) for changes and roadmap.
+#### 背景透明度
 
-<br>
+10 级透明度，从 **0/10**（完全透明/不可见）到 **10/10**（完全不透明/实心）。
 
-## License
+<!-- TODO: [配图] 同一背景色在不同模糊和透明度级别下的效果 -->
+<!-- ![模糊与透明度](screenshots/blur-transparency.png) -->
+
+### 匹配选项
+
+精细控制规则如何匹配注释中的文本：
+
+- **区分大小写** — 启用后，匹配区分大小写（例如 "Todo" 不会匹配 "todo"）
+- **部分匹配** — 启用后，规则匹配注释中的任意位置（例如条件 "note" 会匹配 "important notes"）
+
+---
+
+## 规则管理
+
+### 全局规则与解决方案规则
+
+NexusHighlight 支持两种规则作用域：
+
+| 作用域 | 说明 |
+|--------|------|
+| **全局规则** | 适用于在 Visual Studio 中打开的所有项目 |
+| **解决方案规则** | 仅适用于当前打开的解决方案 |
+
+当不同团队或项目需要不同的注释规范时，这一功能非常实用。
+
+<!-- TODO: [配图] 全局规则标签页与解决方案规则标签页 -->
+<!-- ![规则作用域](screenshots/rule-scopes.png) -->
+
+### 解决方案规则操作
+
+| 操作 | 说明 |
+|------|------|
+| **添加解决方案** | 向解决方案作用域添加新规则 |
+| **从全局复制** | 将所有全局规则复制到解决方案规则（覆盖已有规则） |
+| **从全局导入** | 选择性选择要导入到解决方案规则的全局规则 |
+| **清除** | 移除所有解决方案规则 |
+| **导出** | 将解决方案规则导出为 JSON 文件 |
+| **导入** | 从 JSON 文件导入解决方案规则 |
+
+### 拖拽排序
+
+规则从上到下依次评估——第一个匹配的规则生效。拖拽 **☰** 手柄可重新排序规则，控制优先级。
+
+<!-- TODO: [配图] 拖拽手柄正在重新排序规则 -->
+<!-- ![拖拽排序](screenshots/drag-reorder.png) -->
+
+### 导入与导出
+
+与团队成员或在多台机器间共享规则配置：
+
+- 将规则导出为 **JSON** 文件
+- 导入支持两种模式：
+  - **覆盖** — 用导入的规则替换现有规则
+  - **合并** — 将导入的规则添加到现有规则旁
+
+---
+
+## 支持的语言
+
+NexusHighlight 支持以下语言：
+
+| 语言 | 文件扩展名 |
+|------|-----------|
+| C# | `.cs` |
+| F# | `.fs` |
+| VB.NET | `.vb` |
+| C/C++ | `.c`, `.cpp`, `.h`, `.hpp` |
+| JavaScript / TypeScript | `.js`, `.jsx`, `.ts`, `.tsx` |
+| Python | `.py` |
+| HTML / XAML | `.html`, `.xaml`, `.xml` |
+
+<!-- TODO: [配图] 同一种注释模式在不同语言中的效果 -->
+<!-- ![多语言支持](screenshots/multi-language.png) -->
+
+---
+
+## 贡献指南
+
+欢迎贡献代码和提交 Issue！
+
+## 许可证
+
 [Apache 2.0](LICENSE)
+
+**发布者**: Ghost-Girls

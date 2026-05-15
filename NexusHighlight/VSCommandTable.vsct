@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<Extern href="stdidcmd.h"/>
+	<Extern href="vsshlids.h"/>
+
+	<Commands package="guidNexusHighlightPackage">
+		<Groups>
+			<Group guid="guidNexusHighlightPackageCmdSet" id="ContextMenuGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+			</Group>
+		</Groups>
+
+		<Buttons>
+			<Button guid="guidNexusHighlightPackageCmdSet" id="CreateEditForegroundRule" priority="0x0100" type="Button">
+				<Parent guid="guidNexusHighlightPackageCmdSet" id="ContextMenuGroup" />
+				<Strings>
+					<ButtonText>Create/Edit Foreground Rule</ButtonText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidNexusHighlightPackageCmdSet" id="CreateEditBackgroundRule" priority="0x0101" type="Button">
+				<Parent guid="guidNexusHighlightPackageCmdSet" id="ContextMenuGroup" />
+				<Strings>
+					<ButtonText>Create/Edit Background Rule</ButtonText>
+				</Strings>
+			</Button>
+		</Buttons>
+	</Commands>
+
+	<Symbols>
+		<GuidSymbol name="guidNexusHighlightPackage" value="{35348A1B-994B-4378-B2C1-8B7261FE76D7}" />
+		<GuidSymbol name="guidNexusHighlightPackageCmdSet" value="{09e59564-c21a-44f8-ae2b-c2bc17facd08}">
+			<IDSymbol name="ContextMenuGroup" value="0x0001" />
+			<IDSymbol name="CreateEditForegroundRule" value="0x0100" />
+			<IDSymbol name="CreateEditBackgroundRule" value="0x0101" />
+		</GuidSymbol>
+	</Symbols>
+</CommandTable>

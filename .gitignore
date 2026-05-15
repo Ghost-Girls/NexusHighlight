@@ -243,5 +243,5 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
-/Better Comments Plus/packages.config
+/NexusHighlight/packages.config
 /Options

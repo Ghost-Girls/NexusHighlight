@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+    <Metadata>
+        <Identity Id="NexusHighlight.Ghost-Girls.35348A1B-994B-4378-B2C1-8B7261FE76D7" Version="1.0.0" Language="en-US" Publisher="Ghost-Girls" />
+        <DisplayName>NexusHighlight</DisplayName>
+        <Description xml:space="preserve">NexusHighlight is a Visual Studio extension that gives you complete control over how comments look in the editor. Customize font, size, opacity, foreground colors, background styles — all independently of the editor's default settings.
+
+Key features:
+- Customize comment font, size, opacity, and style (bold, italic, underline, strikethrough)
+- Create unlimited custom comment rules with flexible matching criteria
+- Drag and drop to reorder rule priorities
+- Global and solution-specific rule sets
+- Rich foreground and background customization (colors, shapes, blur, transparency)
+- Case-sensitive and partial match options</Description>
+        <License>Resources\LICENSE</License>
+        <Icon>Resources\Icon.png</Icon>
+        <PreviewImage>Resources\PreviewImage.png</PreviewImage>
+        <Tags>NexusHighlight, Comment, Font, Opacity, Size, Color, Customization, Rules, Background, DragDrop, Solution, Highlight</Tags>
+    </Metadata>
+
+    <Installation>
+        <InstallationTarget Version="[17.0, 19.0)" Id="Microsoft.VisualStudio.Pro">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.7.2,)" />
+    </Dependencies>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    </Assets>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,19.0)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
+</PackageManifest>

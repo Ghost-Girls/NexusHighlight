@@ -6,7 +6,7 @@ Please use the Issues section of the repo.
 
 ## Project Origin
 
-Better Comments Plus is a merged fork of:
+NexusHighlight is a merged fork of:
 - [Better Comments](https://github.com/omsharp/BetterComments) by Omar Rwemi
 - [Highlighter](https://github.com/daxpandhi/Highlighter) by Dax Pandhi
 
