@@ -40,7 +40,7 @@ NexusHighlight 可以将平淡的代码注释转化为视觉上有意义的标�
 <table>
 
   <tr>
-    <td><img src="/documents/3.ActualEffect.png" alt="实际效果" width="800"></td>
+    <td><img src="document/3.ActualEffect.png" alt="实际效果" width="800"></td>
   </tr>
   <tr>
     <td align="center"><em>实际效果</em></td>
@@ -66,7 +66,7 @@ NexusHighlight 可以将平淡的代码注释转化为视觉上有意义的标�
 <table>
 
   <tr>
-    <td><img src="/documents/5.GeneralPage.png" alt="常规页面" width="800"></td>
+    <td><img src="document/5.GeneralPage.png" alt="常规页面" width="800"></td>
   </tr>
   <tr>
     <td align="center"><em>常规页面</em></td>
@@ -102,7 +102,7 @@ NexusHighlight 支持**中文**和**英文**界面，可在常规页面随时切
 <table>
 
   <tr>
-    <td><img src="/documents/2.OptionPage.Rules.png" alt="规则页面" width="800"></td>
+    <td><img src="document/2.OptionPage.Rules.png" alt="规则页面" width="800"></td>
   </tr>
   <tr>
     <td align="center"><em>规则页面</em></td>
@@ -116,7 +116,7 @@ NexusHighlight 支持**中文**和**英文**界面，可在常规页面随时切
 <table>
 
   <tr>
-    <td><img src="/documents/0.CreateRule.png" alt="创建规则" width="800"></td>
+    <td><img src="document/0.CreateRule.png" alt="创建规则" width="800"></td>
   </tr>
   <tr>
     <td align="center"><em>创建规则样式</em></td>

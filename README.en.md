@@ -8,12 +8,14 @@
 ---
 
 **NexusHighlight** is a Visual Studio extension that gives you complete control over how comments look in the editor. Customize font, size, opacity, foreground colors, background styles — all independently of the editor's default settings.
+This project is developed based on [BetterComments](https://github.com/omsharp/BetterComments) and [Highlighter](https://github.com/daxpandhi/Highlighter).
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Screenshots](#screenshots)
 - [Getting Started](#getting-started)
 - [General Options](#general-options)
 - [Custom Rules](#custom-rules)
@@ -34,8 +36,18 @@
 
 NexusHighlight lets you transform plain code comments into visually meaningful annotations. Whether you want to highlight important notes, mark tasks, distinguish questions, or simply make comments more readable, NexusHighlight gives you the tools to do it.
 
-<!-- TODO: [Screenshot] Editor showing various styled comments — different colors, background highlights, bold/italic text -->
-<!-- ![Overview Example](screenshots/overview.png) -->
+## Screenshots
+
+<table>
+
+  <tr>
+    <td><img src="document/3.ActualEffect.png" alt="Actual Effect" width="800"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Actual Effect</em></td>
+  </tr>
+
+</table>
 
 ---
 
@@ -52,8 +64,16 @@ NexusHighlight lets you transform plain code comments into visually meaningful a
 
 The General page provides global settings that affect all comments in the editor.
 
-<!-- TODO: [Screenshot] General Options page showing all controls -->
-<!-- ![General Options Page](screenshots/general-options.png) -->
+<table>
+
+  <tr>
+    <td><img src="document/5.GeneralPage.png" alt="General Page" width="800"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>General Page</em></td>
+  </tr>
+
+</table>
 
 ### UI Language
 
@@ -68,9 +88,6 @@ NexusHighlight supports both **Chinese** and **English** UI. Switch between them
 
 Control comment transparency with a slider from **0%** (fully transparent) to **100%** (fully opaque). This is useful for reducing visual noise while keeping comments readable.
 
-<!-- TODO: [Screenshot] Opacity comparison — same code with different opacity levels -->
-<!-- ![Opacity Comparison](screenshots/opacity-comparison.png) -->
-
 ### Style Toggles
 
 - **Italic** — Toggle italic style for all comments globally
@@ -84,10 +101,31 @@ Control comment transparency with a slider from **0%** (fully transparent) to **
 
 The Rules page is where NexusHighlight truly shines. You can create unlimited rules, each with its own matching criteria and visual style.
 
-<!-- TODO: [Screenshot] Rules page showing the full rule list with various rules configured -->
-<!-- ![Rules Page](screenshots/rules-page.png) -->
+<table>
+
+  <tr>
+    <td><img src="document/2.OptionPage.Rules.png" alt="Rules Page" width="800"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Rules Page</em></td>
+  </tr>
+
+</table>
 
 Each rule consists of a **Criteria** (the text pattern to match) and a set of **Foreground** and **Background** style options.
+
+## Styles
+
+<table>
+
+  <tr>
+    <td><img src="document/0.CreateRule.png" alt="Create Rule" width="800"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Create Rule Styles</em></td>
+  </tr>
+
+</table>
 
 ### Foreground Styles
 
@@ -103,9 +141,6 @@ Control how the matched text looks:
 
 Each rule has an **Enable Foreground** toggle, so you can turn the foreground styling on or off independently.
 
-<!-- TODO: [Screenshot] Foreground style examples — different colors and font styles applied to comments -->
-<!-- ![Foreground Examples](screenshots/foreground-examples.png) -->
-
 ### Background Styles
 
 Add background highlights to make comments stand out even more.
@@ -118,9 +153,6 @@ Add background highlights to make comments stand out even more.
 | **Tag Under** | Same as Tag, but with an additional underline |
 | **Line** | Highlights the entire line containing the match |
 | **Line Under** | Same as Line, but with an additional underline |
-
-<!-- TODO: [Screenshot] Four background shapes applied to the same text for comparison -->
-<!-- ![Background Shapes](screenshots/background-shapes.png) -->
 
 #### Background Blur
 
@@ -137,9 +169,6 @@ Control how sharp or soft the background edge looks:
 #### Background Transparency
 
 10 levels of transparency from **0/10** (fully transparent / invisible) to **10/10** (fully opaque / solid).
-
-<!-- TODO: [Screenshot] Same background color with different blur and transparency levels -->
-<!-- ![Blur and Transparency](screenshots/blur-transparency.png) -->
 
 ### Matching Options
 
@@ -163,9 +192,6 @@ NexusHighlight supports two levels of rule scoping:
 
 This is useful when you want different teams or projects to have different comment conventions.
 
-<!-- TODO: [Screenshot] Global Rules tab vs Solution Rules tab -->
-<!-- ![Rule Scopes](screenshots/rule-scopes.png) -->
-
 ### Solution Rule Operations
 
 | Operation | Description |
@@ -180,9 +206,6 @@ This is useful when you want different teams or projects to have different comme
 ### Drag & Drop Reordering
 
 Rules are evaluated from top to bottom — the first matching rule wins. Drag the **☰** handle to reorder rules and control priority.
-
-<!-- TODO: [Screenshot] Drag handle being used to reorder rules -->
-<!-- ![Drag to Reorder](screenshots/drag-reorder.png) -->
 
 ### Import & Export
 
@@ -208,9 +231,6 @@ NexusHighlight works with the following languages:
 | JavaScript / TypeScript | `.js`, `.jsx`, `.ts`, `.tsx` |
 | Python | `.py` |
 | HTML / XAML | `.html`, `.xaml`, `.xml` |
-
-<!-- TODO: [Screenshot] Same comment pattern styled across different languages -->
-<!-- ![Multi-language Support](screenshots/multi-language.png) -->
 
 ---
 
