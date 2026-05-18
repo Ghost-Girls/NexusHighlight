@@ -8,6 +8,7 @@
 ---
 
 **NexusHighlight** 是一款 Visual Studio 扩展插件，让你能够完全独立于编辑器默认设置，自由控制代码注释的显示样式。自定义字体、大小、透明度、前景色、背景样式——一切尽在掌握。
+本项目基于 [BetterComments](https://github.com/omsharp/BetterComments) 与 [Highlighter](https://github.com/daxpandhi/Highlighter) 项目进行开发。
 
 ---
 
@@ -34,9 +35,18 @@
 
 NexusHighlight 可以将平淡的代码注释转化为视觉上有意义的标注。无论是高亮重要备注、标记任务、区分问题，还是让注释更易读，NexusHighlight 都能满足你的需求。
 
-<!-- TODO: [配图] 编辑器中各种样式注释的效果总览 — 不同颜色、背景高亮、粗体/斜体文字 -->
-<!-- ![功能概览](screenshots/overview.png) -->
+## 截图预览
 
+<table>
+
+  <tr>
+    <td><img src="/documents/3.ActualEffect.png" alt="实际效果" width="800"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>实际效果</em></td>
+  </tr>
+
+</table>
 ---
 
 ## 快速开始
@@ -52,10 +62,19 @@ NexusHighlight 可以将平淡的代码注释转化为视觉上有意义的标�
 
 常规页面提供影响所有注释的全局设置。
 
-<!-- TODO: [配图] 常规选项页全貌 -->
-<!-- ![常规选项页](screenshots/general-options.png) -->
 
-### 界面语言
+<table>
+
+  <tr>
+    <td><img src="/documents/5.GeneralPage.png" alt="常规页面" width="800"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>常规页面</em></td>
+  </tr>
+
+</table>
+
+###### 界面语言
 
 NexusHighlight 支持**中文**和**英文**界面，可在常规页面随时切换。
 
@@ -67,9 +86,6 @@ NexusHighlight 支持**中文**和**英文**界面，可在常规页面随时切
 ### 透明度
 
 通过滑块控制注释透明度，从 **0%**（完全透明）到 **100%**（完全不透明）。适合在降低视觉干扰的同时保持注释可读性。
-
-<!-- TODO: [配图] 透明度对比 — 同一段代码不同透明度效果 -->
-<!-- ![透明度对比](screenshots/opacity-comparison.png) -->
 
 ### 样式开关
 
@@ -83,11 +99,30 @@ NexusHighlight 支持**中文**和**英文**界面，可在常规页面随时切
 ## 自定义规则
 
 规则页面是 NexusHighlight 的核心功能。你可以创建无限数量的规则，每条规则拥有独立的匹配条件和视觉样式。
+<table>
 
-<!-- TODO: [配图] 规则页全貌，显示配置了多条规则的列表 -->
-<!-- ![规则页](screenshots/rules-page.png) -->
+  <tr>
+    <td><img src="/documents/2.OptionPage.Rules.png" alt="规则页面" width="800"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>规则页面</em></td>
+  </tr>
 
+</table>
 每条规则包含一个**匹配条件**（要匹配的文本模式）以及一组**前景**和**背景**样式选项。
+
+## 样式
+
+<table>
+
+  <tr>
+    <td><img src="/documents/0.CreateRule.png" alt="创建规则" width="800"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>创建规则样式</em></td>
+  </tr>
+
+</table>
 
 ### 前景样式
 
@@ -103,9 +138,6 @@ NexusHighlight 支持**中文**和**英文**界面，可在常规页面随时切
 
 每条规则都有**启用前景**开关，可独立控制前景样式的开启与关闭。
 
-<!-- TODO: [配图] 前景样式示例 — 不同颜色和字体样式应用到注释的效果 -->
-<!-- ![前景样式示例](screenshots/foreground-examples.png) -->
-
 ### 背景样式
 
 添加背景高亮，让注释更加醒目。
@@ -118,9 +150,6 @@ NexusHighlight 支持**中文**和**英文**界面，可在常规页面随时切
 | **标签下划线** | 与标签相同，但额外添加下划线 |
 | **行** | 高亮匹配文本所在的整行 |
 | **行下划线** | 与行相同，但额外添加下划线 |
-
-<!-- TODO: [配图] 四种背景形状应用于同一文本的对比 -->
-<!-- ![背景形状](screenshots/background-shapes.png) -->
 
 #### 背景模糊
 
@@ -137,9 +166,6 @@ NexusHighlight 支持**中文**和**英文**界面，可在常规页面随时切
 #### 背景透明度
 
 10 级透明度，从 **0/10**（完全透明/不可见）到 **10/10**（完全不透明/实心）。
-
-<!-- TODO: [配图] 同一背景色在不同模糊和透明度级别下的效果 -->
-<!-- ![模糊与透明度](screenshots/blur-transparency.png) -->
 
 ### 匹配选项
 
@@ -163,9 +189,6 @@ NexusHighlight 支持两种规则作用域：
 
 当不同团队或项目需要不同的注释规范时，这一功能非常实用。
 
-<!-- TODO: [配图] 全局规则标签页与解决方案规则标签页 -->
-<!-- ![规则作用域](screenshots/rule-scopes.png) -->
-
 ### 解决方案规则操作
 
 | 操作 | 说明 |
@@ -180,9 +203,6 @@ NexusHighlight 支持两种规则作用域：
 ### 拖拽排序
 
 规则从上到下依次评估——第一个匹配的规则生效。拖拽 **☰** 手柄可重新排序规则，控制优先级。
-
-<!-- TODO: [配图] 拖拽手柄正在重新排序规则 -->
-<!-- ![拖拽排序](screenshots/drag-reorder.png) -->
 
 ### 导入与导出
 
@@ -208,9 +228,6 @@ NexusHighlight 支持以下语言：
 | JavaScript / TypeScript | `.js`, `.jsx`, `.ts`, `.tsx` |
 | Python | `.py` |
 | HTML / XAML | `.html`, `.xaml`, `.xml` |
-
-<!-- TODO: [配图] 同一种注释模式在不同语言中的效果 -->
-<!-- ![多语言支持](screenshots/multi-language.png) -->
 
 ---
 
