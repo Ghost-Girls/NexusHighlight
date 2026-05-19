@@ -66,7 +66,7 @@ NexusHighlight 可以将平淡的代码注释转化为视觉上有意义的标�
 <table>
 
   <tr>
-    <td><img src="document/5.GeneralPage.png" alt="常规页面" width="800"></td>
+    <td><img src="document/1.OptionPage.General.png" alt="常规页面" width="800"></td>
   </tr>
   <tr>
     <td align="center"><em>常规页面</em></td>
