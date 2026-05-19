@@ -66,7 +66,7 @@ The General page provides global settings that affect all comments in the editor
 <table>
 
   <tr>
-    <td><img src="https://raw.githubusercontent.com/Ghost-Girls/NexusHighlight/master/document/5.GeneralPage.png" alt="General Page" width="800"></td>
+    <td><img src="https://raw.githubusercontent.com/Ghost-Girls/NexusHighlight/master/document/1.OptionPage.General.png" alt="General Page" width="800"></td>
   </tr>
   <tr>
     <td align="center"><em>General Page</em></td>
